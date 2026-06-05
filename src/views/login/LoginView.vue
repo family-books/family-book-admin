@@ -49,7 +49,7 @@ import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
-import { phoneLogin } from '@/api/auth'
+import { passwordLogin } from '@/api/auth'
 import { useUserStore } from '@/stores/user'
 
 const router = useRouter()
@@ -73,7 +73,7 @@ async function handleLogin() {
 
   loading.value = true
   try {
-    const res = await phoneLogin(loginForm)
+    const res = await passwordLogin(loginForm)
     userStore.setToken(res.data.token)
     userStore.setUser(res.data.user)
     ElMessage.success('登录成功')
