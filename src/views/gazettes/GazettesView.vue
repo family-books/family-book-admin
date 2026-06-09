@@ -3,6 +3,14 @@
     <!-- Search Bar -->
     <el-card class="search-card">
       <el-form inline>
+        <el-form-item label="家庭名">
+          <el-input
+            v-model="familyKeyword"
+            placeholder="搜索家庭名"
+            clearable
+            @keyup.enter="handleSearch"
+          />
+        </el-form-item>
         <el-form-item label="状态筛选">
           <el-select v-model="statusFilter" placeholder="全部状态" clearable @change="handleSearch">
             <el-option label="生成中" value="generating" />
@@ -37,14 +45,21 @@
             <el-button size="small" :disabled="!row.pdfUrl" @click="viewPdf(row)">
               查看PDF
             </el-button>
-            <el-dropdown @command="(cmd: string) => updateStatus(row, cmd)" trigger="click">
+            <el-dropdown
+              v-if="getValidTransitions(row.status).length > 0"
+              @command="(cmd: string) => updateStatus(row, cmd)"
+              trigger="click"
+            >
               <el-button size="small">更新状态</el-button>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item command="pending_print">待印刷</el-dropdown-item>
-                  <el-dropdown-item command="printing">印刷中</el-dropdown-item>
-                  <el-dropdown-item command="shipped">已发货</el-dropdown-item>
-                  <el-dropdown-item command="delivered">已送达</el-dropdown-item>
+                  <el-dropdown-item
+                    v-for="status in getValidTransitions(row.status)"
+                    :key="status"
+                    :command="status"
+                  >
+                    {{ getStatusLabel(status) }}
+                  </el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -84,13 +99,14 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { getGazetteList, updateGazetteStatus, updateTrackingNumber } from '@/api/gazettes'
 import type { Gazette } from '@/types'
 
 const loading = ref(false)
 const gazettes = ref<Gazette[]>([])
 const statusFilter = ref('')
+const familyKeyword = ref('')
 const page = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
@@ -98,6 +114,14 @@ const total = ref(0)
 const trackingVisible = ref(false)
 const trackingNumber = ref('')
 const currentGazette = ref<Gazette | null>(null)
+
+const VALID_TRANSITIONS: Record<string, string[]> = {
+  'generating': [],
+  'pending_print': ['printing'],
+  'printing': ['shipped'],
+  'shipped': ['delivered'],
+  'delivered': [],
+}
 
 const statusMap: Record<string, string> = {
   generating: '生成中',
@@ -123,10 +147,19 @@ function getStatusType(status: string) {
   return statusTypeMap[status] || 'info'
 }
 
+function getValidTransitions(status: string): string[] {
+  return VALID_TRANSITIONS[status] || []
+}
+
 async function fetchGazettes() {
   loading.value = true
   try {
-    const res = await getGazetteList({ page: page.value, pageSize: pageSize.value, status: statusFilter.value || undefined })
+    const res = await getGazetteList({
+      page: page.value,
+      pageSize: pageSize.value,
+      status: statusFilter.value || undefined,
+      familyName: familyKeyword.value || undefined,
+    })
     gazettes.value = res.data.records
     total.value = res.data.total
   } catch {
@@ -148,13 +181,21 @@ function viewPdf(gazette: Gazette) {
 }
 
 async function updateStatus(gazette: Gazette, status: string) {
-  try {
-    await updateGazetteStatus(gazette.id, status)
-    ElMessage.success('状态更新成功')
-    fetchGazettes()
-  } catch {
-    // handled by interceptor
-  }
+  ElMessageBox.confirm(
+    `确定要将状态更新为「${getStatusLabel(status)}」吗？`,
+    '确认状态变更',
+    { type: 'warning' }
+  )
+    .then(async () => {
+      try {
+        await updateGazetteStatus(gazette.id, status)
+        ElMessage.success('状态更新成功')
+        fetchGazettes()
+      } catch {
+        // handled by interceptor
+      }
+    })
+    .catch(() => {})
 }
 
 function showTrackingDialog(gazette: Gazette) {
@@ -171,6 +212,10 @@ async function submitTracking() {
   }
   try {
     await updateTrackingNumber(currentGazette.value.id, trackingNumber.value.trim())
+    // Auto-update status to shipped when tracking number is filled
+    if (currentGazette.value.status === 'printing' || currentGazette.value.status === 'pending_print') {
+      await updateGazetteStatus(currentGazette.value.id, 'shipped')
+    }
     ElMessage.success('物流单号已更新')
     trackingVisible.value = false
     fetchGazettes()

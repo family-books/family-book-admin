@@ -5,6 +5,7 @@ export function getPaymentList(params: {
   page: number
   pageSize: number
   status?: string
+  orderNo?: string
 }): Promise<ApiResponse<PageResult<Payment>>> {
   return request.get('/api/admin/payments', { params })
 }

@@ -52,6 +52,10 @@ const routes: RouteRecordRaw[] = [
       },
     ],
   },
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: '/',
+  },
 ]
 
 const router = createRouter({
@@ -59,13 +63,25 @@ const router = createRouter({
   routes,
 })
 
-router.beforeEach((to, _from, next) => {
+router.beforeEach(async (to, _from, next) => {
   const userStore = useUserStore()
 
   if (to.meta.requiresAuth !== false && !userStore.token) {
     next('/login')
   } else if (to.path === '/login' && userStore.token) {
     next('/')
+  } else if (to.meta.requiresAuth !== false && userStore.token) {
+    // Fetch user info if not loaded yet
+    if (!userStore.userInfo) {
+      await userStore.fetchUserInfo()
+    }
+    // Check admin role
+    if (!userStore.isAdmin) {
+      userStore.logout()
+      next('/login')
+    } else {
+      next()
+    }
   } else {
     next()
   }

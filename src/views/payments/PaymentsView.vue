@@ -3,6 +3,14 @@
     <!-- Search Bar -->
     <el-card class="search-card">
       <el-form inline>
+        <el-form-item label="订单号">
+          <el-input
+            v-model="orderNoKeyword"
+            placeholder="搜索订单号"
+            clearable
+            @keyup.enter="handleSearch"
+          />
+        </el-form-item>
         <el-form-item label="状态筛选">
           <el-select v-model="statusFilter" placeholder="全部状态" clearable @change="handleSearch">
             <el-option label="已支付" value="paid" />
@@ -73,6 +81,7 @@ import type { Payment } from '@/types'
 const loading = ref(false)
 const payments = ref<Payment[]>([])
 const statusFilter = ref('')
+const orderNoKeyword = ref('')
 const page = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
@@ -102,7 +111,12 @@ function getPaymentStatusType(status: string) {
 async function fetchPayments() {
   loading.value = true
   try {
-    const res = await getPaymentList({ page: page.value, pageSize: pageSize.value, status: statusFilter.value || undefined })
+    const res = await getPaymentList({
+      page: page.value,
+      pageSize: pageSize.value,
+      status: statusFilter.value || undefined,
+      orderNo: orderNoKeyword.value || undefined,
+    })
     payments.value = res.data.records
     total.value = res.data.total
   } catch {
@@ -117,19 +131,22 @@ function handleSearch() {
   fetchPayments()
 }
 
-async function handleRefund(payment: Payment) {
-  await ElMessageBox.confirm(
+function handleRefund(payment: Payment) {
+  ElMessageBox.confirm(
     `确定要对订单 ${payment.orderNo} 进行退款吗？退款金额：¥${payment.amount}`,
     '确认退款',
     { type: 'warning', confirmButtonText: '确认退款', cancelButtonText: '取消' }
   )
-  try {
-    await refundPayment(payment.id)
-    ElMessage.success('退款成功')
-    fetchPayments()
-  } catch {
-    // handled by interceptor
-  }
+    .then(async () => {
+      try {
+        await refundPayment(payment.id)
+        ElMessage.success('退款成功')
+        fetchPayments()
+      } catch {
+        // handled by interceptor
+      }
+    })
+    .catch(() => {})
 }
 
 onMounted(() => {

@@ -16,9 +16,26 @@
       </el-col>
     </el-row>
 
+    <!-- Search -->
+    <el-card class="search-card">
+      <el-form inline>
+        <el-form-item label="搜索">
+          <el-input
+            v-model="keyword"
+            placeholder="搜索推荐人/被推荐人"
+            clearable
+            @keyup.enter="handleSearch"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="handleSearch">搜索</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+
     <!-- Referrals Table -->
     <el-card>
-      <el-table :data="referrals" stripe v-loading="loading">
+      <el-table :data="filteredReferrals" stripe v-loading="loading">
         <el-table-column prop="referrerName" label="推荐人" width="120" />
         <el-table-column prop="refereeName" label="被推荐人" width="120" />
         <el-table-column prop="status" label="状态" width="100">
@@ -47,16 +64,30 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { getReferralList, getReferralStats } from '@/api/referrals'
 import type { Referral } from '@/types'
 
 const loading = ref(false)
 const referrals = ref<Referral[]>([])
+const keyword = ref('')
 const page = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
 const stats = ref({ totalReferrals: 0, totalPoints: 0 })
+
+const filteredReferrals = computed(() => {
+  if (!keyword.value.trim()) return referrals.value
+  const k = keyword.value.trim().toLowerCase()
+  return referrals.value.filter(
+    r => r.referrerName?.toLowerCase().includes(k) || r.refereeName?.toLowerCase().includes(k)
+  )
+})
+
+function handleSearch() {
+  page.value = 1
+  fetchReferrals()
+}
 
 async function fetchReferrals() {
   loading.value = true
@@ -87,6 +118,10 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.search-card {
+  margin-bottom: 16px;
+}
+
 .stats-row {
   margin-bottom: 20px;
 }

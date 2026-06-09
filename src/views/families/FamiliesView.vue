@@ -46,7 +46,7 @@
 
     <!-- Members Dialog -->
     <el-dialog v-model="membersVisible" title="家庭成员" width="500px">
-      <el-table :data="members" size="small" stripe>
+      <el-table :data="members" size="small" stripe v-loading="membersLoading">
         <el-table-column prop="nickname" label="昵称" />
         <el-table-column prop="role" label="角色">
           <template #default="{ row }">
@@ -94,13 +94,19 @@ function handleSearch() {
   fetchFamilies()
 }
 
+const membersLoading = ref(false)
+
 async function showMembers(family: Family) {
   membersVisible.value = true
+  membersLoading.value = true
+  members.value = []
   try {
     const res = await getFamilyMembers(family.id)
     members.value = res.data
   } catch {
     members.value = []
+  } finally {
+    membersLoading.value = false
   }
 }
 

@@ -97,7 +97,10 @@
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getUserList, getUserFamilies, updateUserStatus, updateUserRole } from '@/api/users'
+import { useUserStore } from '@/stores/user'
 import type { User, FamilyMember } from '@/types'
+
+const userStore = useUserStore()
 
 const loading = ref(false)
 const users = ref<User[]>([])
@@ -142,24 +145,38 @@ async function showDetail(user: User) {
 async function toggleStatus(user: User) {
   const newStatus = user.status === 1 ? 0 : 1
   const action = newStatus === 0 ? '禁用' : '启用'
-  await ElMessageBox.confirm(`确定要${action}该用户吗？`, '提示', { type: 'warning' })
-  try {
-    await updateUserStatus(user.id, newStatus)
-    ElMessage.success(`${action}成功`)
-    fetchUsers()
-  } catch {
-    // handled by interceptor
-  }
+  ElMessageBox.confirm(`确定要${action}该用户吗？`, '提示', { type: 'warning' })
+    .then(async () => {
+      try {
+        await updateUserStatus(user.id, newStatus)
+        ElMessage.success(`${action}成功`)
+        fetchUsers()
+      } catch {
+        // handled by interceptor
+      }
+    })
+    .catch(() => {})
 }
 
 async function changeRole(user: User, role: string) {
-  try {
-    await updateUserRole(user.id, role)
-    ElMessage.success('角色修改成功')
-    fetchUsers()
-  } catch {
-    // handled by interceptor
+  // Prevent self-demotion
+  if (userStore.userInfo && user.id === userStore.userInfo.id && role !== userStore.userInfo.systemRole) {
+    ElMessage.warning('不能修改自己的角色')
+    return
   }
+
+  const roleName = role === 'admin' ? '管理员' : '普通用户'
+  ElMessageBox.confirm(`确定要将该用户角色修改为「${roleName}」吗？`, '确认角色变更', { type: 'warning' })
+    .then(async () => {
+      try {
+        await updateUserRole(user.id, role)
+        ElMessage.success('角色修改成功')
+        fetchUsers()
+      } catch {
+        // handled by interceptor
+      }
+    })
+    .catch(() => {})
 }
 
 onMounted(() => {

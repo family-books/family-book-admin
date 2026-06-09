@@ -19,8 +19,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { ElMessageBox } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 import Sidebar from './Sidebar.vue'
 
@@ -30,9 +31,19 @@ const userStore = useUserStore()
 
 const pageTitle = computed(() => (route.meta.title as string) || '数据看板')
 
+onMounted(async () => {
+  if (!userStore.userInfo) {
+    await userStore.fetchUserInfo()
+  }
+})
+
 function handleLogout() {
-  userStore.logout()
-  router.push('/login')
+  ElMessageBox.confirm('确定退出登录吗？', '提示', { type: 'warning' })
+    .then(() => {
+      userStore.logout()
+      router.push('/login')
+    })
+    .catch(() => {})
 }
 </script>
 

@@ -5,6 +5,7 @@ export function getGazetteList(params: {
   page: number
   pageSize: number
   status?: string
+  familyName?: string
 }): Promise<ApiResponse<PageResult<Gazette>>> {
   return request.get('/api/admin/gazettes', { params })
 }
