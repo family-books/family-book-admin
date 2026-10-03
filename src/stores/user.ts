@@ -11,7 +11,7 @@ export const useUserStore = defineStore('user', () => {
   const userInfo = ref<User | null>(savedUserInfo ? JSON.parse(savedUserInfo) : null)
 
   const isAdmin = computed(() => {
-    const role = userInfo.value?.systemRole
+    const role = userInfo.value?.sysRole
     return role === 'admin' || role === 'super_admin'
   })
 
@@ -23,6 +23,7 @@ export const useUserStore = defineStore('user', () => {
   function setUser(user: User) {
     userInfo.value = user
     localStorage.setItem('admin_userInfo', JSON.stringify(user))
+    localStorage.setItem('admin_userId', String(user.id))
   }
 
   function logout() {
@@ -31,11 +32,14 @@ export const useUserStore = defineStore('user', () => {
     localStorage.removeItem('admin_token')
     localStorage.removeItem('admin_refreshToken')
     localStorage.removeItem('admin_userInfo')
+    localStorage.removeItem('admin_userId')
   }
 
   async function fetchUserInfo() {
     try {
-      const res = await request.get('/api/user/profile')
+      const userId = userInfo.value?.id || Number(localStorage.getItem('admin_userId'))
+      if (!userId) return null
+      const res = await request.get(`/api/admin/user/${userId}`)
       const user = res.data
       setUser(user)
       return user

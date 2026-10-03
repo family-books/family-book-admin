@@ -1,201 +1,36 @@
 <template>
-  <div class="dashboard">
-    <!-- Stats Cards -->
-    <el-row :gutter="20" class="stats-row">
-      <el-col :span="4" v-for="stat in statsCards" :key="stat.label">
-        <el-card shadow="hover" class="stat-card">
-          <div class="stat-value">{{ stat.value }}</div>
-          <div class="stat-label">{{ stat.label }}</div>
-        </el-card>
-      </el-col>
-    </el-row>
-
-    <!-- Charts & Table -->
-    <el-row :gutter="20" class="content-row">
-      <el-col :span="14">
-        <el-card>
-          <template #header>
-            <span>收入趋势</span>
-          </template>
-          <div v-if="loading" class="chart-container chart-loading">
-            <el-skeleton :rows="5" animated />
-          </div>
-          <div v-else-if="loadError" class="chart-container chart-error">
-            <el-empty description="数据加载失败">
-              <el-button type="primary" @click="fetchData">重试</el-button>
-            </el-empty>
-          </div>
-          <div v-else ref="chartRef" class="chart-container"></div>
-        </el-card>
-      </el-col>
-      <el-col :span="10">
-        <el-card>
-          <template #header>
-            <span>最近订单</span>
-          </template>
-          <div v-if="loadError" class="chart-error">
-            <el-empty description="数据加载失败">
-              <el-button type="primary" @click="fetchData">重试</el-button>
-            </el-empty>
-          </div>
-          <el-table v-else :data="recentOrders" size="small" stripe v-loading="loading">
-            <el-table-column prop="userName" label="用户" width="80" />
-            <el-table-column prop="orderNo" label="订单号" width="120" show-overflow-tooltip />
-            <el-table-column prop="amount" label="金额" width="70">
-              <template #default="{ row }">
-                ¥{{ row.amount }}
-              </template>
-            </el-table-column>
-            <el-table-column prop="status" label="状态" width="70">
-              <template #default="{ row }">
-                <el-tag :type="row.status === 'paid' ? 'success' : 'info'" size="small">
-                  {{ row.status === 'paid' ? '已支付' : row.status }}
-                </el-tag>
-              </template>
-            </el-table-column>
-          </el-table>
-        </el-card>
-      </el-col>
-    </el-row>
+  <div class="dashboard" v-loading="loading">
+    <div class="intro"><div><span class="eyebrow">OVERVIEW</span><p>家书运营概览</p><small>来自现有业务服务的实时汇总数据</small></div><div class="live"><i></i> 实时数据</div></div>
+    <div class="card-grid">
+      <article v-for="(item, index) in cards" :key="item.label" class="card" :class="`tone-${index % 4}`">
+        <div class="card-top"><span>{{ String(index + 1).padStart(2, '0') }}</span><i>↗</i></div>
+        <strong>{{ item.value }}</strong><p>{{ item.label }}</p>
+      </article>
+    </div>
+    <el-alert v-if="loadError" class="alert" type="warning" title="数据暂时无法加载，请检查管理员权限与后端服务。" show-icon :closable="false">
+      <template #default><el-button link type="primary" @click="fetchData">重新加载</el-button></template>
+    </el-alert>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed, nextTick } from 'vue'
-import * as echarts from 'echarts'
-import { getDashboardStats, getRevenueTrend, getRecentOrders } from '@/api/dashboard'
-import type { DashboardStats, RevenueData, RecentOrder } from '@/types'
-
-const chartRef = ref<HTMLElement>()
+import { computed, onMounted, ref } from 'vue'
+import { getDashboardStats } from '@/api/dashboard'
+import type { DashboardStats } from '@/types'
 const loading = ref(true)
 const loadError = ref(false)
-
-let chartInstance: echarts.EChartsType | null = null
-
-const stats = ref<DashboardStats>({
-  totalUsers: 0,
-  totalFamilies: 0,
-  totalGazettes: 0,
-  totalRevenue: 0,
-  monthlyNewUsers: 0,
-  activeSubscriptions: 0,
-})
-const revenueTrend = ref<RevenueData[]>([])
-const recentOrders = ref<RecentOrder[]>([])
-
-const statsCards = computed(() => [
-  { label: '总用户数', value: stats.value.totalUsers },
-  { label: '总家庭数', value: stats.value.totalFamilies },
-  { label: '总报纸数', value: stats.value.totalGazettes },
-  { label: '总收入', value: `¥${stats.value.totalRevenue}` },
-  { label: '本月新增用户', value: stats.value.monthlyNewUsers },
-  { label: '活跃订阅', value: stats.value.activeSubscriptions },
+const stats = ref<DashboardStats>({ totalUsers: 0, totalFamilies: 0, totalGazettes: 0, totalRevenue: 0, monthlyNewUsers: 0, monthlyRevenue: 0, activeSubscriptions: 0 })
+const cards = computed(() => [
+  { label: '总用户数', value: stats.value.totalUsers }, { label: '总家庭数', value: stats.value.totalFamilies }, { label: '已生成报纸', value: stats.value.totalGazettes }, { label: '累计收入', value: `¥${stats.value.totalRevenue}` }, { label: '本月新增用户', value: stats.value.monthlyNewUsers }, { label: '本月收入', value: `¥${stats.value.monthlyRevenue}` }, { label: '活跃订阅', value: stats.value.activeSubscriptions },
 ])
-
-function handleResize() {
-  if (chartInstance) {
-    chartInstance.resize()
-  }
-}
-
-function initChart() {
-  if (!chartRef.value) return
-  chartInstance = echarts.init(chartRef.value)
-
-  const dates = revenueTrend.value.map(item => item.date)
-  const amounts = revenueTrend.value.map(item => item.amount)
-
-  chartInstance.setOption({
-    tooltip: { trigger: 'axis' },
-    xAxis: { type: 'category', data: dates },
-    yAxis: { type: 'value', axisLabel: { formatter: '¥{value}' } },
-    series: [
-      {
-        name: '收入',
-        type: 'line',
-        smooth: true,
-        data: amounts,
-        areaStyle: { opacity: 0.3 },
-        itemStyle: { color: '#409EFF' },
-      },
-    ],
-    grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
-  })
-
-  window.addEventListener('resize', handleResize)
-}
-
-async function fetchData() {
-  loading.value = true
-  loadError.value = false
-  try {
-    const [statsRes, trendRes, ordersRes] = await Promise.all([
-      getDashboardStats(),
-      getRevenueTrend(),
-      getRecentOrders(),
-    ])
-    stats.value = statsRes.data
-    revenueTrend.value = trendRes.data
-    recentOrders.value = ordersRes.data
-    await nextTick()
-    initChart()
-  } catch {
-    loadError.value = true
-  } finally {
-    loading.value = false
-  }
-}
-
-onMounted(() => {
-  fetchData()
-})
-
-onUnmounted(() => {
-  if (chartInstance) {
-    chartInstance.dispose()
-    chartInstance = null
-  }
-  window.removeEventListener('resize', handleResize)
-})
+async function fetchData() { loading.value = true; loadError.value = false; try { stats.value = (await getDashboardStats()).data } catch { loadError.value = true } finally { loading.value = false } }
+onMounted(fetchData)
 </script>
 
 <style scoped>
-.dashboard {
-  padding: 0;
-}
+.dashboard{font-family:Inter,"SF Pro Display","PingFang SC",sans-serif}.intro{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:28px}.intro p{margin:5px 0 6px;font-size:30px;letter-spacing:-.05em;font-weight:650;color:#181719}.intro small{color:#92908b;font-size:12px}.eyebrow{font-size:9px;letter-spacing:.16em;color:#ec6948}.live{font-size:11px;color:#77736f;padding:9px 12px;background:#fff;border:1px solid #e6e2db;border-radius:999px}.live i{display:inline-block;width:6px;height:6px;background:#86bd57;border-radius:50%;box-shadow:0 0 8px #86bd57;margin-right:7px}.card-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}.card{position:relative;min-height:190px;padding:22px;border-radius:12px;background:#fff;border:1px solid #e6e2dc;overflow:hidden;box-shadow:0 10px 35px rgba(43,37,30,.035)}.card:after{content:"";position:absolute;width:120px;height:120px;border-radius:50%;right:-50px;bottom:-65px;background:var(--accent);opacity:.14}.card-top{display:flex;justify-content:space-between;color:#aaa6a1;font-size:10px}.card-top i{font-style:normal;font-size:16px}.card strong{display:block;margin-top:39px;font-size:34px;letter-spacing:-.04em;color:#1e1c1d}.card p{margin:8px 0 0;color:#85817d;font-size:12px}.tone-0{--accent:#ff6c4b}.tone-1{--accent:#8758e8}.tone-2{--accent:#4cbba4}.tone-3{--accent:#d7a737}.alert{margin-top:18px}@media(max-width:1100px){.card-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:620px){.intro{align-items:flex-start}.live{display:none}.card{min-height:155px}.card strong{margin-top:28px;font-size:28px}}
+</style>
 
-.stats-row {
-  margin-bottom: 20px;
-}
-
-.stat-card {
-  text-align: center;
-}
-
-.stat-value {
-  font-size: 24px;
-  font-weight: 700;
-  color: #303133;
-  margin-bottom: 8px;
-}
-
-.stat-label {
-  font-size: 13px;
-  color: #909399;
-}
-
-.content-row {
-  margin-bottom: 20px;
-}
-
-.chart-container {
-  height: 350px;
-}
-
-.chart-loading,
-.chart-error {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+<style scoped>
+.intro p{color:#303133}.intro small{color:#909399}.eyebrow{color:#409eff}.live{color:#606266;border-color:#e4e7ed}.card{border-color:#e4e7ed;box-shadow:0 8px 28px rgba(48,65,86,.045)}.card strong{color:#303133}.card p{color:#909399}.tone-0{--accent:#409eff}.tone-1{--accent:#7a7de8}.tone-2{--accent:#67c23a}.tone-3{--accent:#e6a23c}
 </style>

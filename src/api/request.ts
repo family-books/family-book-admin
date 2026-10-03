@@ -60,7 +60,7 @@ request.interceptors.response.use(
 
       if (!refreshToken) {
         userStore.logout()
-        router.push('/login')
+        router.push('/admin/login')
         ElMessage.error('登录已过期，请重新登录')
         return Promise.reject(error)
       }
@@ -103,7 +103,7 @@ request.interceptors.response.use(
         onTokenRefreshFailed(refreshError)
         userStore.logout()
         localStorage.removeItem('admin_refreshToken')
-        router.push('/login')
+        router.push('/admin/login')
         ElMessage.error('登录已过期，请重新登录')
         return Promise.reject(refreshError)
       }

@@ -10,7 +10,7 @@
       </el-col>
       <el-col :span="6">
         <el-card shadow="hover" class="stat-card">
-          <div class="stat-value">{{ stats.totalPoints }}</div>
+          <div class="stat-value">{{ stats.totalPointsIssued }}</div>
           <div class="stat-label">总积分发放</div>
         </el-card>
       </el-col>
@@ -36,8 +36,8 @@
     <!-- Referrals Table -->
     <el-card>
       <el-table :data="filteredReferrals" stripe v-loading="loading">
-        <el-table-column prop="referrerName" label="推荐人" width="120" />
-        <el-table-column prop="refereeName" label="被推荐人" width="120" />
+        <el-table-column prop="referrerNickname" label="推荐人" width="120" />
+        <el-table-column prop="refereeNickname" label="被推荐人" width="120" />
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
             <el-tag :type="row.status === 'completed' ? 'success' : 'info'" size="small">
@@ -45,7 +45,7 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="points" label="积分" width="80" />
+        <el-table-column prop="pointsEarned" label="积分" width="80" />
         <el-table-column prop="createdAt" label="时间" width="170" />
       </el-table>
 
@@ -74,13 +74,13 @@ const keyword = ref('')
 const page = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
-const stats = ref({ totalReferrals: 0, totalPoints: 0 })
+const stats = ref({ totalReferrals: 0, totalPointsIssued: 0 })
 
 const filteredReferrals = computed(() => {
   if (!keyword.value.trim()) return referrals.value
   const k = keyword.value.trim().toLowerCase()
   return referrals.value.filter(
-    r => r.referrerName?.toLowerCase().includes(k) || r.refereeName?.toLowerCase().includes(k)
+    r => r.referrerNickname?.toLowerCase().includes(k) || r.refereeNickname?.toLowerCase().includes(k)
   )
 })
 
@@ -93,7 +93,7 @@ async function fetchReferrals() {
   loading.value = true
   try {
     const res = await getReferralList({ page: page.value, pageSize: pageSize.value })
-    referrals.value = res.data.records
+    referrals.value = res.data.list
     total.value = res.data.total
   } catch {
     // handled by interceptor

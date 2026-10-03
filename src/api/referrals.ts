@@ -5,9 +5,9 @@ export function getReferralList(params: {
   page: number
   pageSize: number
 }): Promise<ApiResponse<PageResult<Referral>>> {
-  return request.get('/api/admin/referrals', { params })
+  return request.get('/api/admin/referral/list', { params })
 }
 
-export function getReferralStats(): Promise<ApiResponse<{ totalReferrals: number; totalPoints: number }>> {
-  return request.get('/api/admin/referrals/stats')
+export function getReferralStats(): Promise<ApiResponse<{ totalReferrals: number; totalPointsIssued: number }>> {
+  return request.get('/api/admin/referral/stats')
 }

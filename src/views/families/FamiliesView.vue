@@ -22,12 +22,12 @@
       <el-table :data="families" stripe v-loading="loading">
         <el-table-column prop="name" label="家庭名" width="150" />
         <el-table-column prop="inviteCode" label="邀请码" width="120" />
-        <el-table-column prop="creatorName" label="创建者" width="120" />
+        <el-table-column prop="creatorNickname" label="创建者" width="120" />
         <el-table-column prop="memberCount" label="成员数" width="80" />
         <el-table-column prop="createdAt" label="创建时间" width="170" />
         <el-table-column label="操作" width="120">
           <template #default="{ row }">
-            <el-button size="small" @click="showMembers(row)">查看成员</el-button>
+            <el-button size="small" @click="showDetail(row)">查看详情</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -44,27 +44,14 @@
       />
     </el-card>
 
-    <!-- Members Dialog -->
-    <el-dialog v-model="membersVisible" title="家庭成员" width="500px">
-      <el-table :data="members" size="small" stripe v-loading="membersLoading">
-        <el-table-column prop="nickname" label="昵称" />
-        <el-table-column prop="role" label="角色">
-          <template #default="{ row }">
-            <el-tag :type="row.role === 'owner' ? 'warning' : 'info'" size="small">
-              {{ row.role === 'owner' ? '创建者' : '成员' }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="joinedAt" label="加入时间" />
-      </el-table>
-    </el-dialog>
+    <el-dialog v-model="detailVisible" title="家庭详情" width="480px"><el-descriptions v-if="currentFamily" :column="1" border><el-descriptions-item label="家庭名">{{ currentFamily.name }}</el-descriptions-item><el-descriptions-item label="创建者">{{ currentFamily.creatorNickname }}</el-descriptions-item><el-descriptions-item label="成员数">{{ currentFamily.memberCount }}</el-descriptions-item><el-descriptions-item label="邀请码">{{ currentFamily.inviteCode }}</el-descriptions-item><el-descriptions-item label="创建时间">{{ currentFamily.createdAt }}</el-descriptions-item></el-descriptions></el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { getFamilyList, getFamilyMembers } from '@/api/families'
-import type { Family, FamilyMember } from '@/types'
+import { getFamilyList } from '@/api/families'
+import type { Family } from '@/types'
 
 const loading = ref(false)
 const families = ref<Family[]>([])
@@ -73,14 +60,14 @@ const page = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
 
-const membersVisible = ref(false)
-const members = ref<FamilyMember[]>([])
+const detailVisible = ref(false)
+const currentFamily = ref<Family | null>(null)
 
 async function fetchFamilies() {
   loading.value = true
   try {
     const res = await getFamilyList({ page: page.value, pageSize: pageSize.value, keyword: keyword.value })
-    families.value = res.data.records
+    families.value = res.data.list
     total.value = res.data.total
   } catch {
     // handled by interceptor
@@ -94,21 +81,7 @@ function handleSearch() {
   fetchFamilies()
 }
 
-const membersLoading = ref(false)
-
-async function showMembers(family: Family) {
-  membersVisible.value = true
-  membersLoading.value = true
-  members.value = []
-  try {
-    const res = await getFamilyMembers(family.id)
-    members.value = res.data
-  } catch {
-    members.value = []
-  } finally {
-    membersLoading.value = false
-  }
-}
+function showDetail(family: Family) { currentFamily.value = family; detailVisible.value = true }
 
 onMounted(() => {
   fetchFamilies()

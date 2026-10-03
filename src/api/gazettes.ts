@@ -5,15 +5,36 @@ export function getGazetteList(params: {
   page: number
   pageSize: number
   status?: string
-  familyName?: string
 }): Promise<ApiResponse<PageResult<Gazette>>> {
-  return request.get('/api/admin/gazettes', { params })
+  return request.get('/api/admin/gazette/list', { params })
 }
 
-export function updateGazetteStatus(gazetteId: number, status: string): Promise<ApiResponse<null>> {
-  return request.put(`/api/admin/gazettes/${gazetteId}/status`, { status })
+export function regenerateGazette(gazetteId: number): Promise<ApiResponse<null>> {
+  return request.post(`/api/admin/gazette/${gazetteId}/generate`)
 }
 
-export function updateTrackingNumber(gazetteId: number, trackingNumber: string): Promise<ApiResponse<null>> {
-  return request.put(`/api/admin/gazettes/${gazetteId}/tracking`, { trackingNumber })
+export function updatePrintStatus(gazetteId: number, printStatus: string): Promise<ApiResponse<null>> {
+  return request.put(`/api/admin/gazette/${gazetteId}/print-status`, { printStatus })
+}
+
+export function shipGazette(
+  gazetteId: number,
+  payload: { expressCompany: string; trackingNo: string },
+): Promise<ApiResponse<null>> {
+  return request.post(`/api/admin/gazette/${gazetteId}/ship`, payload)
+}
+
+export function retryWechatShipping(gazetteId: number): Promise<ApiResponse<null>> {
+  return request.post(`/api/admin/gazette/${gazetteId}/wechat-shipping/retry`)
+}
+
+export interface WechatShippingCapability {
+  enabled: boolean
+  tradeManaged: boolean
+  errCode?: number
+  message?: string
+}
+
+export function getWechatShippingCapability(): Promise<ApiResponse<WechatShippingCapability>> {
+  return request.get('/api/admin/gazette/wechat-shipping/capability')
 }

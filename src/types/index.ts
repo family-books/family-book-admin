@@ -1,18 +1,19 @@
 export interface User {
   id: number
   nickname: string
-  avatarUrl: string
-  phone: string
-  systemRole: string
-  createdAt: string
-  status: number
+  avatarUrl?: string
+  phone?: string
+  sysRole?: string
+  createdAt?: string
+  familyCount?: number
+  subscriptionStatus?: string
 }
 
 export interface Family {
   id: number
   name: string
   inviteCode: string
-  creatorName: string
+  creatorNickname: string
   memberCount: number
   createdAt: string
 }
@@ -28,30 +29,39 @@ export interface FamilyMember {
 export interface Gazette {
   id: number
   familyName: string
-  issueNumber: number
-  contentCount: number
+  issueNo: number
+  postCount: number
   status: string
-  pdfUrl: string
   generatedAt: string
-  trackingNumber: string
+  printId?: number
+  printStatus: string
+  expressCompany?: string
+  trackingNo?: string
+  shippedAt?: string
+  deliveredAt?: string
+  paymentLogId?: number
+  wechatShippingStatus?: 'pending' | 'success' | 'failed' | 'not_applicable' | 'manual_review'
+  wechatShippingError?: string
+  wechatShippingSyncedAt?: string
 }
 
 export interface Payment {
   id: number
-  userName: string
+  userNickname: string
   orderNo: string
   amount: number
-  planName: string
-  status: string
+  planType: string
+  payStatus: string
   paidAt: string
 }
 
 export interface Referral {
   id: number
-  referrerName: string
-  refereeName: string
+  referrerNickname: string
+  refereeNickname: string
+  referralCode: string
   status: string
-  points: number
+  pointsEarned: number
   createdAt: string
 }
 
@@ -59,28 +69,15 @@ export interface DashboardStats {
   totalUsers: number
   totalFamilies: number
   totalGazettes: number
-  totalRevenue: number
+  totalRevenue: number | string
   monthlyNewUsers: number
+  monthlyRevenue: number | string
   activeSubscriptions: number
 }
 
-export interface RevenueData {
-  date: string
-  amount: number
-}
-
-export interface RecentOrder {
-  id: number
-  userName: string
-  orderNo: string
-  amount: number
-  planName: string
-  status: string
-  paidAt: string
-}
 
 export interface PageResult<T> {
-  records: T[]
+  list: T[]
   total: number
   page: number
   pageSize: number
@@ -98,6 +95,10 @@ export interface LoginForm {
 }
 
 export interface LoginResult {
-  token: string
-  user: User
+  accessToken: string
+  refreshToken: string
+  userId: number
+  nickname: string
+  avatar: string
+  isNewUser: boolean
 }

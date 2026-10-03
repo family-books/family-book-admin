@@ -3,14 +3,15 @@ import type { RouteRecordRaw } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 
 const routes: RouteRecordRaw[] = [
+  { path: '/', name: 'Home', component: () => import('@/views/landing/LandingView.vue'), meta: { requiresAuth: false, title: '家书｜记录一家人的故事' } },
   {
-    path: '/login',
+    path: '/admin/login',
     name: 'Login',
     component: () => import('@/views/login/LoginView.vue'),
-    meta: { requiresAuth: false },
+    meta: { requiresAuth: false, title: '登录｜家书管理后台' },
   },
   {
-    path: '/',
+    path: '/admin',
     component: () => import('@/components/layout/AppLayout.vue'),
     meta: { requiresAuth: true },
     children: [
@@ -67,9 +68,9 @@ router.beforeEach(async (to, _from, next) => {
   const userStore = useUserStore()
 
   if (to.meta.requiresAuth !== false && !userStore.token) {
-    next('/login')
-  } else if (to.path === '/login' && userStore.token) {
-    next('/')
+    next('/admin/login')
+  } else if (to.path === '/admin/login' && userStore.token) {
+    next('/admin')
   } else if (to.meta.requiresAuth !== false && userStore.token) {
     // Fetch user info if not loaded yet
     if (!userStore.userInfo) {
@@ -85,6 +86,11 @@ router.beforeEach(async (to, _from, next) => {
   } else {
     next()
   }
+})
+
+router.afterEach((to) => {
+  const title = to.meta.title as string | undefined
+  document.title = title?.includes('家书') ? title : `${title || '管理后台'}｜家书`
 })
 
 export default router

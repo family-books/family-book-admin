@@ -3,20 +3,11 @@
     <!-- Search Bar -->
     <el-card class="search-card">
       <el-form inline>
-        <el-form-item label="订单号">
-          <el-input
-            v-model="orderNoKeyword"
-            placeholder="搜索订单号"
-            clearable
-            @keyup.enter="handleSearch"
-          />
-        </el-form-item>
         <el-form-item label="状态筛选">
           <el-select v-model="statusFilter" placeholder="全部状态" clearable @change="handleSearch">
-            <el-option label="已支付" value="paid" />
-            <el-option label="已退款" value="refunded" />
+            <el-option label="已支付" value="success" />
+            <el-option label="失败" value="failed" />
             <el-option label="待支付" value="pending" />
-            <el-option label="已关闭" value="closed" />
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -28,18 +19,18 @@
     <!-- Payments Table -->
     <el-card>
       <el-table :data="payments" stripe v-loading="loading">
-        <el-table-column prop="userName" label="用户" width="100" />
+        <el-table-column prop="userNickname" label="用户" width="100" />
         <el-table-column prop="orderNo" label="订单号" width="180" show-overflow-tooltip />
         <el-table-column prop="amount" label="金额" width="80">
           <template #default="{ row }">
             ¥{{ row.amount }}
           </template>
         </el-table-column>
-        <el-table-column prop="planName" label="套餐" width="100" />
-        <el-table-column prop="status" label="状态" width="90">
+        <el-table-column prop="planType" label="套餐" width="100" />
+        <el-table-column prop="payStatus" label="状态" width="90">
           <template #default="{ row }">
-            <el-tag :type="getPaymentStatusType(row.status)" size="small">
-              {{ getPaymentStatusLabel(row.status) }}
+            <el-tag :type="getPaymentStatusType(row.payStatus)" size="small">
+              {{ getPaymentStatusLabel(row.payStatus) }}
             </el-tag>
           </template>
         </el-table-column>
@@ -49,7 +40,7 @@
             <el-button
               size="small"
               type="danger"
-              :disabled="row.status !== 'paid'"
+              :disabled="row.payStatus !== 'success'"
               @click="handleRefund(row)"
             >
               退款
@@ -81,23 +72,20 @@ import type { Payment } from '@/types'
 const loading = ref(false)
 const payments = ref<Payment[]>([])
 const statusFilter = ref('')
-const orderNoKeyword = ref('')
 const page = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
 
 const statusMap: Record<string, string> = {
-  paid: '已支付',
-  refunded: '已退款',
+  success: '已支付',
+  failed: '失败',
   pending: '待支付',
-  closed: '已关闭',
 }
 
 const statusTypeMap: Record<string, string> = {
-  paid: 'success',
-  refunded: 'warning',
+  success: 'success',
+  failed: 'danger',
   pending: 'info',
-  closed: 'danger',
 }
 
 function getPaymentStatusLabel(status: string) {
@@ -115,9 +103,8 @@ async function fetchPayments() {
       page: page.value,
       pageSize: pageSize.value,
       status: statusFilter.value || undefined,
-      orderNo: orderNoKeyword.value || undefined,
     })
-    payments.value = res.data.records
+    payments.value = res.data.list
     total.value = res.data.total
   } catch {
     // handled by interceptor

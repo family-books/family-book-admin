@@ -5,11 +5,10 @@ export function getPaymentList(params: {
   page: number
   pageSize: number
   status?: string
-  orderNo?: string
 }): Promise<ApiResponse<PageResult<Payment>>> {
-  return request.get('/api/admin/payments', { params })
+  return request.get('/api/admin/payment/list', { params })
 }
 
 export function refundPayment(paymentId: number): Promise<ApiResponse<null>> {
-  return request.post(`/api/admin/payments/${paymentId}/refund`)
+  return request.post(`/api/admin/payment/${paymentId}/refund`)
 }
