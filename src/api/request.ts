@@ -39,7 +39,15 @@ request.interceptors.request.use(
 )
 
 request.interceptors.response.use(
-  (response) => {
+  async (response) => {
+    if (response.config.responseType === 'blob') {
+      if (response.data instanceof Blob && response.data.type.includes('application/json')) {
+        const error = JSON.parse(await response.data.text())
+        ElMessage.error(error.message || '下载失败')
+        return Promise.reject(new Error(error.message || '下载失败'))
+      }
+      return response
+    }
     const res = response.data
     if (res.code !== 0 && res.code !== 200) {
       // Do not show message for 401 — handled below via HTTP status

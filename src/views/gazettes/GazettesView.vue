@@ -21,7 +21,13 @@
     <el-card class="search-card">
       <el-form inline>
         <el-form-item label="家书状态">
-          <el-select v-model="statusFilter" placeholder="全部状态" clearable @change="handleSearch">
+          <el-select
+            v-model="statusFilter"
+            class="status-filter"
+            placeholder="全部状态"
+            clearable
+            @change="handleSearch"
+          >
             <el-option label="待制作" value="pending" />
             <el-option label="制作中" value="printing" />
             <el-option label="已发货" value="shipped" />
@@ -77,9 +83,12 @@
           </template>
         </el-table-column>
         <el-table-column prop="generatedAt" label="生成时间" width="170" />
-        <el-table-column label="操作" min-width="290">
+        <el-table-column label="操作" min-width="330">
           <template #default="{ row }">
-            <el-button size="small" @click="openAddressDialog(row)">查看地址</el-button>
+            <div class="row-actions">
+            <el-button size="small" @click="openAddressDialog(row)">查看邮寄地址</el-button>
+            <el-button size="small" :loading="downloading[`${row.id}:pdf`]" @click="downloadFile(row, 'pdf')">下载PDF</el-button>
+            <el-button size="small" :loading="downloading[`${row.id}:zip`]" @click="downloadFile(row, 'zip')">下载逐页图片ZIP</el-button>
             <el-button size="small" @click="regenerate(row)">重新生成</el-button>
             <el-button
               v-if="canRetryWechatShipping(row)"
@@ -106,6 +115,7 @@
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -185,6 +195,8 @@ import {
   retryWechatShipping,
   getWechatShippingCapability,
   getGazetteAddress,
+  downloadGazettePdf,
+  downloadGazettePrintImages,
 } from '@/api/gazettes'
 import type { GazetteAddress, WechatShippingCapability } from '@/api/gazettes'
 import type { Gazette } from '@/types'
@@ -203,6 +215,7 @@ const shippingCapability = ref<WechatShippingCapability | null>(null)
 const addressVisible = ref(false)
 const addressLoading = ref(false)
 const addressDetail = ref<GazetteAddress | null>(null)
+const downloading = ref<Record<string, boolean>>({})
 const fullAddress = computed(() => addressDetail.value
   ? [addressDetail.value.province, addressDetail.value.city, addressDetail.value.district, addressDetail.value.address].filter(Boolean).join('')
   : '')
@@ -304,6 +317,30 @@ async function copyText(value?: string) {
     ElMessage.success('已复制')
   } catch {
     ElMessage.error('复制失败，请手动选中文字复制')
+  }
+}
+
+async function downloadFile(gazette: Gazette, format: 'pdf' | 'zip') {
+  const key = `${gazette.id}:${format}`
+  if (downloading.value[key]) return
+  downloading.value[key] = true
+  try {
+    const response = format === 'pdf'
+      ? await downloadGazettePdf(gazette.id)
+      : await downloadGazettePrintImages(gazette.id)
+    if (!response.data.size) throw new Error('下载文件为空')
+    const url = URL.createObjectURL(response.data)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `家书-${gazette.id}${format === 'pdf' ? '.pdf' : '-逐页图片.zip'}`
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.setTimeout(() => URL.revokeObjectURL(url), 60000)
+  } catch (error) {
+    if (error instanceof Error && error.message === '下载文件为空') ElMessage.error(error.message)
+  } finally {
+    downloading.value[key] = false
   }
 }
 
@@ -422,6 +459,11 @@ onMounted(() => {
   margin-bottom: 16px;
 }
 
+.status-filter {
+  width: 160px;
+  min-width: 160px;
+}
+
 .address-detail {
   min-height: 130px;
 }
@@ -431,6 +473,17 @@ onMounted(() => {
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 18px;
+}
+
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.row-actions :deep(.el-button + .el-button) {
+  margin-left: 0;
 }
 
 .capability-alert {

@@ -1,4 +1,5 @@
 import request from './request'
+import type { AxiosResponse } from 'axios'
 import type { ApiResponse, PageResult, Gazette } from '@/types'
 
 export function getGazetteList(params: {
@@ -39,6 +40,18 @@ export interface GazetteAddress {
 
 export function getGazetteAddress(gazetteId: string): Promise<ApiResponse<GazetteAddress>> {
   return request.get(`/api/admin/gazette/${gazetteId}/address`)
+}
+
+export function downloadGazettePdf(gazetteId: string): Promise<AxiosResponse<Blob>> {
+  return request.get<Blob, AxiosResponse<Blob>>(`/api/admin/gazette/${gazetteId}/pdf`, {
+    responseType: 'blob', timeout: 300000,
+  })
+}
+
+export function downloadGazettePrintImages(gazetteId: string): Promise<AxiosResponse<Blob>> {
+  return request.get<Blob, AxiosResponse<Blob>>(`/api/admin/gazette/${gazetteId}/print-images.zip`, {
+    responseType: 'blob', timeout: 300000,
+  })
 }
 
 export interface WechatShippingCapability {
