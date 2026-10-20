@@ -46,12 +46,18 @@ export interface Gazette {
 }
 
 export interface Payment {
-  id: number
+  id: string
   userNickname: string
   orderNo: string
   amount: number
+  wxAmount?: number
+  walletAmount?: number
+  payChannel?: string
+  orderType?: string
   planType: string
   payStatus: string
+  refundStatus?: 'unknown' | 'processing' | 'success' | 'closed' | 'abnormal'
+  refundAmount?: number
   paidAt: string
 }
 

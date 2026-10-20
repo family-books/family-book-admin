@@ -290,12 +290,12 @@
           <p class="dialog-kicker">联系客服</p>
           <h3 id="dialog-title">我们在这里</h3>
           <p class="dialog-copy">如需帮助，可以在微信小程序「家书」内联系客服。</p>
-          <p class="dialog-copy">也可以发送邮件至 <a class="mail" href="mailto:privacy@jiashu.com">privacy@jiashu.com</a>，我们会尽快回复。</p>
+          <p class="dialog-copy">也可以发送邮件至 <a class="mail" href="mailto:homebooks@163.com">homebooks@163.com</a>，我们会尽快回复。</p>
         </template>
 
         <template v-else-if="modal === 'privacy'">
           <h3 id="dialog-title">隐私政策</h3>
-          <p class="legal-date">更新日期：2024年1月1日</p>
+          <p class="legal-date">更新日期：2026年10月20日</p>
           <section v-for="block in privacyBlocks" :key="block.title">
             <h4>{{ block.title }}</h4>
             <p v-for="(para, index) in block.paragraphs" :key="index">{{ para }}</p>
@@ -304,7 +304,7 @@
 
         <template v-else-if="modal === 'terms'">
           <h3 id="dialog-title">服务条款</h3>
-          <p class="legal-date">更新日期：2024年1月1日</p>
+          <p class="legal-date">更新日期：2026年10月20日</p>
           <section v-for="block in termsBlocks" :key="block.title">
             <h4>{{ block.title }}</h4>
             <p v-for="(para, index) in block.paragraphs" :key="index">{{ para }}</p>
@@ -452,7 +452,7 @@ const privacyBlocks = [
   {
     title: '六、联系我们',
     paragraphs: [
-      '如果您对本隐私政策有任何疑问或建议，请发送邮件至 privacy@jiashu.com。我们将在15个工作日内回复您的请求。',
+      '如需咨询隐私政策，或申请删除、导出内容及注销账号，请发送邮件至 homebooks@163.com。我们会先核实账号归属，并在15个工作日内回复您的请求。',
     ],
   },
 ]
@@ -473,6 +473,7 @@ const termsBlocks = [
       '3. 订阅到期后若未续费，服务将自动停止，您的数据将保留90天；',
       '4. 已支付的订阅费用，在服务正常提供的情况下不予退还；',
       '5. 如因我方原因导致服务无法提供，将按剩余服务期限比例退款。',
+      '6. 如需售后或申请退款，请联系 homebooks@163.com。我们将核实订单、已提供的服务和实际履约情况后处理。',
     ],
   },
   {

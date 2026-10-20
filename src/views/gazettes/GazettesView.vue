@@ -3,7 +3,7 @@
     <el-alert
       v-if="shippingCapability && !shippingCapability.tradeManaged"
       :title="shippingCapability.message || '微信订单发货管理尚未开通'"
-      description="本地发货状态可正常保存；开通微信权限后，可在列表中重试上报。"
+      description="本地发货不受影响。请先在微信公众平台完成订单发货管理接入与商户授权；授权后再开启服务端开关。"
       type="warning"
       :closable="false"
       show-icon
@@ -11,8 +11,9 @@
     />
     <el-alert
       v-else-if="shippingCapability?.tradeManaged"
-      title="微信订单发货管理已接通"
-      type="success"
+      :title="shippingCapability.enabled ? '微信订单发货上报已启用' : '微信侧已开通，服务端上报开关仍关闭'"
+      :description="shippingCapability.enabled ? '发货时将自动上报；历史记录可按需补报。' : '请按上线 SOP 设置 WECHAT_ORDER_SHIPPING_ENABLED=true 并重启服务，随后补报历史记录。'"
+      :type="shippingCapability.enabled ? 'success' : 'warning'"
       :closable="false"
       show-icon
       class="capability-alert"
@@ -89,7 +90,7 @@
             <el-button size="small" @click="openAddressDialog(row)">查看邮寄地址</el-button>
             <el-button size="small" :loading="downloading[`${row.id}:pdf`]" @click="downloadFile(row, 'pdf')">下载PDF</el-button>
             <el-button size="small" :loading="downloading[`${row.id}:zip`]" @click="downloadFile(row, 'zip')">下载图片包</el-button>
-            <el-button size="small" @click="regenerate(row)">重新生成</el-button>
+            <el-button size="small" @click="regenerate(row)">重新生成PDF</el-button>
             <el-button
               v-if="canRetryWechatShipping(row)"
               size="small"
@@ -405,13 +406,21 @@ async function submitShipping() {
 }
 
 function canRetryWechatShipping(gazette: Gazette) {
-  return ['shipped', 'delivered'].includes(gazette.printStatus)
+  return shippingCapability.value?.enabled === true
+    && shippingCapability.value?.tradeManaged === true
+    && ['shipped', 'delivered'].includes(gazette.printStatus)
     && gazette.wechatShippingStatus !== 'success'
-    && gazette.wechatShippingStatus !== 'not_applicable'
 }
 
 async function retryWechat(gazette: Gazette) {
   try {
+    if (gazette.wechatShippingStatus === 'manual_review') {
+      await ElMessageBox.confirm(
+        '这笔订单标记为需人工处理。请先查看原因并在微信后台核实处理方案；确认问题已解决后再重试。',
+        '确认重试微信上报',
+        { type: 'warning', confirmButtonText: '已核实，继续重试' },
+      )
+    }
     await retryWechatShipping(gazette.id)
     ElMessage.success('已重新提交微信上报')
     await Promise.all([fetchGazettes(), fetchShippingCapability()])
