@@ -40,6 +40,12 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '企业内购' },
       },
       {
+        path: 'redemption',
+        name: 'Redemption',
+        component: () => import('@/views/redemption/RedemptionView.vue'),
+        meta: { title: '兑换码管理' },
+      },
+      {
         path: 'gazettes',
         name: 'Gazettes',
         component: () => import('@/views/gazettes/GazettesView.vue'),

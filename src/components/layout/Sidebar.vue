@@ -25,6 +25,10 @@
         <el-icon><OfficeBuilding /></el-icon>
         <span>企业内购</span>
       </el-menu-item>
+      <el-menu-item index="/admin/redemption">
+        <el-icon><Tickets /></el-icon>
+        <span>兑换码管理</span>
+      </el-menu-item>
       <el-menu-item index="/admin/gazettes">
         <el-icon><Document /></el-icon>
         <span>报纸管理</span>
@@ -44,7 +48,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { OfficeBuilding } from '@element-plus/icons-vue'
+import { OfficeBuilding, Tickets } from '@element-plus/icons-vue'
 
 const route = useRoute()
 const activeMenu = computed(() => route.path)
