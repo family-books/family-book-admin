@@ -20,12 +20,12 @@
     <!-- Search Bar -->
     <el-card class="search-card">
       <el-form inline>
-        <el-form-item label="状态筛选">
+        <el-form-item label="家书状态">
           <el-select v-model="statusFilter" placeholder="全部状态" clearable @change="handleSearch">
-            <el-option label="草稿" value="draft" />
-            <el-option label="已生成" value="generated" />
-            <el-option label="已印刷" value="printed" />
-            <el-option label="已寄出" value="mailed" />
+            <el-option label="待制作" value="pending" />
+            <el-option label="制作中" value="printing" />
+            <el-option label="已发货" value="shipped" />
+            <el-option label="已送达" value="delivered" />
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -40,14 +40,14 @@
         <el-table-column prop="familyName" label="家庭名" width="130" />
         <el-table-column prop="issueNo" label="期号" width="70" />
         <el-table-column prop="postCount" label="内容数" width="70" />
-        <el-table-column prop="status" label="状态" width="100">
+        <el-table-column prop="status" label="PDF状态" width="100">
           <template #default="{ row }">
             <el-tag :type="getStatusType(row.status)" size="small">
               {{ getStatusLabel(row.status) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="printStatus" label="印刷进度" width="100">
+        <el-table-column prop="printStatus" label="家书状态" width="100">
           <template #default="{ row }"><el-tag v-if="row.printStatus" :type="getPrintStatusType(row.printStatus)" size="small">{{ getPrintStatusLabel(row.printStatus) }}</el-tag><span v-else>—</span></template>
         </el-table-column>
         <el-table-column label="物流信息" min-width="190">
@@ -77,15 +77,10 @@
           </template>
         </el-table-column>
         <el-table-column prop="generatedAt" label="生成时间" width="170" />
-        <el-table-column label="操作" min-width="280">
+        <el-table-column label="操作" min-width="290">
           <template #default="{ row }">
+            <el-button size="small" @click="openAddressDialog(row)">查看地址</el-button>
             <el-button size="small" @click="regenerate(row)">重新生成</el-button>
-            <el-button
-              v-if="row.printStatus === 'printing'"
-              size="small"
-              type="primary"
-              @click="openShippingDialog(row)"
-            >确认发货</el-button>
             <el-button
               v-if="canRetryWechatShipping(row)"
               size="small"
@@ -95,7 +90,7 @@
             >重试微信上报</el-button>
             <el-dropdown
               v-if="getValidTransitions(row.printStatus).length > 0"
-              @command="(cmd: string) => updateStatus(row, cmd)"
+              @command="(cmd: string) => handleStatusCommand(row, cmd)"
               trigger="click"
             >
               <el-button size="small">更新状态</el-button>
@@ -126,6 +121,26 @@
         @size-change="fetchGazettes"
       />
     </el-card>
+
+    <el-dialog v-model="addressVisible" title="家书收件地址" width="520px" destroy-on-close>
+      <div v-loading="addressLoading" class="address-detail">
+        <template v-if="addressDetail">
+          <el-descriptions :column="1" border>
+            <el-descriptions-item label="收件人">{{ addressDetail.recipientName || '—' }}</el-descriptions-item>
+            <el-descriptions-item label="联系电话">{{ addressDetail.phone || '—' }}</el-descriptions-item>
+            <el-descriptions-item label="省 / 市 / 区">{{ [addressDetail.province, addressDetail.city, addressDetail.district].filter(Boolean).join(' / ') || '—' }}</el-descriptions-item>
+            <el-descriptions-item label="详细地址">{{ addressDetail.address || '—' }}</el-descriptions-item>
+          </el-descriptions>
+          <div class="address-actions">
+            <el-button type="primary" @click="copyText([addressDetail.recipientName, addressDetail.phone, fullAddress].filter(Boolean).join('  '))">复制全部收件信息</el-button>
+            <el-button @click="copyText(addressDetail.recipientName)">复制收件人</el-button>
+            <el-button @click="copyText(addressDetail.phone)">复制电话</el-button>
+            <el-button @click="copyText(fullAddress)">复制完整地址</el-button>
+          </div>
+        </template>
+      </div>
+      <template #footer><el-button @click="addressVisible = false">关闭</el-button></template>
+    </el-dialog>
 
     <el-dialog v-model="shippingVisible" title="确认家书发货" width="460px">
       <el-alert
@@ -160,7 +175,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   getGazetteList,
@@ -169,8 +184,9 @@ import {
   updatePrintStatus,
   retryWechatShipping,
   getWechatShippingCapability,
+  getGazetteAddress,
 } from '@/api/gazettes'
-import type { WechatShippingCapability } from '@/api/gazettes'
+import type { GazetteAddress, WechatShippingCapability } from '@/api/gazettes'
 import type { Gazette } from '@/types'
 
 const loading = ref(false)
@@ -184,6 +200,12 @@ const shippingSubmitting = ref(false)
 const shippingGazette = ref<Gazette | null>(null)
 const shippingForm = ref({ expressCompany: '', trackingNo: '' })
 const shippingCapability = ref<WechatShippingCapability | null>(null)
+const addressVisible = ref(false)
+const addressLoading = ref(false)
+const addressDetail = ref<GazetteAddress | null>(null)
+const fullAddress = computed(() => addressDetail.value
+  ? [addressDetail.value.province, addressDetail.value.city, addressDetail.value.district, addressDetail.value.address].filter(Boolean).join('')
+  : '')
 
 const EXPRESS_COMPANIES = [
   { label: '顺丰速运', value: 'SF' },
@@ -210,7 +232,7 @@ const statusTypeMap: Record<string, string> = {
   draft: 'info', generated: 'success', printed: 'warning', mailed: 'success',
 }
 
-const printStatusMap: Record<string, string> = { pending: '待印刷', printing: '印刷中', shipped: '已发货', delivered: '已送达' }
+const printStatusMap: Record<string, string> = { pending: '待制作', printing: '制作中', shipped: '已发货', delivered: '已送达' }
 const printStatusTypeMap: Record<string, string> = { pending: 'warning', printing: '', shipped: 'success', delivered: 'success' }
 const wechatShippingStatusMap: Record<string, string> = {
   pending: '待上报',
@@ -249,7 +271,40 @@ function getWechatShippingStatusType(gazette: Gazette) {
 }
 
 function getValidTransitions(status: string): string[] {
-  return (VALID_TRANSITIONS[status] || []).filter((target) => target !== 'shipped')
+  return VALID_TRANSITIONS[status] || []
+}
+
+function handleStatusCommand(gazette: Gazette, status: string) {
+  if (status === 'shipped') {
+    openShippingDialog(gazette)
+    return
+  }
+  updateStatus(gazette, status)
+}
+
+async function openAddressDialog(gazette: Gazette) {
+  addressDetail.value = null
+  addressVisible.value = true
+  addressLoading.value = true
+  try {
+    const response = await getGazetteAddress(gazette.id)
+    addressDetail.value = response.data
+  } catch {
+    addressVisible.value = false
+  } finally {
+    addressLoading.value = false
+  }
+}
+
+async function copyText(value?: string) {
+  const text = (value || '').trim()
+  if (!text) return ElMessage.warning('暂无内容可复制')
+  try {
+    await navigator.clipboard.writeText(text)
+    ElMessage.success('已复制')
+  } catch {
+    ElMessage.error('复制失败，请手动选中文字复制')
+  }
 }
 
 function getExpressCompanyLabel(value?: string) {
@@ -339,7 +394,7 @@ async function fetchShippingCapability() {
 
 async function updateStatus(gazette: Gazette, status: string) {
   ElMessageBox.confirm(
-    `确定要将印刷进度更新为「${getPrintStatusLabel(status)}」吗？`,
+    `确定要将家书状态更新为「${getPrintStatusLabel(status)}」吗？`,
     '确认状态变更',
     { type: 'warning' }
   )
@@ -365,6 +420,17 @@ onMounted(() => {
 <style scoped>
 .search-card {
   margin-bottom: 16px;
+}
+
+.address-detail {
+  min-height: 130px;
+}
+
+.address-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
 }
 
 .capability-alert {

@@ -50,7 +50,7 @@ const routes: RouteRecordRaw[] = [
         path: 'gazettes',
         name: 'Gazettes',
         component: () => import('@/views/gazettes/GazettesView.vue'),
-        meta: { title: '报纸管理' },
+        meta: { title: '家书管理' },
       },
       {
         path: 'payments',

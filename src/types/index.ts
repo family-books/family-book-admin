@@ -27,19 +27,19 @@ export interface FamilyMember {
 }
 
 export interface Gazette {
-  id: number
+  id: string
   familyName: string
   issueNo: number
   postCount: number
   status: string
   generatedAt: string
-  printId?: number
+  printId?: string
   printStatus: string
   expressCompany?: string
   trackingNo?: string
   shippedAt?: string
   deliveredAt?: string
-  paymentLogId?: number
+  paymentLogId?: string
   wechatShippingStatus?: 'pending' | 'success' | 'failed' | 'not_applicable' | 'manual_review'
   wechatShippingError?: string
   wechatShippingSyncedAt?: string

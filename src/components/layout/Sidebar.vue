@@ -31,7 +31,7 @@
       </el-menu-item>
       <el-menu-item index="/admin/gazettes">
         <el-icon><Document /></el-icon>
-        <span>报纸管理</span>
+        <span>家书管理</span>
       </el-menu-item>
       <el-menu-item index="/admin/payments">
         <el-icon><Money /></el-icon>

@@ -21,7 +21,7 @@ const loading = ref(true)
 const loadError = ref(false)
 const stats = ref<DashboardStats>({ totalUsers: 0, totalFamilies: 0, totalGazettes: 0, totalRevenue: 0, monthlyNewUsers: 0, monthlyRevenue: 0, activeSubscriptions: 0 })
 const cards = computed(() => [
-  { label: '总用户数', value: stats.value.totalUsers }, { label: '总家庭数', value: stats.value.totalFamilies }, { label: '已生成报纸', value: stats.value.totalGazettes }, { label: '累计收入', value: `¥${stats.value.totalRevenue}` }, { label: '本月新增用户', value: stats.value.monthlyNewUsers }, { label: '本月收入', value: `¥${stats.value.monthlyRevenue}` }, { label: '活跃订阅', value: stats.value.activeSubscriptions },
+  { label: '总用户数', value: stats.value.totalUsers }, { label: '总家庭数', value: stats.value.totalFamilies }, { label: '已生成家书', value: stats.value.totalGazettes }, { label: '累计收入', value: `¥${stats.value.totalRevenue}` }, { label: '本月新增用户', value: stats.value.monthlyNewUsers }, { label: '本月收入', value: `¥${stats.value.monthlyRevenue}` }, { label: '活跃订阅', value: stats.value.activeSubscriptions },
 ])
 async function fetchData() { loading.value = true; loadError.value = false; try { stats.value = (await getDashboardStats()).data } catch { loadError.value = true } finally { loading.value = false } }
 onMounted(fetchData)
