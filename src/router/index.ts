@@ -4,6 +4,7 @@ import { useUserStore } from '@/stores/user'
 
 const routes: RouteRecordRaw[] = [
   { path: '/', name: 'Home', component: () => import('@/views/landing/LandingView.vue'), meta: { requiresAuth: false, title: '家书｜记录一家人的故事' } },
+  { path: '/home', name: 'OfficialHome', component: () => import('@/views/home/HomeView.vue'), meta: { requiresAuth: false, title: '家书｜记录一家人的故事' } },
   {
     path: '/admin/login',
     name: 'Login',
