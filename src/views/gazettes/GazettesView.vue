@@ -88,7 +88,7 @@
             <div class="row-actions">
             <el-button size="small" @click="openAddressDialog(row)">查看邮寄地址</el-button>
             <el-button size="small" :loading="downloading[`${row.id}:pdf`]" @click="downloadFile(row, 'pdf')">下载PDF</el-button>
-            <el-button size="small" :loading="downloading[`${row.id}:zip`]" @click="downloadFile(row, 'zip')">下载逐页图片ZIP</el-button>
+            <el-button size="small" :loading="downloading[`${row.id}:zip`]" @click="downloadFile(row, 'zip')">下载图片包</el-button>
             <el-button size="small" @click="regenerate(row)">重新生成</el-button>
             <el-button
               v-if="canRetryWechatShipping(row)"
