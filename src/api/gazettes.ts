@@ -18,6 +18,10 @@ export function updatePrintStatus(gazetteId: string, printStatus: string): Promi
   return request.put(`/api/admin/gazette/${gazetteId}/print-status`, { printStatus })
 }
 
+export function updatePrintTaskStatus(printId: string, printStatus: string): Promise<ApiResponse<null>> {
+  return request.put(`/api/admin/gazette/print/${printId}/status`, { printStatus })
+}
+
 export function shipGazette(
   gazetteId: string,
   payload: { expressCompany: string; trackingNo: string },
@@ -25,8 +29,19 @@ export function shipGazette(
   return request.post(`/api/admin/gazette/${gazetteId}/ship`, payload)
 }
 
+export function shipPrint(
+  printId: string,
+  payload: { expressCompany: string; trackingNo: string },
+): Promise<ApiResponse<null>> {
+  return request.post(`/api/admin/gazette/print/${printId}/ship`, payload)
+}
+
 export function retryWechatShipping(gazetteId: string): Promise<ApiResponse<null>> {
   return request.post(`/api/admin/gazette/${gazetteId}/wechat-shipping/retry`)
+}
+
+export function retryPrintWechatShipping(printId: string): Promise<ApiResponse<null>> {
+  return request.post(`/api/admin/gazette/print/${printId}/wechat-shipping/retry`)
 }
 
 export interface GazetteAddress {
@@ -42,6 +57,10 @@ export function getGazetteAddress(gazetteId: string): Promise<ApiResponse<Gazett
   return request.get(`/api/admin/gazette/${gazetteId}/address`)
 }
 
+export function getPrintAddress(printId: string): Promise<ApiResponse<GazetteAddress>> {
+  return request.get(`/api/admin/gazette/print/${printId}/address`)
+}
+
 export function downloadGazettePdf(gazetteId: string): Promise<AxiosResponse<Blob>> {
   return request.get<Blob, AxiosResponse<Blob>>(`/api/admin/gazette/${gazetteId}/pdf`, {
     responseType: 'blob', timeout: 300000,
@@ -50,6 +69,18 @@ export function downloadGazettePdf(gazetteId: string): Promise<AxiosResponse<Blo
 
 export function downloadGazettePrintImages(gazetteId: string): Promise<AxiosResponse<Blob>> {
   return request.get<Blob, AxiosResponse<Blob>>(`/api/admin/gazette/${gazetteId}/print-images.zip`, {
+    responseType: 'blob', timeout: 300000,
+  })
+}
+
+export function downloadPrintPdf(printId: string): Promise<AxiosResponse<Blob>> {
+  return request.get<Blob, AxiosResponse<Blob>>(`/api/admin/gazette/print/${printId}/pdf`, {
+    responseType: 'blob', timeout: 300000,
+  })
+}
+
+export function downloadPrintImages(printId: string): Promise<AxiosResponse<Blob>> {
+  return request.get<Blob, AxiosResponse<Blob>>(`/api/admin/gazette/print/${printId}/print-images.zip`, {
     responseType: 'blob', timeout: 300000,
   })
 }

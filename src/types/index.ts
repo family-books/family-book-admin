@@ -26,6 +26,22 @@ export interface FamilyMember {
   joinedAt: string
 }
 
+export interface GazettePrintTask {
+  id: string
+  recipientId?: string
+  recipientLabel?: string
+  recipientName?: string
+  printStatus: string
+  expressCompany?: string
+  trackingNo?: string
+  shippedAt?: string
+  deliveredAt?: string
+  paymentLogId?: string
+  wechatShippingStatus?: 'pending' | 'success' | 'failed' | 'not_applicable' | 'manual_review'
+  wechatShippingError?: string
+  wechatShippingSyncedAt?: string
+}
+
 export interface Gazette {
   id: string
   familyName: string
@@ -43,6 +59,9 @@ export interface Gazette {
   wechatShippingStatus?: 'pending' | 'success' | 'failed' | 'not_applicable' | 'manual_review'
   wechatShippingError?: string
   wechatShippingSyncedAt?: string
+  deliveryCount?: number
+  shippedCount?: number
+  prints?: GazettePrintTask[]
 }
 
 export interface Payment {
