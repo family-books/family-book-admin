@@ -2,8 +2,8 @@
   <div class="gazettes-view">
     <el-alert
       v-if="shippingCapability && !shippingCapability.tradeManaged"
-      :title="shippingCapability.message || '微信订单发货管理尚未开通'"
-      description="本地发货不受影响。请先在微信公众平台完成订单发货管理接入与商户授权；授权后再开启服务端开关。"
+      :title="shippingCapability.message || '微信订单发货管理当前不可用'"
+      description="本地发货不受影响。若微信尚未开放入口，请保持服务端上报关闭；仅在微信侧确认开通并完成授权后再开启。"
       type="warning"
       :closable="false"
       show-icon
@@ -80,65 +80,11 @@
         <el-table-column prop="printStatus" label="家书状态" width="100">
           <template #default="{ row }"><el-tag v-if="row.printStatus" :type="getPrintStatusType(row.printStatus)" size="small">{{ getPrintStatusLabel(row.printStatus) }}</el-tag><span v-else>—</span></template>
         </el-table-column>
-        <el-table-column label="物流信息" min-width="190">
-          <template #default="{ row }">
-            <template v-if="row.trackingNo">
-              <div>{{ getExpressCompanyLabel(row.expressCompany) }}</div>
-              <div class="tracking-no">{{ row.trackingNo }}</div>
-            </template>
-            <span v-else>—</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="微信上报" min-width="190">
-          <template #default="{ row }">
-            <div class="sync-status">
-              <el-tag :type="getWechatShippingStatusType(row)" size="small">
-                {{ getWechatShippingStatusLabel(row) }}
-              </el-tag>
-              <el-tooltip
-                v-if="row.wechatShippingError"
-                :content="row.wechatShippingError"
-                placement="top"
-                :show-after="200"
-              >
-                <span class="sync-error">查看原因</span>
-              </el-tooltip>
-            </div>
-          </template>
-        </el-table-column>
         <el-table-column prop="generatedAt" label="生成时间" width="170" />
-        <el-table-column label="操作" min-width="330">
+        <el-table-column label="操作" width="170">
           <template #default="{ row }">
             <div class="row-actions">
-            <el-button size="small" @click="openAddressDialog(row)">查看邮寄地址</el-button>
-            <el-button size="small" :loading="downloading[`${row.id}:pdf`]" @click="downloadFile(row, 'pdf')">下载PDF</el-button>
-            <el-button size="small" :loading="downloading[`${row.id}:zip`]" @click="downloadFile(row, 'zip')">下载图片包</el-button>
-            <el-button size="small" @click="regenerate(row)">重新生成PDF</el-button>
-            <el-button
-              v-if="canRetryWechatShipping(row)"
-              size="small"
-              type="warning"
-              plain
-              @click="retryWechat(row)"
-            >重试微信上报</el-button>
-            <el-dropdown
-              v-if="getValidTransitions(row.printStatus).length > 0"
-              @command="(cmd: string) => handleStatusCommand(row, cmd)"
-              trigger="click"
-            >
-              <el-button size="small">更新状态</el-button>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item
-                    v-for="status in getValidTransitions(row.printStatus)"
-                    :key="status"
-                    :command="status"
-                  >
-                    {{ getPrintStatusLabel(status) }}
-                  </el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
+            <el-button size="small" type="primary" plain @click="regenerate(row)">重新生成全部PDF</el-button>
             </div>
           </template>
         </el-table-column>
@@ -214,13 +160,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   getGazetteList,
   regenerateGazette,
-  shipGazette,
-  updatePrintStatus,
-  retryWechatShipping,
   getWechatShippingCapability,
-  getGazetteAddress,
-  downloadGazettePdf,
-  downloadGazettePrintImages,
   getPrintAddress,
   downloadPrintPdf,
   downloadPrintImages,
@@ -239,7 +179,6 @@ const pageSize = ref(10)
 const total = ref(0)
 const shippingVisible = ref(false)
 const shippingSubmitting = ref(false)
-const shippingGazette = ref<Gazette | null>(null)
 const shippingPrint = ref<GazettePrintTask | null>(null)
 const shippingForm = ref({ expressCompany: '', trackingNo: '' })
 const shippingCapability = ref<WechatShippingCapability | null>(null)
@@ -303,17 +242,6 @@ function getStatusType(status: string) {
 
 function getPrintStatusLabel(status: string) { return printStatusMap[status] || status }
 function getPrintStatusType(status: string) { return printStatusTypeMap[status] || 'info' }
-function getWechatShippingStatusLabel(gazette: Gazette) {
-  if (!['shipped', 'delivered'].includes(gazette.printStatus)) return '待发货'
-  const status = gazette.wechatShippingStatus
-  return status ? (wechatShippingStatusMap[status] || status) : '待上报'
-}
-function getWechatShippingStatusType(gazette: Gazette) {
-  if (!['shipped', 'delivered'].includes(gazette.printStatus)) return 'info'
-  const status = gazette.wechatShippingStatus
-  return status ? (wechatShippingStatusTypeMap[status] || 'info') : 'info'
-}
-
 function getWechatTaskStatusLabel(task: GazettePrintTask) {
   if (!['shipped', 'delivered'].includes(task.printStatus)) return '待发货'
   return task.wechatShippingStatus ? (wechatShippingStatusMap[task.wechatShippingStatus] || task.wechatShippingStatus) : '待上报'
@@ -327,34 +255,12 @@ function getValidTransitions(status: string): string[] {
   return VALID_TRANSITIONS[status] || []
 }
 
-function handleStatusCommand(gazette: Gazette, status: string) {
-  if (status === 'shipped') {
-    openShippingDialog(gazette)
-    return
-  }
-  updateStatus(gazette, status)
-}
-
 function handlePrintStatusCommand(task: GazettePrintTask, status: string) {
   if (status === 'shipped') {
     openPrintShippingDialog(task)
     return
   }
   updateTaskStatus(task, status)
-}
-
-async function openAddressDialog(gazette: Gazette) {
-  addressDetail.value = null
-  addressVisible.value = true
-  addressLoading.value = true
-  try {
-    const response = await getGazetteAddress(gazette.id)
-    addressDetail.value = response.data
-  } catch {
-    addressVisible.value = false
-  } finally {
-    addressLoading.value = false
-  }
 }
 
 async function openPrintAddressDialog(task: GazettePrintTask) {
@@ -379,30 +285,6 @@ async function copyText(value?: string) {
     ElMessage.success('已复制')
   } catch {
     ElMessage.error('复制失败，请手动选中文字复制')
-  }
-}
-
-async function downloadFile(gazette: Gazette, format: 'pdf' | 'zip') {
-  const key = `${gazette.id}:${format}`
-  if (downloading.value[key]) return
-  downloading.value[key] = true
-  try {
-    const response = format === 'pdf'
-      ? await downloadGazettePdf(gazette.id)
-      : await downloadGazettePrintImages(gazette.id)
-    if (!response.data.size) throw new Error('下载文件为空')
-    const url = URL.createObjectURL(response.data)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `家书-${gazette.id}${format === 'pdf' ? '.pdf' : '-逐页图片.zip'}`
-    document.body.appendChild(link)
-    link.click()
-    link.remove()
-    window.setTimeout(() => URL.revokeObjectURL(url), 60000)
-  } catch (error) {
-    if (error instanceof Error && error.message === '下载文件为空') ElMessage.error(error.message)
-  } finally {
-    downloading.value[key] = false
   }
 }
 
@@ -455,25 +337,14 @@ function handleSearch() {
 
 async function regenerate(gazette: Gazette) { try { await regenerateGazette(gazette.id); ElMessage.success('已提交重新生成任务') } catch {} }
 
-function openShippingDialog(gazette: Gazette) {
-  shippingGazette.value = gazette
-  shippingPrint.value = null
-  shippingForm.value = {
-    expressCompany: gazette.expressCompany || '',
-    trackingNo: gazette.trackingNo || '',
-  }
-  shippingVisible.value = true
-}
-
 function openPrintShippingDialog(task: GazettePrintTask) {
   shippingPrint.value = task
-  shippingGazette.value = null
   shippingForm.value = { expressCompany: task.expressCompany || '', trackingNo: task.trackingNo || '' }
   shippingVisible.value = true
 }
 
 async function submitShipping() {
-  if (!shippingGazette.value && !shippingPrint.value) return
+  if (!shippingPrint.value) return
   const expressCompany = shippingForm.value.expressCompany.trim()
   const trackingNo = shippingForm.value.trackingNo.trim()
   if (!expressCompany) {
@@ -486,8 +357,7 @@ async function submitShipping() {
   }
   shippingSubmitting.value = true
   try {
-    if (shippingPrint.value) await shipPrint(shippingPrint.value.id, { expressCompany, trackingNo })
-    else await shipGazette(shippingGazette.value!.id, { expressCompany, trackingNo })
+    await shipPrint(shippingPrint.value.id, { expressCompany, trackingNo })
     ElMessage.success('家书已发货，微信上报结果请查看列表')
     shippingVisible.value = false
     await fetchGazettes()
@@ -512,30 +382,6 @@ async function retryPrintWechat(task: GazettePrintTask) {
   }
 }
 
-function canRetryWechatShipping(gazette: Gazette) {
-  return shippingCapability.value?.enabled === true
-    && shippingCapability.value?.tradeManaged === true
-    && ['shipped', 'delivered'].includes(gazette.printStatus)
-    && gazette.wechatShippingStatus !== 'success'
-}
-
-async function retryWechat(gazette: Gazette) {
-  try {
-    if (gazette.wechatShippingStatus === 'manual_review') {
-      await ElMessageBox.confirm(
-        '这笔订单标记为需人工处理。请先查看原因并在微信后台核实处理方案；确认问题已解决后再重试。',
-        '确认重试微信上报',
-        { type: 'warning', confirmButtonText: '已核实，继续重试' },
-      )
-    }
-    await retryWechatShipping(gazette.id)
-    ElMessage.success('已重新提交微信上报')
-    await Promise.all([fetchGazettes(), fetchShippingCapability()])
-  } catch {
-    await fetchGazettes()
-  }
-}
-
 async function fetchShippingCapability() {
   try {
     const res = await getWechatShippingCapability()
@@ -543,24 +389,6 @@ async function fetchShippingCapability() {
   } catch {
     // handled by interceptor
   }
-}
-
-async function updateStatus(gazette: Gazette, status: string) {
-  ElMessageBox.confirm(
-    `确定要将家书状态更新为「${getPrintStatusLabel(status)}」吗？`,
-    '确认状态变更',
-    { type: 'warning' }
-  )
-    .then(async () => {
-      try {
-        await updatePrintStatus(gazette.id, status)
-        ElMessage.success('状态更新成功')
-        fetchGazettes()
-      } catch {
-        // handled by interceptor
-      }
-    })
-    .catch(() => {})
 }
 
 async function updateTaskStatus(task: GazettePrintTask, status: string) {
