@@ -213,9 +213,8 @@
     <footer>
       <div class="wrap foot">
         <div class="foot-brand">
-          <a class="brand" href="#about">
-            <span class="brand-mark">家</span>
-            <span>家书</span>
+          <a class="brand brand-logo" href="#about" aria-label="家书来了">
+            <img src="/images/home/logo.png" alt="家书来了" />
           </a>
           <p>让亲情可以被触摸</p>
         </div>
@@ -585,16 +584,6 @@ onBeforeUnmount(() => {
   font-size: 22px;
   font-weight: 700;
   letter-spacing: .04em;
-}
-.brand-mark {
-  width: 34px;
-  height: 34px;
-  display: grid;
-  place-items: center;
-  border-radius: 10px;
-  background: #c45c38;
-  color: #fff;
-  font-size: 18px;
 }
 .brand-logo { gap: 0; line-height: 0; }
 .brand-logo img {
@@ -1050,19 +1039,16 @@ details[open] .chev::before { top: 11px; transform: rotate(225deg); }
   display: grid;
   place-items: center;
   padding: 64px 24px;
-  border-radius: 28px;
-  background: linear-gradient(120deg, #c4623f 0%, #e3924e 46%, #f0c56a 100%);
+  border-radius: 16px;
+  background: #c4a07a;
   text-align: center;
 }
 .bloom {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 86% 72%, #f6d35a 0 54px, transparent 56px),
-    radial-gradient(circle at 78% 38%, #f0b24a 0 36px, transparent 38px),
-    radial-gradient(circle at 92% 48%, #7da06a 0 46px, transparent 48px),
-    radial-gradient(circle at 8% 78%, #f2c14b 0 42px, transparent 44px),
-    radial-gradient(circle at 18% 30%, rgba(255, 244, 214, .45) 0 70px, transparent 72px);
+    radial-gradient(ellipse at center, rgba(48, 28, 16, .34), rgba(48, 28, 16, .12) 46%, rgba(48, 28, 16, .05) 72%),
+    url("/images/home/finale.png") center / cover no-repeat;
 }
 .finale-copy { position: relative; z-index: 1; }
 .finale h2 {
@@ -1078,7 +1064,8 @@ details[open] .chev::before { top: 11px; transform: rotate(225deg); }
 
 footer { border-top: 1px solid #efe4d6; padding: 36px 0 28px; }
 .foot { display: grid; grid-template-columns: auto 1fr; gap: 12px 32px; align-items: center; }
-.foot-brand p { margin-top: 8px; color: #7a6e64; font-size: 14px; }
+.foot-brand { display: flex; flex-direction: column; align-items: center; }
+.foot-brand p { margin-top: 8px; color: #7a6e64; font-size: 14px; text-align: center; }
 .foot-links { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 12px 22px; }
 .copyright { grid-column: 2; justify-self: end; color: #a8988c; font-size: 13px; }
 
@@ -1214,7 +1201,7 @@ footer { border-top: 1px solid #efe4d6; padding: 36px 0 28px; }
   .back-a { left: 8px; }
   .copyright, .foot-links { grid-column: 1; justify-self: start; }
   .foot { grid-template-columns: 1fr; }
-  .finale { min-height: 240px; padding: 48px 18px; border-radius: 20px; }
+  .finale { min-height: 240px; padding: 48px 18px; }
   .cover-sheet strong { font-size: 48px; }
   .in-viewer { min-height: 0; }
 }
