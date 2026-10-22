@@ -3,9 +3,8 @@
     <header class="site-header">
       <p class="announce">家人数量不限 · 全家共同参与 · 免费配送</p>
       <div class="nav wrap">
-        <a class="brand" href="#about" @click="closeMenu">
-          <span class="brand-mark">家</span>
-          <span>家书</span>
+        <a class="brand brand-logo" href="#about" aria-label="家书来了" @click="closeMenu">
+          <img src="/images/home/logo.png" alt="家书来了" />
         </a>
         <nav class="nav-links" :class="{ open: menuOpen }" aria-label="主导航">
           <a href="#about" @click="closeMenu">家书是什么</a>
@@ -41,37 +40,8 @@
           <p class="meta">微信小程序 · 全家共同上传 · 纸质月刊寄到家</p>
         </div>
 
-        <div class="hero-scene" aria-hidden="true">
-          <div class="scene-window"></div>
-          <div class="folk folk-a">
-            <div class="hair bun"></div>
-            <div class="head">
-              <i class="glasses"></i>
-              <i class="smile"></i>
-            </div>
-            <div class="torso blouse"></div>
-          </div>
-          <div class="folk folk-b">
-            <div class="hair short"></div>
-            <div class="head">
-              <i class="glasses"></i>
-              <i class="smile"></i>
-            </div>
-            <div class="torso cardigan"></div>
-          </div>
-          <div class="scene-table"></div>
-          <div class="scene-book">
-            <div class="scene-page">
-              <i class="ph ph-1"></i><i class="ph ph-2"></i><i class="ph ph-3"></i><i class="ph ph-4"></i>
-            </div>
-            <div class="scene-page story">
-              <i class="ph ph-5"></i>
-              <b>家书</b>
-              <small>这一期的日常</small>
-            </div>
-          </div>
-          <div class="oranges"><i></i><i></i><i></i></div>
-          <div class="cup"></div>
+        <div class="hero-scene">
+          <img src="/images/home/hero.jpg" alt="爷爷奶奶一起翻看家书月刊" />
         </div>
       </section>
 
@@ -626,6 +596,12 @@ onBeforeUnmount(() => {
   color: #fff;
   font-size: 18px;
 }
+.brand-logo { gap: 0; line-height: 0; }
+.brand-logo img {
+  display: block;
+  height: 48px;
+  width: auto;
+}
 .nav-links {
   display: flex;
   align-items: center;
@@ -723,171 +699,16 @@ onBeforeUnmount(() => {
 .meta { margin-top: 16px; color: #8d7f74; font-size: 13px; }
 
 .hero-scene {
-  position: relative;
-  height: 520px;
   border-radius: 28px;
   overflow: hidden;
-  background:
-    radial-gradient(circle at 78% 18%, rgba(255, 236, 196, .95), transparent 28%),
-    linear-gradient(180deg, #f6d7b4 0%, #f3c49a 42%, #e7b07a 100%);
   box-shadow: 0 24px 60px rgba(90, 50, 20, .12);
 }
-.scene-window {
-  position: absolute;
-  top: 28px;
-  right: 36px;
-  width: 150px;
-  height: 112px;
-  border-radius: 12px;
-  background:
-    linear-gradient(#f8e7c2, #f8e7c2) center/2px 100% no-repeat,
-    linear-gradient(#f8e7c2, #f8e7c2) center/100% 2px no-repeat,
-    linear-gradient(180deg, #fff6df, #f2d7a4);
-  box-shadow: inset 0 0 0 8px rgba(196, 146, 96, .35);
-}
-.folk { position: absolute; width: 170px; z-index: 2; }
-.folk-a { left: 9%; top: 148px; }
-.folk-b { right: 12%; top: 136px; }
-.hair { position: absolute; left: 50%; z-index: 2; background: #e7e2da; }
-.hair.bun {
-  top: -8px;
-  width: 86px;
-  height: 58px;
-  margin-left: -40px;
-  border-radius: 40px 40px 16px 16px;
-}
-.hair.bun::after {
-  content: "";
-  position: absolute;
-  right: -6px;
-  top: 8px;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: #ddd7ce;
-}
-.hair.short {
-  top: -4px;
-  width: 78px;
-  height: 42px;
-  margin-left: -39px;
-  border-radius: 30px 30px 8px 8px;
-}
-.head {
-  position: relative;
-  z-index: 1;
-  width: 86px;
-  height: 96px;
-  margin: 18px auto 0;
-  border-radius: 46px 46px 40px 40px;
-  background: radial-gradient(circle at 28px 58px, rgba(232, 150, 140, .45), transparent 16px), radial-gradient(circle at 60px 58px, rgba(232, 150, 140, .4), transparent 16px), #f2c3a8;
-}
-.glasses {
-  position: absolute;
-  left: 50%;
-  top: 40px;
-  width: 58px;
-  height: 16px;
-  transform: translateX(-50%);
-}
-.glasses::before, .glasses::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  width: 22px;
-  height: 14px;
-  border: 2px solid #6a5346;
-  border-radius: 7px;
-  background: rgba(255, 255, 255, .2);
-}
-.glasses::before { left: 2px; }
-.glasses::after { right: 2px; }
-.smile {
-  position: absolute;
-  left: 50%;
-  top: 64px;
-  width: 16px;
-  height: 8px;
-  border-bottom: 2px solid #c4846a;
-  border-radius: 0 0 12px 12px;
-  transform: translateX(-50%);
-}
-.torso { width: 150px; height: 150px; margin: -16px auto 0; border-radius: 70px 70px 24px 24px; }
-.blouse { background: linear-gradient(180deg, #f7efe4, #eadccb); }
-.cardigan { background: linear-gradient(180deg, #d37a58, #b85d42); }
-.scene-table {
-  position: absolute;
-  z-index: 3;
-  left: -8%;
-  right: -8%;
-  bottom: -30px;
-  height: 230px;
-  background: linear-gradient(180deg, #e2a86a 0%, #c98449 28%, #b8743c 100%);
-  border-radius: 50% 50% 0 0 / 24% 24% 0 0;
-  box-shadow: inset 0 10px 0 rgba(255, 226, 186, .28);
-}
-.scene-book {
-  position: absolute;
-  z-index: 4;
-  left: 50%;
-  bottom: 58px;
-  width: min(76%, 390px);
-  height: 196px;
-  transform: translateX(-50%) rotate(-2deg);
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  background: #fffdf8;
-  border-radius: 4px;
-  overflow: hidden;
-  box-shadow: 0 16px 30px rgba(70, 36, 12, .2);
-}
-.scene-book::before {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 0;
-  bottom: 0;
-  width: 18px;
-  transform: translateX(-50%);
-  background: linear-gradient(90deg, transparent, rgba(70, 40, 20, .12), transparent);
-  z-index: 2;
-}
-.scene-page { padding: 12px; display: grid; gap: 6px; }
-.scene-page:first-child { grid-template-columns: 1fr 1fr; }
-.scene-page .ph { min-height: 78px; border-radius: 3px; }
-.scene-page.story { grid-template-rows: 1fr auto auto; }
-.scene-page.story b { font-family: "Songti SC", serif; font-size: 22px; line-height: 1; }
-.scene-page.story small { color: #8d7b6e; font-size: 11px; }
-.oranges { position: absolute; z-index: 5; right: 28px; bottom: 36px; display: flex; }
-.oranges i, .cup {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #ffd27a, #ef8d2e 55%, #d86a1e);
-  box-shadow: 0 6px 10px rgba(90, 40, 10, .18);
-}
-.oranges i:nth-child(2) { margin-left: -8px; margin-top: 8px; }
-.oranges i:nth-child(3) { margin-left: -10px; }
-.cup {
-  position: absolute;
-  z-index: 5;
-  left: 34px;
-  bottom: 48px;
-  width: 34px;
-  height: 26px;
-  border-radius: 0 0 12px 12px;
-  background: linear-gradient(#f7f1ea, #e6d5c4);
-}
-.cup::before {
-  content: "";
-  position: absolute;
-  right: -8px;
-  top: 6px;
-  width: 10px;
-  height: 12px;
-  border: 2px solid #e6d5c4;
-  border-left: 0;
-  border-radius: 0 8px 8px 0;
+.hero-scene img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 800 / 632;
+  object-fit: cover;
 }
 
 .section { padding: 88px 0; }
@@ -1365,9 +1186,6 @@ footer { border-top: 1px solid #efe4d6; padding: 36px 0 28px; }
   .nav-links a, .nav-links button { text-align: left; padding: 13px 8px; border-bottom: 1px solid #f6eee6; font-size: 15px; }
   .hero, .sample-layout, .steps, .quotes, .plan, .story-sheet, .mail-sheet { grid-template-columns: 1fr; }
   .hero { padding-top: 28px; gap: 28px; }
-  .hero-scene { height: 420px; }
-  .folk-a { left: 4%; }
-  .folk-b { right: 2%; }
   .section { padding: 64px 0; }
   .book { min-height: 0; }
   .feature-photo { min-height: 140px; }
@@ -1384,14 +1202,9 @@ footer { border-top: 1px solid #efe4d6; padding: 36px 0 28px; }
   .title-break { display: block; }
   .section-title, .finale h2 { font-size: 28px; }
   .foot-links { justify-content: flex-start; }
+  .brand-logo img { height: 40px; }
   .hero-copy h1 { font-size: 34px; }
   .hero-actions, .hero-actions .btn, .plan-btn, .dialog .btn.solid { width: 100%; }
-  .hero-scene { height: 360px; }
-  .scene-window { width: 96px; height: 72px; right: 16px; }
-  .folk { transform: scale(.86); transform-origin: top center; }
-  .scene-book { height: 150px; bottom: 42px; }
-  .oranges { right: 12px; bottom: 22px; }
-  .cup { left: 14px; bottom: 28px; }
   .book, .inside-sheet .book { grid-template-columns: 1fr; }
   .book::before, .in-viewer::before { display: none; }
   .mosaic { min-height: 280px; }
