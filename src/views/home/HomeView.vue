@@ -19,7 +19,7 @@
           <span class="cta-short">小程序</span>
         </button>
         <button class="menu-btn" type="button" :aria-expanded="menuOpen" aria-label="打开菜单" @click="menuOpen = !menuOpen">
-          <span></span><span></span><span></span>
+          <img src="/images/home/menu-icon.png" alt="" />
         </button>
       </div>
     </header>
@@ -27,21 +27,27 @@
     <main>
       <section id="about" class="hero wrap">
         <div class="hero-copy">
-          <span class="eyebrow">爷爷奶奶爱看的家庭月刊</span>
           <span class="kicker">让亲情可以被触摸</span>
-          <h1>把一家人的日常，<br>寄到父母手里。</h1>
+          <h1>把一家人的日常，<br><span class="hero-title-accent">寄到父母手里。</span></h1>
           <p class="gift">送给长辈的贴心礼物</p>
-          <p class="smile-line">每个月，让他们多一份笑容。</p>
           <p class="lead">在微信分享照片和文字，家书帮你自动排版、印刷，每月寄送一本专属家庭月刊，让远方的家人看见你的生活，也把珍贵的回忆留在手里。</p>
           <div class="hero-actions">
             <button class="btn solid" type="button" @click="openModal('wechat')">开始制作家书</button>
-            <button class="btn ghost" type="button" @click="openSample(0)">翻看一本样刊</button>
+            <div class="hero-sample">
+              <button class="btn ghost" type="button" @click="openSample(0)">翻看一本样刊</button>
+              <p class="smile-line">每个月，让他们多一份笑容。</p>
+            </div>
           </div>
-          <p class="meta">微信小程序 · 全家共同上传 · 纸质月刊寄到家</p>
+          <ul class="meta">
+            <li><i aria-hidden="true">✓</i>微信小程序</li>
+            <li><i aria-hidden="true">✓</i>全家共同上传</li>
+            <li><i aria-hidden="true">✓</i>纸质月刊寄到家</li>
+          </ul>
         </div>
 
         <div class="hero-scene">
           <img src="/images/home/hero.jpg" alt="爷爷奶奶一起翻看家书月刊" />
+          <span class="hero-caption">爷爷奶奶爱看的家庭月刊</span>
         </div>
       </section>
 
@@ -104,34 +110,19 @@
         <h2 class="section-title">你分享生活，我们负责送达</h2>
         <ol class="steps">
           <li>
-            <div class="step-art form-card" aria-hidden="true">
-              <b>收件人</b>
-              <span></span><span></span><span class="short"></span>
-              <div class="avatars"><i></i><i></i><i></i></div>
-              <small>邀请家人加入</small>
-            </div>
+            <img class="step-shot" src="/images/home/step-family.jpg" alt="我的家庭：管理家庭并邀请家人加入" />
             <p class="step-no">01</p>
             <h3>开通家书</h3>
             <p>填写收件信息，邀请家人加入。</p>
           </li>
           <li>
-            <div class="phone" aria-hidden="true">
-              <div class="phone-screen">
-                <b>本期家书</b>
-                <div class="phone-photos"><i class="ph ph-1"></i><i class="ph ph-2"></i><i class="ph ph-5"></i><i class="ph ph-6"></i></div>
-                <small>妈妈：今天宝宝自己走了两步。</small>
-                <em>上传照片</em>
-              </div>
-            </div>
+            <img class="step-shot" src="/images/home/step-share.jpg" alt="家庭墙：上传照片和近况" />
             <p class="step-no">02</p>
             <h3>分享日常</h3>
             <p>上传照片，写下几句近况。</p>
           </li>
           <li>
-            <div class="step-art mail-art" aria-hidden="true">
-              <div class="mini-issue"><span>家书</span><i class="ph ph-4"></i></div>
-              <div class="envelope"></div>
-            </div>
+            <img class="step-shot" src="/images/home/step-issue.jpg" alt="排版印刷后的家书月刊" />
             <p class="step-no">03</p>
             <h3>每月收件</h3>
             <p>自动排版、印刷，寄到家人手里。</p>
@@ -540,13 +531,13 @@ onBeforeUnmount(() => {
   min-height: 100vh;
   background: #fff9f3;
   color: #2c241c;
-  font-family: "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  font-family: 'helvetica neue','microsoft yahei','pingfang sc','hiragino sans gb','stheiti',tahoma,sans-serif;
   overflow-x: clip;
 }
 .page h1, .page h2, .page h3, .page p { margin: 0; }
 .page button, .page a { font-family: inherit; }
 .wrap { width: min(1120px, calc(100% - 48px)); margin: 0 auto; }
-.serif, .section-title, .hero-copy h1, .brand, .quote-mark, .amount, .dialog h3, .cover-sheet strong { font-family: "Songti SC", "STSong", "Noto Serif SC", "SimSun", serif; }
+.serif, .section-title, .hero-copy h1, .brand, .quote-mark, .amount, .dialog h3, .cover-sheet strong { font-family: 'helvetica neue', 'microsoft yahei', 'pingfang sc', 'hiragino sans gb', 'stheiti', tahoma, sans-serif; }
 
 .site-header {
   position: sticky;
@@ -592,6 +583,8 @@ onBeforeUnmount(() => {
   width: auto;
 }
 .nav-links {
+  font-family: 'helvetica neue','microsoft yahei','pingfang sc','hiragino sans gb','stheiti',tahoma,sans-serif;
+  font-weight: 500;
   display: flex;
   align-items: center;
   gap: 28px;
@@ -602,25 +595,24 @@ onBeforeUnmount(() => {
   padding: 0;
   color: #4e453f;
   text-decoration: none;
-  font-size: 14px;
+  font-size: 16px;
   cursor: pointer;
 }
-.nav-links a:hover, .nav-links button:hover, .foot-links a:hover, .foot-links button:hover { color: #c45c38; }
+.nav-links a:hover, .nav-links button:hover, .foot-links a:hover, .foot-links button:hover { color: #fbc133; }
 .nav-cta { justify-self: end; }
 .cta-short { display: none; }
 .menu-btn {
   display: none;
-  width: 40px;
-  height: 40px;
-  border: 1px solid #eadfd2;
-  border-radius: 12px;
-  background: #fff;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  border: 0;
   padding: 0;
-  place-items: center;
-  gap: 4px;
+  background: transparent;
   cursor: pointer;
 }
-.menu-btn span { display: block; width: 16px; height: 1.5px; background: #2c241c; }
+.menu-btn img { display: block; width: 36px; height: 36px; }
 
 .btn {
   appearance: none;
@@ -638,13 +630,13 @@ onBeforeUnmount(() => {
   text-decoration: none;
   white-space: nowrap;
 }
-.btn.solid { background: #f5c043; color: #2a2118; box-shadow: 0 8px 18px rgba(210, 160, 40, .22); }
-.btn.solid:hover { background: #eab52d; }
+.btn.solid { background: #fbc133; color: #2a2118; box-shadow: 0 8px 18px rgba(210, 160, 40, .22); }
+.btn.solid:hover { background: #fbc133; }
 .btn.ghost { background: #fff; color: #2c241c; border: 1px solid #e6d9c8; }
 .btn.ghost:hover { border-color: #d8c4aa; }
 .btn:disabled { opacity: .45; cursor: not-allowed; }
 .btn:focus-visible, .nav-links a:focus-visible, .menu-btn:focus-visible, summary:focus-visible, .close-x:focus-visible {
-  outline: 2px solid #c45c38;
+  outline: 2px solid #fbc133;
   outline-offset: 3px;
 }
 .wx { width: 16px; height: 16px; color: #1aad19; display: block; flex: none; }
@@ -657,19 +649,8 @@ onBeforeUnmount(() => {
   align-items: center;
   padding: 48px 0 28px;
 }
-.eyebrow {
-  display: inline-flex;
-  padding: 5px 10px;
-  border-radius: 999px;
-  background: #fff;
-  border: 1px solid #f0e0c0;
-  color: #a15a32;
-  font-size: 13px;
-  font-weight: 700;
-}
 .kicker {
   display: block;
-  margin-top: 14px;
   color: #8a5a3c;
   font-size: 16px;
 }
@@ -681,14 +662,46 @@ onBeforeUnmount(() => {
   letter-spacing: -.02em;
   color: #241c16;
 }
+.hero-title-accent { color: #c45c38; }
 .gift { font-size: 18px; font-weight: 700; }
-.smile-line { margin-top: 6px; color: #5c5148; font-size: 16px; }
+.smile-line { margin: 0; color: #5c5148; font-size: 16px; line-height: 1.45; }
 .lead { margin-top: 16px; max-width: 540px; color: #6f645c; font-size: 15px; line-height: 1.9; }
-.hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
-.meta { margin-top: 16px; color: #8d7f74; font-size: 13px; }
+.hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 26px; }
+.hero-sample { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  row-gap: 10px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+  color: #8d7f74;
+  font-size: 15px;
+}
+.meta li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.meta li:not(:last-child)::after {
+  content: "";
+  width: 1px;
+  height: 14px;
+  margin: 0 16px;
+  background: #e4d8cc;
+}
+.meta i {
+  color: #d4a24c;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 1;
+}
 
 .hero-scene {
-  border-radius: 28px;
+  position: relative;
+  min-width: 0;
+  border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 24px 60px rgba(90, 50, 20, .12);
 }
@@ -698,6 +711,34 @@ onBeforeUnmount(() => {
   height: auto;
   aspect-ratio: 800 / 632;
   object-fit: cover;
+}
+.hero-caption {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  z-index: 1;
+  max-width: calc(100% - 32px);
+  padding: 9px 14px 9px 16px;
+  border-radius: 999px;
+  background: rgba(255, 249, 241, .94);
+  color: #6a3e28;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  line-height: 1;
+  box-shadow: 0 10px 24px rgba(70, 36, 12, .18);
+  backdrop-filter: blur(10px);
+}
+.hero-caption::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: #fbc133;
+  box-shadow: 0 0 0 4px rgba(251, 193, 51, .28);
+  vertical-align: 1px;
 }
 
 .section { padding: 88px 0; }
@@ -709,7 +750,13 @@ onBeforeUnmount(() => {
   color: #241c16;
   overflow-wrap: anywhere;
 }
-.section-desc { text-align: center; max-width: 640px; margin: 12px auto 0; color: #7a6e64; line-height: 1.8; }
+.page .section-desc {
+  text-align: center;
+  max-width: 640px;
+  margin: 12px auto 0;
+  color: #7a6e64;
+  line-height: 1.8;
+}
 .sample-layout {
   margin-top: 40px;
   display: grid;
@@ -817,72 +864,18 @@ onBeforeUnmount(() => {
 .steps h3 { margin: 8px 0 6px; font-size: 20px; }
 .steps li > p:last-child { color: #6f645c; font-size: 14px; line-height: 1.7; }
 .step-no { margin-top: 16px; color: #c45c38; font-family: "Songti SC", serif; font-size: 28px; font-weight: 700; }
-.form-card, .mail-art {
-  height: 300px;
-  display: grid;
-  align-content: center;
-  justify-items: center;
-  gap: 8px;
-}
-.form-card {
-  width: min(100%, 230px);
+.step-shot {
+  display: block;
+  width: 200px;
+  height: 430px;
   margin: 0 auto;
-  padding: 22px 18px;
-  background: #fff;
+  object-fit: cover;
+  object-position: top center;
+  border-radius: 22px;
   border: 1px solid #f1e6d8;
-  border-radius: 18px;
-  box-shadow: 0 12px 30px rgba(80, 50, 20, .05);
+  box-shadow: 0 16px 36px rgba(80, 50, 20, .12);
+  background: #fff;
 }
-.form-card b { justify-self: start; font-size: 14px; }
-.form-card span { justify-self: stretch; height: 8px; border-radius: 99px; background: #f3e7da; }
-.form-card span.short { width: 62%; }
-.avatars { display: flex; margin-top: 8px; }
-.avatars i {
-  width: 28px;
-  height: 28px;
-  margin-left: -6px;
-  border-radius: 50%;
-  border: 2px solid #fff;
-  background: #f0c3a4;
-}
-.avatars i:first-child { margin-left: 0; background: #e7a27a; }
-.avatars i:nth-child(2) { background: #efd3b4; }
-.form-card small, .phone small { color: #8d7f74; font-size: 12px; }
-.phone {
-  width: 180px;
-  height: 300px;
-  margin: 0 auto;
-  padding: 10px;
-  border-radius: 28px;
-  background: #2a241f;
-  box-shadow: 0 18px 36px rgba(50, 30, 12, .16);
-}
-.phone-screen {
-  height: 100%;
-  background: #fffaf4;
-  border-radius: 20px;
-  padding: 28px 12px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  text-align: left;
-}
-.phone-screen b { font-size: 14px; }
-.phone-photos { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
-.phone-photos i { height: 62px; }
-.phone-screen em {
-  margin-top: auto;
-  display: grid;
-  place-items: center;
-  height: 32px;
-  border-radius: 999px;
-  background: #f5c043;
-  color: #2a2118;
-  font-style: normal;
-  font-size: 12px;
-  font-weight: 700;
-}
-.mail-art { position: relative; width: min(100%, 230px); margin: 0 auto; }
 .mini-issue {
   width: 116px;
   height: 156px;
@@ -897,30 +890,6 @@ onBeforeUnmount(() => {
 }
 .mini-issue span { font-family: "Songti SC", serif; font-size: 20px; }
 .mini-issue i { flex: 1; }
-.envelope {
-  position: absolute;
-  right: 18px;
-  bottom: 28px;
-  width: 92px;
-  height: 58px;
-  background: #fff;
-  border: 1.5px solid #e7d3bc;
-  border-radius: 4px;
-  transform: rotate(8deg);
-}
-.envelope::before {
-  content: "";
-  position: absolute;
-  left: 8px;
-  right: 8px;
-  top: 8px;
-  height: 24px;
-  border-top: 1.5px solid #e7d3bc;
-  border-left: 1.5px solid transparent;
-  border-right: 1.5px solid transparent;
-  clip-path: polygon(0 0, 100% 0, 50% 100%);
-  background: #f8efe4;
-}
 
 .quotes { margin-top: 36px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 .quotes blockquote {
@@ -934,7 +903,7 @@ onBeforeUnmount(() => {
 }
 .quote-mark { display: block; color: #e2b15a; font-size: 48px; line-height: .8; }
 .quotes p { font-size: 15px; line-height: 1.8; color: #3f352f; }
-.review-note { margin-top: 16px; text-align: center; color: #a8988c; font-size: 13px; }
+.review-note { margin-top: 16px !important; text-align: center; color: #a8988c; font-size: 13px; }
 
 .plan {
   margin: 36px auto 0;
@@ -1154,7 +1123,7 @@ footer { border-top: 1px solid #efe4d6; padding: 36px 0 28px; }
   .nav { display: flex; min-height: 64px; width: 100%; }
   .brand, .menu-btn, .nav-cta { flex: none; }
   .nav-cta { margin-left: auto; }
-  .menu-btn { display: grid; }
+  .menu-btn { display: block; }
   .nav-links {
     display: none;
     position: absolute;
@@ -1171,7 +1140,7 @@ footer { border-top: 1px solid #efe4d6; padding: 36px 0 28px; }
   }
   .nav-links.open { display: grid; }
   .nav-links a, .nav-links button { text-align: left; padding: 13px 8px; border-bottom: 1px solid #f6eee6; font-size: 15px; }
-  .hero, .sample-layout, .steps, .quotes, .plan, .story-sheet, .mail-sheet { grid-template-columns: 1fr; }
+  .hero, .sample-layout, .steps, .quotes, .plan, .story-sheet, .mail-sheet { grid-template-columns: minmax(0, 1fr); }
   .hero { padding-top: 28px; gap: 28px; }
   .section { padding: 64px 0; }
   .book { min-height: 0; }
@@ -1191,7 +1160,18 @@ footer { border-top: 1px solid #efe4d6; padding: 36px 0 28px; }
   .foot-links { justify-content: flex-start; }
   .brand-logo img { height: 40px; }
   .hero-copy h1 { font-size: 34px; }
-  .hero-actions, .hero-actions .btn, .plan-btn, .dialog .btn.solid { width: 100%; }
+  .meta { font-size: 13px; }
+  .meta li:not(:last-child)::after { margin: 0 12px; }
+  .hero-caption {
+    right: 10px;
+    bottom: 10px;
+    max-width: calc(100% - 20px);
+    padding: 8px 12px;
+    font-size: 12px;
+    letter-spacing: .02em;
+  }
+  .hero-actions, .hero-actions > .btn, .hero-sample, .plan-btn, .dialog .btn.solid { width: 100%; }
+  .hero-sample .btn { width: auto; flex: none; }
   .book, .inside-sheet .book { grid-template-columns: 1fr; }
   .book::before, .in-viewer::before { display: none; }
   .mosaic { min-height: 280px; }
