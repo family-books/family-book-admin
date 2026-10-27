@@ -274,51 +274,14 @@
         <template v-else>
           <div class="sample-head">
             <h3 id="dialog-title">翻看一本样刊</h3>
-            <p>样刊示意，正式内容来自你们自己上传的照片和文字。</p>
+            <p>2026年11月 · 第1期。封面、内页和封底按真实成刊排版。</p>
           </div>
           <div class="viewer" @touchstart.passive="onSampleTouchStart" @touchend.passive="onSampleTouchEnd">
-            <div v-show="sampleIndex === 0" class="sheet cover-sheet">
-              <span>FAMILY MONTHLY</span>
-              <strong>家书</strong>
-              <em>把一家人的日常，寄到父母手里</em>
-              <div class="ph ph-5 cover-photo"></div>
-              <small>第 06 期 · 样刊</small>
-            </div>
-            <div v-show="sampleIndex === 1" class="sheet inside-sheet">
-              <div class="book in-viewer">
-                <div class="book-page mosaic">
-                  <div class="ph ph-1 tall"><span>周日午饭</span></div>
-                  <div class="ph ph-2"></div>
-                  <div class="ph ph-6"></div>
-                  <div class="ph ph-3"></div>
-                  <div class="ph ph-7"></div>
-                  <div class="ph ph-4"><span>小满</span></div>
-                  <div class="ph ph-8"></div>
-                </div>
-                <div class="book-page spread-copy">
-                  <p class="mast">家书 · 第06期</p>
-                  <div class="ph ph-5 feature-photo"></div>
-                  <h3>和爷爷奶奶一起吃饭</h3>
-                  <p>照片、文字和一家人的近况，翻开就能看见。</p>
-                </div>
-              </div>
-            </div>
-            <div v-show="sampleIndex === 2" class="sheet story-sheet">
-              <div class="ph ph-6 story-photo"></div>
-              <div>
-                <p class="mast">妈妈的一句话</p>
-                <h3>今天宝宝第一次自己走路了</h3>
-                <p>10 月 12 日 · 来自妈妈的手机。随手写下的几句近况，会和照片一起留在这一期里。</p>
-              </div>
-            </div>
-            <div v-show="sampleIndex === 3" class="sheet mail-sheet">
-              <div class="mini-issue big"><span>家书</span><i class="ph ph-1"></i></div>
-              <div>
-                <p class="mast">本月收件</p>
-                <h3>这一本，正在寄往家里</h3>
-                <p>自动排版、印刷，免费配送。父母不用打开小程序，也能翻到你们的生活。</p>
-              </div>
-            </div>
+            <img
+              class="sample-page"
+              :src="samplePages[sampleIndex]"
+              :alt="sampleIndex === 0 ? '样刊封面' : sampleIndex === samplePages.length - 1 ? '样刊封底' : `样刊第 ${sampleIndex} 页`"
+            />
           </div>
           <div class="viewer-nav">
             <button class="btn ghost" type="button" :disabled="sampleIndex === 0" @click="stepSample(-1)">上一页</button>
@@ -338,8 +301,9 @@ type ModalName = 'wechat' | 'sample' | 'story' | 'contact' | 'privacy' | 'terms'
 
 const modal = ref<ModalName | null>(null)
 const menuOpen = ref(false)
+const samplePages = Array.from({ length: 16 }, (_, index) => `/images/home/sample/${String(index + 1).padStart(2, '0')}.jpg`)
 const sampleIndex = ref(0)
-const sampleCount = 4
+const sampleCount = samplePages.length
 const closeBtn = ref<HTMLButtonElement | null>(null)
 const touchStartX = ref(0)
 
@@ -537,7 +501,7 @@ onBeforeUnmount(() => {
 .page h1, .page h2, .page h3, .page p { margin: 0; }
 .page button, .page a { font-family: inherit; }
 .wrap { width: min(1120px, calc(100% - 48px)); margin: 0 auto; }
-.serif, .section-title, .hero-copy h1, .brand, .quote-mark, .amount, .dialog h3, .cover-sheet strong { font-family: 'helvetica neue', 'microsoft yahei', 'pingfang sc', 'hiragino sans gb', 'stheiti', tahoma, sans-serif; }
+.serif, .section-title, .hero-copy h1, .brand, .quote-mark, .amount, .dialog h3 { font-family: 'helvetica neue', 'microsoft yahei', 'pingfang sc', 'hiragino sans gb', 'stheiti', tahoma, sans-serif; }
 
 .site-header {
   position: sticky;
@@ -801,8 +765,8 @@ onBeforeUnmount(() => {
 }
 .mosaic .tall { grid-row: 1 / 3; }
 .spread-copy { display: flex; flex-direction: column; gap: 8px; }
-.spread-copy h3, .story-sheet h3, .mail-sheet h3 { font-size: 18px; line-height: 1.4; }
-.spread-copy p, .story-sheet p, .mail-sheet p { color: #6f645c; font-size: 13px; line-height: 1.7; }
+.spread-copy h3 { font-size: 18px; line-height: 1.4; }
+.spread-copy p { color: #6f645c; font-size: 13px; line-height: 1.7; }
 .mast { color: #a15a32; font-size: 12px; letter-spacing: .08em; }
 .feature-photo { min-height: 168px; border-radius: 4px; }
 .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; min-height: 72px; }
@@ -876,21 +840,6 @@ onBeforeUnmount(() => {
   box-shadow: 0 16px 36px rgba(80, 50, 20, .12);
   background: #fff;
 }
-.mini-issue {
-  width: 116px;
-  height: 156px;
-  padding: 12px;
-  background: #fff;
-  border-radius: 4px 8px 8px 4px;
-  box-shadow: 0 12px 24px rgba(70, 40, 20, .12);
-  transform: rotate(-8deg);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.mini-issue span { font-family: "Songti SC", serif; font-size: 20px; }
-.mini-issue i { flex: 1; }
-
 .quotes { margin-top: 36px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 .quotes blockquote {
   margin: 0;
@@ -1057,7 +1006,13 @@ footer { border-top: 1px solid #efe4d6; padding: 36px 0 28px; }
   padding: 28px 26px 24px;
   box-shadow: 0 24px 70px rgba(40, 20, 10, .28);
 }
-.dialog.wide { width: min(920px, 100%); }
+.dialog.wide {
+  width: min(920px, 100%);
+  height: min(84vh, 780px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
 .dialog h3 { font-size: 28px; line-height: 1.3; padding-right: 36px; }
 .dialog-kicker { color: #a15a32; font-size: 13px; font-weight: 700; letter-spacing: .08em; }
 .dialog-copy { margin-top: 12px; color: #5f554e; font-size: 15px; line-height: 1.85; }
@@ -1088,35 +1043,31 @@ footer { border-top: 1px solid #efe4d6; padding: 36px 0 28px; }
 .legal h4 { margin: 16px 0 6px; font-size: 16px; }
 .legal p { margin: 0 0 8px; color: #5f554e; font-size: 14px; line-height: 1.8; }
 .sample-head p { margin-top: 6px; color: #7a6e64; font-size: 13px; }
-.viewer { margin-top: 16px; }
-.sheet { border-radius: 14px; overflow: hidden; background: #f7f1e7; }
-.cover-sheet {
-  min-height: 460px;
+.dialog.wide .sample-head,
+.dialog.wide .viewer-nav { flex: none; }
+.viewer {
+  flex: 1;
+  min-height: 0;
+  margin-top: 16px;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 28px 16px;
-  background: linear-gradient(180deg, #f8efe3, #f4e0c8);
-  text-align: center;
+  background: #f6efe6;
+  border-radius: 14px;
+  padding: 12px;
 }
-.cover-sheet span, .cover-sheet small { letter-spacing: .14em; color: #8d6244; font-size: 12px; }
-.cover-sheet strong { font-size: 64px; line-height: 1; }
-.cover-sheet em { font-style: normal; color: #5c5148; }
-.cover-photo { width: min(280px, 70%); height: 150px; margin: 8px 0; border-radius: 6px; }
-.inside-sheet { padding: 12px; }
-.in-viewer { min-height: 420px; box-shadow: none; }
-.story-sheet, .mail-sheet {
-  min-height: 380px;
-  display: grid;
-  grid-template-columns: .9fr 1.1fr;
-  gap: 22px;
-  align-items: center;
-  padding: 22px;
+.sample-page {
+  display: block;
+  width: auto;
+  height: auto;
+  min-width: 0;
+  min-height: 0;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  background: #fff;
+  box-shadow: 0 12px 36px rgba(70, 40, 20, .1);
 }
-.story-photo { min-height: 260px; border-radius: 8px; }
-.mini-issue.big { width: 180px; height: 240px; margin: 0 auto; transform: rotate(-6deg); }
 .viewer-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; color: #7a6e64; font-size: 13px; }
 
 @media (max-width: 900px) {
@@ -1140,7 +1091,7 @@ footer { border-top: 1px solid #efe4d6; padding: 36px 0 28px; }
   }
   .nav-links.open { display: grid; }
   .nav-links a, .nav-links button { text-align: left; padding: 13px 8px; border-bottom: 1px solid #f6eee6; font-size: 15px; }
-  .hero, .sample-layout, .steps, .quotes, .plan, .story-sheet, .mail-sheet { grid-template-columns: minmax(0, 1fr); }
+  .hero, .sample-layout, .steps, .quotes, .plan { grid-template-columns: minmax(0, 1fr); }
   .hero { padding-top: 28px; gap: 28px; }
   .section { padding: 64px 0; }
   .book { min-height: 0; }
@@ -1172,8 +1123,8 @@ footer { border-top: 1px solid #efe4d6; padding: 36px 0 28px; }
   }
   .hero-actions, .hero-actions > .btn, .hero-sample, .plan-btn, .dialog .btn.solid { width: 100%; }
   .hero-sample .btn { width: auto; flex: none; }
-  .book, .inside-sheet .book { grid-template-columns: 1fr; }
-  .book::before, .in-viewer::before { display: none; }
+  .book { grid-template-columns: 1fr; }
+  .book::before { display: none; }
   .mosaic { min-height: 280px; }
   .steps { gap: 36px; }
   .quotes blockquote { min-height: 0; }
@@ -1182,8 +1133,6 @@ footer { border-top: 1px solid #efe4d6; padding: 36px 0 28px; }
   .copyright, .foot-links { grid-column: 1; justify-self: start; }
   .foot { grid-template-columns: 1fr; }
   .finale { min-height: 240px; padding: 48px 18px; }
-  .cover-sheet strong { font-size: 48px; }
-  .in-viewer { min-height: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   :global(html.home-scroll) { scroll-behavior: auto; }
