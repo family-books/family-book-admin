@@ -56,27 +56,12 @@
         <p class="section-desc">照片、文字和一家人的近况，翻开就能看见。</p>
         <div class="sample-layout">
           <button class="book" type="button" aria-label="在线翻看样刊" @click="openSample(1)">
-            <div class="book-page mosaic">
-              <div class="ph ph-1 tall"><span>周日午饭</span></div>
-              <div class="ph ph-2"><span>公园</span></div>
-              <div class="ph ph-6"><span>出门</span></div>
-              <div class="ph ph-3"><span>菜园</span></div>
-              <div class="ph ph-7"><span>晚饭</span></div>
-              <div class="ph ph-4"><span>小满</span></div>
-              <div class="ph ph-8"></div>
-            </div>
-            <div class="book-page spread-copy">
-              <p class="mast">家书 · 家庭月刊</p>
-              <div class="ph ph-5 feature-photo"><span>和爷爷奶奶一起吃饭</span></div>
-              <h3>周末回家这一顿</h3>
-              <p>番茄是爷爷种的，宝宝负责把碗里的饭吃完。</p>
-              <div class="pair"><i class="ph ph-3"></i><i class="ph ph-2"></i></div>
-            </div>
+            <img src="/images/home/sample-book.jpg" alt="家书样刊：封面与内页" />
           </button>
           <div class="sample-points">
             <article>
               <span class="point-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="2.1" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="16" cy="8" r="2.1" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4.6 17.5c.5-2.2 2-3.4 3.4-3.4s2.9 1.2 3.4 3.4M12.6 17.5c.5-2.2 2-3.4 3.4-3.4s2.9 1.2 3.4 3.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                <img src="/images/home/point-share.png" alt="" />
               </span>
               <div>
                 <h3>全家一起分享</h3>
@@ -85,7 +70,7 @@
             </article>
             <article>
               <span class="point-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="17" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 8h8M8 12h8M8 16h5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                <img src="/images/home/point-layout.png" alt="" />
               </span>
               <div>
                 <h3>不用自己排版</h3>
@@ -94,7 +79,7 @@
             </article>
             <article>
               <span class="point-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4 7l8 6 8-6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+                <img src="/images/home/point-deliver.png" alt="" />
               </span>
               <div>
                 <h3>父母直接收件</h3>
@@ -730,46 +715,13 @@ onBeforeUnmount(() => {
 }
 .book {
   width: 100%;
-  display: grid;
-  grid-template-columns: 1.05fr .95fr;
-  min-height: 390px;
+  display: block;
   padding: 0;
   border: 0;
-  background: #fffdf8;
-  border-radius: 8px;
-  overflow: hidden;
-  text-align: left;
+  background: transparent;
   cursor: pointer;
-  box-shadow: 0 24px 50px rgba(80, 48, 20, .12);
-  position: relative;
 }
-.book::before {
-  content: "";
-  position: absolute;
-  left: 52%;
-  top: 0;
-  bottom: 0;
-  width: 22px;
-  transform: translateX(-50%);
-  background: linear-gradient(90deg, transparent, rgba(70, 40, 20, .13), transparent);
-  z-index: 2;
-  pointer-events: none;
-}
-.book-page { padding: 16px; }
-.mosaic {
-  display: grid;
-  grid-template-columns: 1.15fr 1fr;
-  grid-template-rows: 1fr 1fr 1fr .8fr;
-  gap: 6px;
-  background: #f7f1e7;
-}
-.mosaic .tall { grid-row: 1 / 3; }
-.spread-copy { display: flex; flex-direction: column; gap: 8px; }
-.spread-copy h3 { font-size: 18px; line-height: 1.4; }
-.spread-copy p { color: #6f645c; font-size: 13px; line-height: 1.7; }
-.mast { color: #a15a32; font-size: 12px; letter-spacing: .08em; }
-.feature-photo { min-height: 168px; border-radius: 4px; }
-.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; min-height: 72px; }
+.book img { display: block; width: 100%; height: auto; }
 .ph { position: relative; border-radius: 4px; overflow: hidden; display: block; }
 .ph span {
   position: absolute;
@@ -780,13 +732,6 @@ onBeforeUnmount(() => {
   text-shadow: 0 1px 2px rgba(0, 0, 0, .35);
 }
 .ph-1 { background: linear-gradient(160deg, #f6c991, #d4785a 58%, #8d4c3a); }
-.ph-2 { background: linear-gradient(165deg, #dce6cc, #7f9a6e); }
-.ph-3 { background: linear-gradient(160deg, #f8e2b8, #e0a15a); }
-.ph-4 { background: linear-gradient(200deg, #f3d3b8, #c4896a 70%, #8d5a48); }
-.ph-5 { background: linear-gradient(160deg, #f7d7ae, #e29a62 40%, #7f9a78); }
-.ph-6 { background: linear-gradient(165deg, #f0c2a8, #c46b4f); }
-.ph-7 { background: linear-gradient(160deg, #ead7a8, #b7894e); }
-.ph-8 { background: linear-gradient(160deg, #f7dccb, #d99070); }
 .sample-points { display: grid; gap: 22px; }
 .sample-points article { display: grid; grid-template-columns: 44px 1fr; gap: 12px; align-items: start; }
 .sample-points h3 { font-size: 18px; margin-bottom: 4px; }
@@ -801,7 +746,7 @@ onBeforeUnmount(() => {
   color: #c45c38;
   border: 1px solid #f1e4d4;
 }
-.point-icon svg { width: 22px; height: 22px; }
+.point-icon img { width: 24px; height: 24px; display: block; }
 .text-arrow {
   justify-self: start;
   border: 0;
@@ -1095,7 +1040,6 @@ footer { border-top: 1px solid #efe4d6; padding: 36px 0 28px; }
   .hero { padding-top: 28px; gap: 28px; }
   .section { padding: 64px 0; }
   .book { min-height: 0; }
-  .feature-photo { min-height: 140px; }
   .plan { padding: 28px 22px 24px; }
   .stack { height: 230px; margin-bottom: 8px; }
   .foot, .finale-wrap { width: min(1120px, calc(100% - 32px)); }
@@ -1123,9 +1067,6 @@ footer { border-top: 1px solid #efe4d6; padding: 36px 0 28px; }
   }
   .hero-actions, .hero-actions > .btn, .hero-sample, .plan-btn, .dialog .btn.solid { width: 100%; }
   .hero-sample .btn { width: auto; flex: none; }
-  .book { grid-template-columns: 1fr; }
-  .book::before { display: none; }
-  .mosaic { min-height: 280px; }
   .steps { gap: 36px; }
   .quotes blockquote { min-height: 0; }
   .front { left: 64px; }
