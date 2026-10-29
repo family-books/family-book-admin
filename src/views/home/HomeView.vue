@@ -102,7 +102,9 @@
               <p class="step-no">01</p>
               <h3>开通家书</h3>
             </div>
-            <img class="step-shot" src="/images/home/step-family.jpg" alt="子女和父母一起看手机，填写收件信息并邀请家人" />
+            <div class="step-shot">
+              <img src="/images/home/step-family.jpg" alt="子女和父母一起看手机，填写收件信息并邀请家人" />
+            </div>
             <p>填写收件信息，邀请家人加入。</p>
           </li>
           <li>
@@ -110,7 +112,9 @@
               <p class="step-no">02</p>
               <h3>分享日常</h3>
             </div>
-            <img class="step-shot" src="/images/home/step-share.jpg" alt="妈妈用手机拍下孩子画画，准备上传照片和近况" />
+            <div class="step-shot">
+              <img src="/images/home/step-share.jpg" alt="妈妈用手机拍下孩子画画，准备上传照片和近况" />
+            </div>
             <p>上传照片，写下几句近况。</p>
           </li>
           <li>
@@ -118,7 +122,9 @@
               <p class="step-no">03</p>
               <h3>每月收件</h3>
             </div>
-            <img class="step-shot" src="/images/home/step-issue.jpg" alt="父母坐在沙发上翻开寄到家里的家书月刊" />
+            <div class="step-shot">
+              <img src="/images/home/step-issue.jpg" alt="父母坐在沙发上翻开寄到家里的家书月刊" />
+            </div>
             <p>自动排版、印刷，寄到家人手里。</p>
           </li>
         </ol>
@@ -835,7 +841,7 @@ onBeforeUnmount(() => {
 .band-reviews { background: #f2f6f1; }
 .band-pricing { background: #fff6ea; }
 .band-faq { background: #f7f1ea; }
-.band-finale { background: #f6e6d2; padding: 72px 0 88px; }
+.band-finale { background: #f7f1ea; padding: 72px 0 88px; }
 .section-title {
   text-align: center;
   font-size: clamp(28px, 3.2vw, 40px);
@@ -917,7 +923,7 @@ onBeforeUnmount(() => {
 .steps li { container-type: inline-size; text-align: center; }
 .step-head { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 16px; }
 .steps h3 { margin: 0; font-size: 20px; }
-.steps li > p:last-child { margin-top: 12px; color: #6f645c; font-size: 14px; line-height: 1.7; }
+.steps li > p:last-child { margin-top: 12px; color: #6f645c; font-size: 18px; line-height: 1.7; }
 .step-no {
   position: relative;
   z-index: 1;
@@ -949,15 +955,29 @@ onBeforeUnmount(() => {
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath d='M3 2.2 L10.2 7 L3 11.8' fill='none' stroke='%23c45c38' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") right center / 14px 14px no-repeat;
 }
 .step-shot {
+  position: relative;
   display: block;
   width: 100%;
   aspect-ratio: 4 / 5;
-  object-fit: cover;
-  object-position: center 36%;
   border-radius: 8px;
   border: 1px solid #f1e6d8;
   box-shadow: 0 16px 36px rgba(80, 50, 20, .12);
+  overflow: hidden;
   background: #fff;
+}
+.step-shot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 36%;
+}
+.step-shot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, .3);
+  pointer-events: none;
 }
 .quote-swiper { margin-top: 36px; }
 .quote-viewport { overflow: hidden; }
