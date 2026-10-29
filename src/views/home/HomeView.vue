@@ -1,7 +1,6 @@
 <template>
   <div class="page">
     <header class="site-header">
-      <p class="announce">家人数量不限 · 全家共同参与 · 免费配送</p>
       <div class="nav wrap">
         <a class="brand brand-logo" href="#about" aria-label="家书来了" @click="closeMenu">
           <img src="/images/home/logo.png" alt="家书来了" />
@@ -25,22 +24,22 @@
     </header>
 
     <main>
-      <section id="about" class="hero wrap">
+      <section id="about" class="band band-hero">
+        <div class="wrap hero">
         <div class="hero-copy">
           <span class="kicker">让亲情可以被触摸</span>
           <h1>把一家人的日常，<br><span class="hero-title-accent">寄到父母手里。</span></h1>
-          <p class="gift">送给长辈的贴心礼物</p>
-          <p class="lead">在微信分享照片和文字，家书帮你自动排版、印刷，每月寄送一本专属家庭月刊，让远方的家人看见你的生活，也把珍贵的回忆留在手里。</p>
+          <p class="gift">送给长辈的贴心礼物， 每个月，让他们多一份笑容。</p>
+          <p class="lead">分享照片和文字，家书帮你自动排版印刷，每月寄送专属家庭月刊，<br/>让远方的家人看见你的生活，也把珍贵的回忆留在手里。</p>
           <div class="hero-actions">
             <button class="btn solid" type="button" @click="openModal('wechat')">开始制作家书</button>
             <div class="hero-sample">
               <button class="btn ghost" type="button" @click="openSample(0)">翻看一本样刊</button>
-              <p class="smile-line">每个月，让他们多一份笑容。</p>
             </div>
           </div>
           <ul class="meta">
-            <li><i aria-hidden="true">✓</i>微信小程序</li>
-            <li><i aria-hidden="true">✓</i>全家共同上传</li>
+            <li><i aria-hidden="true">✓</i>家人数量不限</li>
+            <li><i aria-hidden="true">✓</i>全家共同参与</li>
             <li><i aria-hidden="true">✓</i>纸质月刊寄到家</li>
           </ul>
         </div>
@@ -49,9 +48,11 @@
           <img src="/images/home/hero.jpg" alt="爷爷奶奶一起翻看家书月刊" />
           <span class="hero-caption">爷爷奶奶爱看的家庭月刊</span>
         </div>
+        </div>
       </section>
 
-      <section id="sample" class="section wrap">
+      <section id="sample" class="section band band-sample">
+        <div class="wrap">
         <h2 class="section-title">他们收到的，<span class="title-break">是这样一本家书</span></h2>
         <p class="section-desc">照片、文字和一家人的近况，翻开就能看见。</p>
         <div class="sample-layout">
@@ -89,54 +90,86 @@
             <button class="text-arrow" type="button" @click="openSample(1)">在线翻看样刊 <span>→</span></button>
           </div>
         </div>
+        </div>
       </section>
 
-      <section id="how" class="section how wrap">
+      <section id="how" class="section how band band-how">
+        <div class="wrap">
         <h2 class="section-title">你分享生活，我们负责送达</h2>
         <ol class="steps">
           <li>
-            <img class="step-shot" src="/images/home/step-family.jpg" alt="我的家庭：管理家庭并邀请家人加入" />
-            <p class="step-no">01</p>
-            <h3>开通家书</h3>
+            <div class="step-head">
+              <p class="step-no">01</p>
+              <h3>开通家书</h3>
+            </div>
+            <img class="step-shot" src="/images/home/step-family.jpg" alt="子女和父母一起看手机，填写收件信息并邀请家人" />
             <p>填写收件信息，邀请家人加入。</p>
           </li>
           <li>
-            <img class="step-shot" src="/images/home/step-share.jpg" alt="家庭墙：上传照片和近况" />
-            <p class="step-no">02</p>
-            <h3>分享日常</h3>
+            <div class="step-head">
+              <p class="step-no">02</p>
+              <h3>分享日常</h3>
+            </div>
+            <img class="step-shot" src="/images/home/step-share.jpg" alt="妈妈用手机拍下孩子画画，准备上传照片和近况" />
             <p>上传照片，写下几句近况。</p>
           </li>
           <li>
-            <img class="step-shot" src="/images/home/step-issue.jpg" alt="排版印刷后的家书月刊" />
-            <p class="step-no">03</p>
-            <h3>每月收件</h3>
+            <div class="step-head">
+              <p class="step-no">03</p>
+              <h3>每月收件</h3>
+            </div>
+            <img class="step-shot" src="/images/home/step-issue.jpg" alt="父母坐在沙发上翻开寄到家里的家书月刊" />
             <p>自动排版、印刷，寄到家人手里。</p>
           </li>
         </ol>
+        </div>
       </section>
 
-      <section class="section reviews wrap">
+      <section class="section reviews band band-reviews">
+        <div class="wrap">
         <h2 class="section-title">用家人喜欢的方式，<span class="title-break">分享你的生活</span></h2>
         <p class="section-desc">一份订阅，全家参与。在微信上传照片和文字，把一家人的近况，送到长辈手里。</p>
-        <div class="quotes">
-          <blockquote>
-            <span class="quote-mark" aria-hidden="true">“</span>
-            <p>妈妈收到后，边翻边给我打电话，问起照片里的每一件小事。</p>
-          </blockquote>
-          <blockquote>
-            <span class="quote-mark" aria-hidden="true">“</span>
-            <p>兄弟姐妹一起上传，爸爸妈妈能在一本里看到大家的近况。</p>
-          </blockquote>
-          <blockquote>
-            <span class="quote-mark" aria-hidden="true">“</span>
-            <p>不用自己整理和排版，随手分享，就能把日常留给家人。</p>
-          </blockquote>
+        <div
+          class="quote-swiper"
+          @touchstart.passive="onQuoteTouchStart"
+          @touchend.passive="onQuoteTouchEnd"
+        >
+          <div class="quote-viewport">
+            <div class="quote-track" :style="{ '--i': quoteIndex, '--visible': quoteVisible }">
+              <blockquote v-for="item in reviews" :key="item.name">
+                <header class="quote-user">
+                  <img class="quote-avatar" :src="item.avatar" :alt="item.name" />
+                  <div>
+                    <strong>{{ item.name }}</strong>
+                    <time :datetime="item.datetime">{{ item.time }}</time>
+                  </div>
+                </header>
+                <p>{{ item.text }}</p>
+              </blockquote>
+            </div>
+          </div>
+          <div class="quote-controls">
+            <button class="quote-arrow" type="button" aria-label="上一条评价" :disabled="quoteIndex === 0" @click="stepQuote(-1)">‹</button>
+            <div class="quote-dots">
+              <button
+                v-for="page in quotePageCount"
+                :key="page"
+                type="button"
+                :class="{ on: quoteIndex === page - 1 }"
+                :aria-label="`第 ${page} 屏评价`"
+                @click="quoteIndex = page - 1"
+              ></button>
+            </div>
+            <button class="quote-arrow" type="button" aria-label="下一条评价" :disabled="quoteIndex >= quoteMax" @click="stepQuote(1)">›</button>
+          </div>
         </div>
         <p class="review-note">示例文案，后续替换为真实用户评价。</p>
+        </div>
       </section>
 
-      <section id="pricing" class="section wrap">
-        <h2 class="section-title">每月30元，<span class="title-break">把全家的近况寄回家</span></h2>
+      <section id="pricing" class="section band band-pricing">
+        <div class="wrap">
+        <h2 class="section-title">每月29元，<span class="title-break">把全家的近况寄回家</span></h2>
         <div class="plan">
           <div class="stack" aria-hidden="true">
             <div class="issue back-a"></div>
@@ -150,7 +183,7 @@
           </div>
           <div class="plan-copy">
             <h3>家书月刊</h3>
-            <p class="amount"><span>¥</span><strong>30</strong><em>／月</em></p>
+            <p class="amount"><span>¥</span><strong>29</strong><em>／月</em></p>
             <ul class="perks">
               <li><i>✓</i>每月寄送1本纸质月刊</li>
               <li><i>✓</i>每期最多上传28张照片</li>
@@ -160,9 +193,11 @@
             <button class="btn solid plan-btn" type="button" @click="openModal('wechat')">开通家书月刊</button>
           </div>
         </div>
+        </div>
       </section>
 
-      <section id="faq" class="section wrap">
+      <section id="faq" class="section band band-faq">
+        <div class="wrap">
         <h2 class="section-title">你可能想知道</h2>
         <div class="faq-list">
           <details v-for="item in faqs" :key="item.q">
@@ -170,9 +205,11 @@
             <p>{{ item.a }}</p>
           </details>
         </div>
+        </div>
       </section>
 
-      <section id="start" class="finale-wrap wrap">
+      <section id="start" class="band band-finale">
+        <div class="wrap finale-wrap">
         <div class="finale">
           <div class="bloom" aria-hidden="true"></div>
           <div class="finale-copy">
@@ -182,6 +219,7 @@
               打开微信小程序
             </button>
           </div>
+        </div>
         </div>
       </section>
     </main>
@@ -217,11 +255,10 @@
         <button ref="closeBtn" class="close-x" type="button" aria-label="关闭" @click="closeModal">×</button>
 
         <template v-if="modal === 'wechat'">
-          <p class="dialog-kicker">微信小程序</p>
-          <h3 id="dialog-title">打开微信小程序</h3>
-          <p class="dialog-copy">家书在微信小程序里制作。打开微信，搜索「家书」，就可以上传照片、邀请家人，并开通月刊。</p>
-          <p class="search-name">小程序名称：家书</p>
-          <button class="btn solid" type="button" @click="closeModal">我知道了</button>
+          <h3 id="dialog-title" class="wechat-title">打开微信小程序</h3>
+          <img class="mini-qr" src="/images/home/miniapp-qr.png" alt="家书来了微信小程序二维码" />
+          <p class="qr-hint">用微信扫描二维码即可进入家书，上传照片、邀请家人，并开通月刊。</p>
+          <p class="search-name">也可以在微信中搜索小程序：家书来了</p>
         </template>
 
         <template v-else-if="modal === 'story'">
@@ -280,7 +317,7 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 type ModalName = 'wechat' | 'sample' | 'story' | 'contact' | 'privacy' | 'terms'
 
@@ -291,6 +328,74 @@ const sampleIndex = ref(0)
 const sampleCount = samplePages.length
 const closeBtn = ref<HTMLButtonElement | null>(null)
 const touchStartX = ref(0)
+const quoteTouchX = ref(0)
+const quoteIndex = ref(0)
+const quoteVisible = ref(typeof window !== 'undefined' && window.matchMedia('(max-width: 900px)').matches ? 1 : 3)
+
+const reviews = [
+  {
+    name: '林晓雯',
+    initial: '林',
+    avatar: '/images/home/avatar-lin.png',
+    time: '2026年10月18日',
+    datetime: '2026-10-18',
+    text: '妈妈收到九月那期的当晚就给我打了电话。她一边翻，一边问宝宝新学的歌、公园里的合影，连午饭那盘番茄都认出来了。纸质的比聊天记录踏实多了。',
+  },
+  {
+    name: '周予安',
+    initial: '周',
+    avatar: '/images/home/avatar-zhou.png',
+    time: '2026年9月26日',
+    datetime: '2026-09-26',
+    text: '我和弟弟、妹妹分住三个城市，近况以前散落在家族群里。现在各自上传到同一本里，爸妈翻开就能看见每个人最近在忙什么，不用再来回翻聊天记录。',
+  },
+  {
+    name: '陈一诺',
+    initial: '陈',
+    avatar: '/images/home/avatar-chen.png',
+    time: '2026年10月3日',
+    datetime: '2026-10-03',
+    text: '我最怕整理相册和对版式。家书把随手拍的照片和几句近况自动排成月刊，我只要在微信里上传，月底就能变成一本可以寄回家的杂志。',
+  },
+  {
+    name: '赵晚宁',
+    initial: '赵',
+    avatar: '/images/home/avatar-zhao.png',
+    time: '2026年8月12日',
+    datetime: '2026-08-12',
+    text: '爷爷不太会用手机，视频通话也常常听不清。家书寄到家，他可以拿在手里慢慢看，看完还会放到书架上，说下个月还想再收一本。',
+  },
+  {
+    name: '苏小满',
+    initial: '苏',
+    avatar: '/images/home/avatar-su.png',
+    time: '2026年10月22日',
+    datetime: '2026-10-22',
+    text: '开通后把爸妈和姑姑都拉进来了。一份订阅全家都能传，照片不会公开，月底又会印成一本留得住的刊物。爸妈说，这比红包更想收到。',
+  },
+]
+
+const quoteMax = computed(() => Math.max(0, reviews.length - quoteVisible.value))
+const quotePageCount = computed(() => quoteMax.value + 1)
+
+const syncQuoteVisible = () => {
+  quoteVisible.value = window.matchMedia('(max-width: 900px)').matches ? 1 : 3
+  if (quoteIndex.value > quoteMax.value) quoteIndex.value = quoteMax.value
+}
+
+const stepQuote = (dir: number) => {
+  quoteIndex.value = Math.min(quoteMax.value, Math.max(0, quoteIndex.value + dir))
+}
+
+const onQuoteTouchStart = (event: TouchEvent) => {
+  quoteTouchX.value = event.changedTouches[0]?.clientX ?? 0
+}
+
+const onQuoteTouchEnd = (event: TouchEvent) => {
+  const delta = (event.changedTouches[0]?.clientX ?? 0) - quoteTouchX.value
+  if (delta > 48) stepQuote(-1)
+  if (delta < -48) stepQuote(1)
+}
 
 const faqs = [
   {
@@ -464,12 +569,14 @@ watch(modal, async (value) => {
 onMounted(() => {
   document.documentElement.classList.add('home-scroll')
   window.addEventListener('keydown', onKey)
+  window.addEventListener('resize', syncQuoteVisible)
 })
 
 onBeforeUnmount(() => {
   document.documentElement.classList.remove('home-scroll')
   document.body.style.overflow = ''
   window.removeEventListener('keydown', onKey)
+  window.removeEventListener('resize', syncQuoteVisible)
 })
 </script>
 
@@ -486,7 +593,7 @@ onBeforeUnmount(() => {
 .page h1, .page h2, .page h3, .page p { margin: 0; }
 .page button, .page a { font-family: inherit; }
 .wrap { width: min(1120px, calc(100% - 48px)); margin: 0 auto; }
-.serif, .section-title, .hero-copy h1, .brand, .quote-mark, .amount, .dialog h3 { font-family: 'helvetica neue', 'microsoft yahei', 'pingfang sc', 'hiragino sans gb', 'stheiti', tahoma, sans-serif; }
+.serif, .section-title, .hero-copy h1, .brand, .amount, .dialog h3 { font-family: 'helvetica neue', 'microsoft yahei', 'pingfang sc', 'hiragino sans gb', 'stheiti', tahoma, sans-serif; }
 
 .site-header {
   position: sticky;
@@ -494,17 +601,6 @@ onBeforeUnmount(() => {
   z-index: 30;
   background: #fff9f3;
   border-bottom: 1px solid rgba(90, 60, 30, .06);
-}
-.announce {
-  margin: 0;
-  background: #f6c23c;
-  color: #2a2118;
-  text-align: center;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: .04em;
-  line-height: 1.5;
-  padding: 8px 16px;
 }
 .nav {
   min-height: 72px;
@@ -561,7 +657,7 @@ onBeforeUnmount(() => {
   background: transparent;
   cursor: pointer;
 }
-.menu-btn img { display: block; width: 36px; height: 36px; }
+.menu-btn img { display: block; width: 26px; height: 26px; }
 
 .btn {
   appearance: none;
@@ -594,9 +690,49 @@ onBeforeUnmount(() => {
 .hero {
   display: grid;
   grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr);
-  gap: 48px;
-  align-items: center;
-  padding: 48px 0 28px;
+  align-items: stretch;
+  min-height: 650px;
+  padding: 0;
+}
+@media (min-width: 901px) {
+  .band-hero .hero {
+    width: min(1280px, calc(100% - 48px));
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0;
+    column-gap: 0;
+    grid-template-columns: minmax(0, 520px) minmax(0, 1fr);
+  }
+  .hero-copy { position: relative; z-index: 2; }
+  .hero-copy::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: 24px;
+    bottom: 24px;
+    left: -48px;
+    right: 0;
+    background: linear-gradient(90deg, #fff9f3 0%, #fff9f3 86%, rgba(255, 249, 243, .8) 95%, rgba(255, 249, 243, 0) 100%);
+    pointer-events: none;
+  }
+  .band-hero .hero-scene {
+    z-index: 1;
+    height: auto;
+    margin-top: 25px;
+    margin-bottom: 25px;
+    margin-left: -290px;
+    width: calc(100% + 220px);
+  }
+  .hero-scene img {
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, .2) 10%, #000 22%, #000 94%, rgba(0, 0, 0, .35) 98%, transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, .2) 10%, #000 22%, #000 94%, rgba(0, 0, 0, .35) 98%, transparent 100%);
+  }
+}
+.hero-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 28px;
 }
 .kicker {
   display: block;
@@ -604,25 +740,24 @@ onBeforeUnmount(() => {
   font-size: 16px;
 }
 .hero-copy h1 {
-  margin: 12px 0 18px;
+  margin: 0;
   font-size: clamp(36px, 4.5vw, 56px);
   font-weight: 700;
-  line-height: 1.22;
+  line-height: 1.28;
   letter-spacing: -.02em;
   color: #241c16;
 }
 .hero-title-accent { color: #c45c38; }
-.gift { font-size: 18px; font-weight: 700; }
 .smile-line { margin: 0; color: #5c5148; font-size: 16px; line-height: 1.45; }
-.lead { margin-top: 16px; max-width: 540px; color: #6f645c; font-size: 15px; line-height: 1.9; }
-.hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 26px; }
+.lead { margin: 0; max-width: 540px; color: #6f645c; font-size: 15px; line-height: 1.9; }
+.hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 8px 0 0; }
 .hero-sample { display: flex; align-items: center; gap: 14px; min-width: 0; }
 .meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   row-gap: 10px;
-  margin: 18px 0 0;
+  margin: 0;
   padding: 0;
   list-style: none;
   color: #8d7f74;
@@ -650,16 +785,18 @@ onBeforeUnmount(() => {
 .hero-scene {
   position: relative;
   min-width: 0;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 24px 60px rgba(90, 50, 20, .12);
+  height: 100%;
+  min-height: 520px;
 }
 .hero-scene img {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
-  height: auto;
-  aspect-ratio: 800 / 632;
+  height: 100%;
   object-fit: cover;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, .55) 3%, #000 8%, #000 86%, rgba(0, 0, 0, .45) 94%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, .55) 3%, #000 8%, #000 86%, rgba(0, 0, 0, .45) 94%, transparent 100%);
 }
 .hero-caption {
   position: absolute;
@@ -691,6 +828,14 @@ onBeforeUnmount(() => {
 }
 
 .section { padding: 88px 0; }
+.band { width: 100%; }
+.band-hero { background: #fff9f3; }
+.band-sample { background: #f3eee4; }
+.band-how { background: #fff4e4; }
+.band-reviews { background: #f2f6f1; }
+.band-pricing { background: #fff6ea; }
+.band-faq { background: #f7f1ea; }
+.band-finale { background: #f6e6d2; padding: 72px 0 88px; }
 .section-title {
   text-align: center;
   font-size: clamp(28px, 3.2vw, 40px);
@@ -758,59 +903,138 @@ onBeforeUnmount(() => {
   cursor: pointer;
 }
 .text-arrow span { margin-left: 4px; }
-
-.how { padding-top: 20px; }
 .steps {
+  --step-gap: 56px;
   list-style: none;
   margin: 42px 0 0;
   padding: 0;
   display: grid;
-  grid-template-columns: 1fr 1.05fr 1fr;
-  gap: 28px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: var(--step-gap);
+  row-gap: 28px;
   align-items: start;
 }
-.steps li { text-align: center; }
-.steps h3 { margin: 8px 0 6px; font-size: 20px; }
-.steps li > p:last-child { color: #6f645c; font-size: 14px; line-height: 1.7; }
-.step-no { margin-top: 16px; color: #c45c38; font-family: "Songti SC", serif; font-size: 28px; font-weight: 700; }
+.steps li { container-type: inline-size; text-align: center; }
+.step-head { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 16px; }
+.steps h3 { margin: 0; font-size: 20px; }
+.steps li > p:last-child { margin-top: 12px; color: #6f645c; font-size: 14px; line-height: 1.7; }
+.step-no {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  margin: 0;
+  border-radius: 50%;
+  background: #fbc133;
+  box-shadow: 0 0 0 6px #fff4e4;
+  color: #2a2118;
+  font-family: "Songti SC", serif;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+}
+.steps li:not(:last-child) .step-no::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  left: calc(100% + 10px);
+  top: 50%;
+  width: calc(100cqw + var(--step-gap) - 46px - 20px);
+  height: 14px;
+  transform: translateY(-50%);
+  background:
+    linear-gradient(#e0b15a, #e0b15a) left center / calc(100% - 14px) 2px no-repeat,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath d='M3 2.2 L10.2 7 L3 11.8' fill='none' stroke='%23c45c38' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") right center / 14px 14px no-repeat;
+}
 .step-shot {
   display: block;
-  width: 200px;
-  height: 430px;
-  margin: 0 auto;
+  width: 100%;
+  aspect-ratio: 4 / 5;
   object-fit: cover;
-  object-position: top center;
-  border-radius: 22px;
+  object-position: center 36%;
+  border-radius: 8px;
   border: 1px solid #f1e6d8;
   box-shadow: 0 16px 36px rgba(80, 50, 20, .12);
   background: #fff;
 }
-.quotes { margin-top: 36px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-.quotes blockquote {
+.quote-swiper { margin-top: 36px; }
+.quote-viewport { overflow: hidden; }
+.quote-track {
+  --gap: 16px;
+  --visible: 3;
+  --i: 0;
+  display: flex;
+  gap: var(--gap);
+  width: 100%;
+  transition: transform .45s ease;
+  transform: translateX(calc(var(--i) * -1 * (100% + var(--gap)) / var(--visible)));
+}
+.quote-track blockquote {
+  flex: 0 0 calc((100% - (var(--visible) - 1) * var(--gap)) / var(--visible));
+  min-width: 0;
   margin: 0;
-  min-height: 190px;
-  padding: 18px 22px 20px;
+  min-height: 220px;
+  padding: 20px 22px 22px;
   background: #fff;
   border: 1px solid #f3e9dd;
-  border-radius: 18px;
+  border-radius: 8px;
   box-shadow: 0 10px 30px rgba(80, 50, 20, .04);
 }
-.quote-mark { display: block; color: #e2b15a; font-size: 48px; line-height: .8; }
-.quotes p { font-size: 15px; line-height: 1.8; color: #3f352f; }
+.quote-user { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.quote-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex: none;
+}
+.quote-user strong { display: block; color: #241c16; font-size: 15px; font-weight: 700; }
+.quote-user time { color: #a8988c; font-size: 12px; }
+.quote-track p { font-size: 15px; line-height: 1.8; color: #3f352f; }
+.quote-controls { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 18px; }
+.quote-arrow {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #eadfd2;
+  border-radius: 50%;
+  background: #fff;
+  color: #4e453f;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+.quote-arrow:disabled { opacity: .35; cursor: not-allowed; }
+.quote-dots { display: flex; gap: 8px; }
+.quote-dots button {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #eadfd2;
+  cursor: pointer;
+}
+.quote-dots button.on { background: #e2b15a; }
 .review-note { margin-top: 16px !important; text-align: center; color: #a8988c; font-size: 13px; }
 
 .plan {
-  margin: 36px auto 0;
-  max-width: 880px;
+  margin: 40px auto 0;
+  max-width: 920px;
   display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 12px;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 8px 36px;
   align-items: center;
-  padding: 36px 42px;
-  background: #fff;
-  border: 1px solid #f1e6d8;
-  border-radius: 28px;
-  box-shadow: 0 18px 50px rgba(80, 50, 20, .06);
+  padding: 28px 36px 28px 28px;
+  background:
+    linear-gradient(180deg, rgba(255, 253, 249, .4), rgba(255, 253, 249, 0) 72px),
+    #fff;
+  border: 1px solid #f0e3d4;
+  border-radius: 8px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .9),
+    0 22px 50px rgba(92, 54, 20, .07);
 }
 .stack { position: relative; height: 250px; }
 .issue {
@@ -837,26 +1061,81 @@ onBeforeUnmount(() => {
 .front strong { font-family: "Songti SC", serif; font-size: 28px; line-height: 1; }
 .front i { flex: 1; border-radius: 3px; }
 .front small { color: #8d7f74; font-size: 11px; }
-.plan-copy h3 { font-size: 18px; }
-.amount { display: flex; align-items: flex-end; gap: 2px; margin: 6px 0 16px; color: #c45c38; }
-.amount span { font-size: 22px; margin-bottom: 8px; }
-.amount strong { font-size: 64px; line-height: .85; font-weight: 700; }
-.amount em { margin: 0 0 8px 2px; font-style: normal; font-size: 18px; color: #7a6e64; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; }
-.perks { list-style: none; margin: 0 0 22px; padding: 0; }
-.perks li { display: flex; align-items: center; gap: 10px; padding: 6px 0; color: #4e453f; font-size: 15px; }
+.plan-copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 8px 4px 4px 8px;
+}
+.plan-copy h3 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  color: #241c16;
+}
+.page .amount {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  margin: 10px 0 0;
+  color: #fbc133;
+}
+.amount span { font-size: 24px; font-weight: 700; margin-bottom: 10px; }
+.amount strong {
+  font-size: 76px;
+  line-height: .8;
+  font-weight: 700;
+  letter-spacing: -.04em;
+}
+.amount em {
+  margin: 0 0 12px 6px;
+  font-style: normal;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  color: #9a8878;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+.perks {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 28px;
+  margin: 22px 0 26px;
+  padding: 6px 0 2px;
+  border-top: 1px solid #f4e8da;
+}
+.perks li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f7efe6;
+  color: #4a4038;
+  font-size: 14px;
+  line-height: 1.4;
+}
 .perks i {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: #f8e7b8;
-  color: #9a6230;
+  background: #fbc133;
+  color: #2a2118;
   font-style: normal;
   font-size: 11px;
+  font-weight: 700;
   flex: none;
+  box-shadow: 0 4px 10px rgba(210, 160, 40, .22);
 }
-.plan-btn { min-width: 220px; }
+.plan-btn {
+  align-self: flex-start;
+  min-width: 220px;
+  padding: 14px 28px;
+  box-shadow: 0 10px 22px rgba(210, 160, 40, .28);
+}
 
 .faq-list { max-width: 760px; margin: 28px auto 0; }
 .faq-list details { border-bottom: 1px solid #efe4d6; }
@@ -894,7 +1173,7 @@ onBeforeUnmount(() => {
 }
 details[open] .chev::before { top: 11px; transform: rotate(225deg); }
 
-.finale-wrap { padding-bottom: 88px; }
+.finale-wrap { padding-bottom: 0; }
 .finale {
   position: relative;
   overflow: hidden;
@@ -902,7 +1181,7 @@ details[open] .chev::before { top: 11px; transform: rotate(225deg); }
   display: grid;
   place-items: center;
   padding: 64px 24px;
-  border-radius: 16px;
+  border-radius: 8px;
   background: #c4a07a;
   text-align: center;
 }
@@ -959,16 +1238,27 @@ footer { border-top: 1px solid #efe4d6; padding: 36px 0 28px; }
   overflow: hidden;
 }
 .dialog h3 { font-size: 28px; line-height: 1.3; padding-right: 36px; }
+.dialog h3.wechat-title { padding-right: 0; text-align: center; }
 .dialog-kicker { color: #a15a32; font-size: 13px; font-weight: 700; letter-spacing: .08em; }
 .dialog-copy { margin-top: 12px; color: #5f554e; font-size: 15px; line-height: 1.85; }
-.search-name {
-  margin: 16px 0 20px;
+.page .search-name {
+  margin: 20px 0;
   padding: 12px 14px;
   border-radius: 12px;
   background: #fff6e4;
   color: #6a4b28;
   font-weight: 700;
+  text-align: center;
 }
+.mini-qr {
+  display: block;
+  width: 220px;
+  height: 220px;
+  margin: 18px auto 0;
+  border-radius: 16px;
+  background: #fff;
+}
+.page .qr-hint { margin-top: 15px; text-align: center; color: #7a6e64; font-size: 14px; }
 .mail { color: #c45c38; }
 .close-x {
   position: absolute;
@@ -1036,17 +1326,29 @@ footer { border-top: 1px solid #efe4d6; padding: 36px 0 28px; }
   }
   .nav-links.open { display: grid; }
   .nav-links a, .nav-links button { text-align: left; padding: 13px 8px; border-bottom: 1px solid #f6eee6; font-size: 15px; }
-  .hero, .sample-layout, .steps, .quotes, .plan { grid-template-columns: minmax(0, 1fr); }
-  .hero { padding-top: 28px; gap: 28px; }
+  .hero, .sample-layout, .steps, .plan { grid-template-columns: minmax(0, 1fr); }
+  .steps { max-width: 460px; margin-inline: auto; row-gap: 36px; }
+  .steps li:not(:last-child) .step-no::after { display: none; }
+  .hero { min-height: 0; padding: 36px 0 48px; gap: 32px; }
+  .hero-copy { gap: 22px; }
+  .lead { display: none; }
+  .hero-scene { order: -1; height: min(78vw, 460px); min-height: 0; }
   .section { padding: 64px 0; }
   .book { min-height: 0; }
-  .plan { padding: 28px 22px 24px; }
-  .stack { height: 230px; margin-bottom: 8px; }
-  .foot, .finale-wrap { width: min(1120px, calc(100% - 32px)); }
+  .plan { padding: 28px 22px 24px; gap: 8px; }
+  .plan-copy { padding: 4px 2px 0; }
+  .stack {
+    width: 248px;
+    height: 230px;
+    justify-self: center;
+    margin-bottom: 8px;
+  }
+  .plan-copy h3 { text-align: center; }
+  .page .amount { justify-content: center; }
+  .foot { width: min(1120px, calc(100% - 32px)); }
 }
 @media (max-width: 640px) {
   .wrap { width: min(1120px, calc(100% - 32px)); }
-  .announce { font-size: 12px; padding: 8px 12px; }
   .nav-cta { padding: 9px 12px; }
   .cta-long { display: none; }
   .nav-cta .cta-short { display: inline; }
@@ -1065,24 +1367,33 @@ footer { border-top: 1px solid #efe4d6; padding: 36px 0 28px; }
     font-size: 12px;
     letter-spacing: .02em;
   }
-  .hero-actions, .hero-actions > .btn, .hero-sample, .plan-btn, .dialog .btn.solid { width: 100%; }
-  .hero-sample .btn { width: auto; flex: none; }
-  .steps { gap: 36px; }
-  .quotes blockquote { min-height: 0; }
-  .front { left: 64px; }
-  .back-a { left: 8px; }
+  .perks { grid-template-columns: 1fr; }
+  .amount strong { font-size: 64px; }
+  .plan-btn, .dialog .btn.solid { width: 100%; }
+  .hero-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: stretch;
+    width: 100%;
+  }
+  .hero-sample { display: contents; }
+  .hero-actions > .btn,
+  .hero-sample .btn { width: 100%; padding: 13px 8px; font-size: 14px; }
+  .smile-line { grid-column: 1 / -1; text-align: center; }
+  .text-arrow { justify-self: center; color: #fbc133; }
   .copyright, .foot-links { grid-column: 1; justify-self: start; }
   .foot { grid-template-columns: 1fr; }
   .finale { min-height: 240px; padding: 48px 18px; }
 }
 @media (prefers-reduced-motion: reduce) {
   :global(html.home-scroll) { scroll-behavior: auto; }
+  .quote-track { transition: none; }
 }
 </style>
 
 <style scoped>
 :global(html.home-scroll) {
   scroll-behavior: smooth;
-  scroll-padding-top: 118px;
+  scroll-padding-top: 88px;
 }
 </style>
