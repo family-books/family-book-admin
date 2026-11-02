@@ -35,11 +35,24 @@ export const useUserStore = defineStore('user', () => {
     localStorage.removeItem('admin_userId')
   }
 
+  function readUserIdFromToken(rawToken: string): string {
+    try {
+      const payload = rawToken.split('.')[1]
+      if (!payload) return ''
+      const normalized = payload.replace(/-/g, '+').replace(/_/g, '/')
+      const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=')
+      const parsed = JSON.parse(atob(padded)) as { sub?: string }
+      return parsed.sub ? String(parsed.sub) : ''
+    } catch {
+      return ''
+    }
+  }
+
   async function fetchUserInfo() {
     try {
-      const userId = userInfo.value?.id || Number(localStorage.getItem('admin_userId'))
+      const userId = readUserIdFromToken(token.value)
       if (!userId) return null
-      const res = await request.get(`/api/admin/user/${userId}`)
+      const res = await request.get(`/api/admin/user/${encodeURIComponent(userId)}`)
       const user = res.data
       setUser(user)
       return user

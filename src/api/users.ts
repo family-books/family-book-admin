@@ -9,14 +9,14 @@ export function getUserList(params: {
   return request.get('/api/admin/user/list', { params })
 }
 
-export function getUserDetail(userId: number): Promise<ApiResponse<User>> {
+export function getUserDetail(userId: number | string): Promise<ApiResponse<User>> {
   return request.get(`/api/admin/user/${userId}`)
 }
 
-export function setUserEnabled(userId: number, enabled: boolean): Promise<ApiResponse<null>> {
+export function setUserEnabled(userId: number | string, enabled: boolean): Promise<ApiResponse<null>> {
   return request.put(`/api/admin/user/${userId}/${enabled ? 'enable' : 'disable'}`)
 }
 
-export function updateUserRole(userId: number, role: string): Promise<ApiResponse<null>> {
+export function updateUserRole(userId: number | string, role: string): Promise<ApiResponse<null>> {
   return request.put(`/api/admin/user/${userId}/role`, { sysRole: role })
 }

@@ -144,7 +144,7 @@ async function disableUser(user: User) {
 
 async function changeRole(user: User, role: string) {
   // Prevent self-demotion
-  if (userStore.userInfo && user.id === userStore.userInfo.id && role !== userStore.userInfo.sysRole) {
+  if (userStore.userInfo && String(user.id) === String(userStore.userInfo.id) && role !== userStore.userInfo.sysRole) {
     ElMessage.warning('不能修改自己的角色')
     return
   }

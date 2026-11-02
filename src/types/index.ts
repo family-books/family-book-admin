@@ -1,5 +1,5 @@
 export interface User {
-  id: number
+  id: number | string
   nickname: string
   avatarUrl?: string
   phone?: string
@@ -115,14 +115,14 @@ export interface ApiResponse<T> {
 }
 
 export interface LoginForm {
-  phone: string
+  account: string
   password: string
 }
 
 export interface LoginResult {
   accessToken: string
   refreshToken: string
-  userId: number
+  userId: number | string
   nickname: string
   avatar: string
   isNewUser: boolean

@@ -18,9 +18,9 @@
         label-width="0"
         @submit.prevent="handleLogin"
       >
-        <el-form-item prop="phone">
+        <el-form-item prop="account">
           <el-input
-            v-model="loginForm.phone"
+            v-model="loginForm.account"
             prefix-icon="User"
             placeholder="管理员账号"
             size="large"
@@ -69,12 +69,12 @@ const formRef = ref<FormInstance>()
 const loading = ref(false)
 
 const loginForm = reactive({
-  phone: '',
+  account: '',
   password: '',
 })
 
 const rules: FormRules = {
-  phone: [{ required: true, message: '请输入手机号/邮箱', trigger: 'blur' }],
+  account: [{ required: true, message: '请输入管理员账号', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
 }
 
