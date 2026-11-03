@@ -28,7 +28,7 @@
         <div class="wrap hero">
         <div class="hero-copy">
           <span class="kicker">让亲情可以被触摸</span>
-          <h1>把一家人的日常，<br><span class="hero-title-accent">寄到父母手里。</span></h1>
+          <h1>把一家人的日常<br><span class="hero-title-accent">打印成家庭报纸</span><br><span class="hero-title-accent">邮寄到长辈手中</span></h1>
           <p class="gift">送给长辈的贴心礼物， 每个月，让他们多一份笑容。</p>
           <p class="lead">分享照片和文字，家书帮你自动排版印刷，每月寄送专属家庭月刊，<br/>让远方的家人看见你的生活，也把珍贵的回忆留在手里。</p>
           <div class="hero-actions">
@@ -57,7 +57,7 @@
         <p class="section-desc">照片、文字和一家人的近况，翻开就能看见。</p>
         <div class="sample-layout">
           <button class="book" type="button" aria-label="在线翻看样刊" @click="openSample(1)">
-            <img src="/images/home/sample-book.jpg" alt="家书样刊：封面与内页" />
+            <img src="/images/home/sample-book.png?v=3" alt="家书样刊：封面与内页" />
           </button>
           <div class="sample-points">
             <article>
@@ -98,34 +98,50 @@
         <h2 class="section-title">你分享生活，我们负责送达</h2>
         <ol class="steps">
           <li>
-            <div class="step-head">
-              <p class="step-no">01</p>
-              <h3>开通家书</h3>
+            <div class="step-body">
+              <div class="step-copy">
+                <p class="step-no">01</p>
+                <div>
+                  <h3>开通家书</h3>
+                  <p>填写收件信息，邀请家人加入</p>
+                </div>
+              </div>
+              <span class="step-icon">
+                <img src="/images/home/step-invite.png" alt="" />
+              </span>
             </div>
-            <div class="step-shot">
-              <img src="/images/home/step-family.jpg" alt="子女和父母一起看手机，填写收件信息并邀请家人" />
-            </div>
-            <p>填写收件信息，邀请家人加入。</p>
+            <span class="step-next" aria-hidden="true"><svg viewBox="0 0 14 14"><path d="M4 2.4 9.6 7 4 11.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
           </li>
           <li>
-            <div class="step-head">
-              <p class="step-no">02</p>
-              <h3>分享日常</h3>
+            <div class="step-body">
+              <div class="step-copy">
+                <p class="step-no">02</p>
+                <div>
+                  <h3>分享日常</h3>
+                  <p>上传照片，写下几句近况</p>
+                </div>
+              </div>
+              <span class="step-phone">
+                <span class="step-icon">
+                  <img class="step-shot" src="/images/home/step-share.png" alt="" />
+                </span>
+              </span>
             </div>
-            <div class="step-shot">
-              <img src="/images/home/step-share.jpg" alt="妈妈用手机拍下孩子画画，准备上传照片和近况" />
-            </div>
-            <p>上传照片，写下几句近况。</p>
+            <span class="step-next" aria-hidden="true"><svg viewBox="0 0 14 14"><path d="M4 2.4 9.6 7 4 11.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
           </li>
           <li>
-            <div class="step-head">
-              <p class="step-no">03</p>
-              <h3>每月收件</h3>
+            <div class="step-body">
+              <div class="step-copy">
+                <p class="step-no">03</p>
+                <div>
+                  <h3>每月收件</h3>
+                  <p>自动排版、印刷，寄到家人手里</p>
+                </div>
+              </div>
+              <span class="step-icon">
+                <img src="/images/home/step-deliver.png" alt="" />
+              </span>
             </div>
-            <div class="step-shot">
-              <img src="/images/home/step-issue.jpg" alt="父母坐在沙发上翻开寄到家里的家书月刊" />
-            </div>
-            <p>自动排版、印刷，寄到家人手里。</p>
           </li>
         </ol>
         </div>
@@ -163,7 +179,7 @@
                 type="button"
                 :class="{ on: quoteIndex === page - 1 }"
                 :aria-label="`第 ${page} 屏评价`"
-                @click="quoteIndex = page - 1"
+                @click="goQuote(page - 1)"
               ></button>
             </div>
             <button class="quote-arrow" type="button" aria-label="下一条评价" :disabled="quoteIndex >= quoteMax" @click="stepQuote(1)">›</button>
@@ -175,36 +191,31 @@
 
       <section id="pricing" class="section band band-pricing">
         <div class="wrap">
-        <h2 class="section-title">每月29元，<span class="title-break">把全家的近况寄回家</span></h2>
-        <div class="plan">
-          <div class="stack" aria-hidden="true">
-            <div class="issue back-a"></div>
-            <div class="issue back-b"></div>
-            <div class="issue front">
-              <span>家庭月刊</span>
-              <strong>家书</strong>
-              <i class="ph ph-1"></i>
-              <small>第 06 期</small>
+        <h2 class="section-title">选一份家书，<span class="title-break">把全家的近况寄回家</span></h2>
+        <p class="section-desc">纸质月刊按月寄出。开通一份，全家都可以一起上传。</p>
+        <div class="plans">
+          <article v-for="plan in plans" :key="plan.name" class="price-card">
+            <header class="price-head">
+              <p class="price-term">{{ plan.term }}</p>
+              <span v-if="plan.badge" class="price-badge">{{ plan.badge }}</span>
+            </header>
+            <div class="price-main">
+              <h3>{{ plan.name }}</h3>
+              <p class="amount"><span>¥</span><strong>{{ plan.price }}</strong></p>
             </div>
-          </div>
-          <div class="plan-copy">
-            <h3>家书月刊</h3>
-            <p class="amount"><span>¥</span><strong>29</strong><em>／月</em></p>
+            <p class="price-note">约合每月 <b>¥{{ plan.monthly }}</b></p>
             <ul class="perks">
-              <li><i>✓</i>每月寄送1本纸质月刊</li>
-              <li><i>✓</i>每期最多上传28张照片</li>
-              <li><i>✓</i>家人数量不限，全家共同参与</li>
-              <li><i>✓</i>自动排版、印刷，免费配送</li>
+              <li v-for="perk in planPerks" :key="perk"><i>✓</i>{{ perk }}</li>
             </ul>
-            <button class="btn solid plan-btn" type="button" @click="openModal('wechat')">开通家书月刊</button>
-          </div>
+            <button class="btn solid plan-btn" type="button" @click="openModal('wechat')">开通{{ plan.name }}</button>
+          </article>
         </div>
         </div>
       </section>
 
       <section id="faq" class="section band band-faq">
         <div class="wrap">
-        <h2 class="section-title">你可能想知道</h2>
+        <h2 class="section-title">常见问题</h2>
         <div class="faq-list">
           <details v-for="item in faqs" :key="item.q">
             <summary>{{ item.q }}<i class="chev" aria-hidden="true"></i></summary>
@@ -253,7 +264,7 @@
     <div v-if="modal" class="backdrop" @click.self="closeModal">
       <div
         class="dialog"
-        :class="{ wide: modal === 'sample', legal: modal === 'privacy' || modal === 'terms' }"
+        :class="{ wide: modal === 'sample', story: modal === 'story', legal: modal === 'privacy' || modal === 'terms' }"
         role="dialog"
         aria-modal="true"
         aria-labelledby="dialog-title"
@@ -270,6 +281,16 @@
         <template v-else-if="modal === 'story'">
           <p class="dialog-kicker">品牌故事</p>
           <h3 id="dialog-title">让亲情可以被触摸</h3>
+          <video
+            ref="storyVideo"
+            class="story-video"
+            src="/videos/brand-story.mp4"
+            controls
+            playsinline
+            preload="auto"
+          >
+            您的浏览器无法播放这段视频。
+          </video>
           <p class="dialog-copy">家书想把散落在聊天窗口里的日常，变成父母手里可以一页页翻看的月刊。</p>
           <p class="dialog-copy">家人在微信里分享照片和文字，我们负责排版、印刷，并免费寄到家里。让远方的生活被看见，也让珍贵的回忆留在手里。</p>
         </template>
@@ -333,6 +354,7 @@ const samplePages = Array.from({ length: 16 }, (_, index) => `/images/home/sampl
 const sampleIndex = ref(0)
 const sampleCount = samplePages.length
 const closeBtn = ref<HTMLButtonElement | null>(null)
+const storyVideo = ref<HTMLVideoElement | null>(null)
 const touchStartX = ref(0)
 const quoteTouchX = ref(0)
 const quoteIndex = ref(0)
@@ -381,16 +403,53 @@ const reviews = [
   },
 ]
 
+const planPerks = [
+  '每月寄送 1 本纸质月刊',
+  '每期最多上传 28 张照片',
+  '家人数量不限，全家参与',
+  '自动排版印刷，免费配送',
+]
+const plans = [
+  { name: '月卡', term: '寄出 1 期', price: '29', monthly: '29', badge: '' },
+  { name: '季卡', term: '寄出 3 期', price: '79', monthly: '26.3', badge: '' },
+  { name: '年卡', term: '寄出 12 期', price: '299', monthly: '24.9', badge: '一年十二期' },
+]
+
 const quoteMax = computed(() => Math.max(0, reviews.length - quoteVisible.value))
 const quotePageCount = computed(() => quoteMax.value + 1)
+const QUOTE_FRAME_MS = 3000
+let quoteTimer: number | undefined
+
+const stopQuoteAutoplay = () => {
+  if (quoteTimer === undefined) return
+  window.clearInterval(quoteTimer)
+  quoteTimer = undefined
+}
+
+const startQuoteAutoplay = () => {
+  stopQuoteAutoplay()
+  if (quoteMax.value <= 0) return
+  quoteTimer = window.setInterval(() => {
+    quoteIndex.value = quoteIndex.value >= quoteMax.value ? 0 : quoteIndex.value + 1
+  }, QUOTE_FRAME_MS)
+}
 
 const syncQuoteVisible = () => {
-  quoteVisible.value = window.matchMedia('(max-width: 900px)').matches ? 1 : 3
+  const next = window.matchMedia('(max-width: 900px)').matches ? 1 : 3
+  if (next === quoteVisible.value) return
+  quoteVisible.value = next
   if (quoteIndex.value > quoteMax.value) quoteIndex.value = quoteMax.value
+  startQuoteAutoplay()
 }
 
 const stepQuote = (dir: number) => {
   quoteIndex.value = Math.min(quoteMax.value, Math.max(0, quoteIndex.value + dir))
+  startQuoteAutoplay()
+}
+
+const goQuote = (index: number) => {
+  quoteIndex.value = index
+  startQuoteAutoplay()
 }
 
 const onQuoteTouchStart = (event: TouchEvent) => {
@@ -418,7 +477,7 @@ const faqs = [
   },
   {
     q: '家庭照片会公开吗？',
-    a: '不会公开展示。照片和文字只供你的家庭制作这本月刊，受邀家人可以一起上传。为了印刷和寄送，内容会提供给必要的印刷与物流合作方，不会用于公开传播。',
+    a: '不会公开展示。照片和文字只供你的家庭制作这本月刊，受邀家人可以一起上传，不会用于公开传播。',
   },
 ]
 
@@ -570,12 +629,19 @@ watch(modal, async (value) => {
   if (!value) return
   await nextTick()
   closeBtn.value?.focus()
+  if (value === 'story') {
+    const video = storyVideo.value
+    if (!video) return
+    video.currentTime = 0
+    video.play().catch(() => {})
+  }
 })
 
 onMounted(() => {
   document.documentElement.classList.add('home-scroll')
   window.addEventListener('keydown', onKey)
   window.addEventListener('resize', syncQuoteVisible)
+  startQuoteAutoplay()
 })
 
 onBeforeUnmount(() => {
@@ -583,6 +649,7 @@ onBeforeUnmount(() => {
   document.body.style.overflow = ''
   window.removeEventListener('keydown', onKey)
   window.removeEventListener('resize', syncQuoteVisible)
+  stopQuoteAutoplay()
 })
 </script>
 
@@ -873,16 +940,6 @@ onBeforeUnmount(() => {
   cursor: pointer;
 }
 .book img { display: block; width: 100%; height: auto; }
-.ph { position: relative; border-radius: 4px; overflow: hidden; display: block; }
-.ph span {
-  position: absolute;
-  left: 8px;
-  bottom: 6px;
-  color: #fff;
-  font-size: 11px;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, .35);
-}
-.ph-1 { background: linear-gradient(160deg, #f6c991, #d4785a 58%, #8d4c3a); }
 .sample-points { display: grid; gap: 22px; }
 .sample-points article { display: grid; grid-template-columns: 44px 1fr; gap: 12px; align-items: start; }
 .sample-points h3 { font-size: 18px; margin-bottom: 4px; }
@@ -910,75 +967,108 @@ onBeforeUnmount(() => {
 }
 .text-arrow span { margin-left: 4px; }
 .steps {
-  --step-gap: 56px;
   list-style: none;
-  margin: 42px 0 0;
+  margin: 48px auto 0;
   padding: 0;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  column-gap: var(--step-gap);
-  row-gap: 28px;
-  align-items: start;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 12px;
 }
-.steps li { container-type: inline-size; text-align: center; }
-.step-head { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 16px; }
-.steps h3 { margin: 0; font-size: 20px; }
-.steps li > p:last-child { margin-top: 12px; color: #6f645c; font-size: 18px; line-height: 1.7; }
-.step-no {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  place-items: center;
-  width: 46px;
-  height: 46px;
+.steps li {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.step-body {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+.step-copy {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+}
+.step-copy p {
+  max-width: 8.6em;
+  margin: 6px 0 0;
+  color: #8a7b70;
+  font-size: 13px;
+  line-height: 1.55;
+}
+.step-copy .step-no {
+  max-width: none;
   margin: 0;
-  border-radius: 50%;
-  background: #fbc133;
-  box-shadow: 0 0 0 6px #fff4e4;
-  color: #2a2118;
-  font-family: "Songti SC", serif;
+  color: #fbc133;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: .9;
+  letter-spacing: -.03em;
+}
+.steps h3 {
+  margin: 0;
+  color: #241c16;
   font-size: 18px;
   font-weight: 700;
-  line-height: 1;
+  line-height: 1.2;
 }
-.steps li:not(:last-child) .step-no::after {
-  content: "";
-  position: absolute;
-  z-index: 0;
-  left: calc(100% + 10px);
-  top: 50%;
-  width: calc(100cqw + var(--step-gap) - 46px - 20px);
-  height: 14px;
-  transform: translateY(-50%);
-  background:
-    linear-gradient(#e0b15a, #e0b15a) left center / calc(100% - 14px) 2px no-repeat,
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath d='M3 2.2 L10.2 7 L3 11.8' fill='none' stroke='%23c45c38' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") right center / 14px 14px no-repeat;
-}
-.step-shot {
-  position: relative;
-  display: block;
-  width: 100%;
-  aspect-ratio: 4 / 5;
-  border-radius: 8px;
-  border: 1px solid #f1e6d8;
-  box-shadow: 0 16px 36px rgba(80, 50, 20, .12);
+.step-icon {
+  --icon-w: 76px;
+  width: var(--icon-w);
+  height: calc(var(--icon-w) * 512 / 473);
+  flex: none;
   overflow: hidden;
-  background: #fff;
+  display: block;
 }
-.step-shot img {
+.step-icon img {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: center 36%;
+  object-fit: contain;
 }
-.step-shot::after {
+.step-icon img.step-shot {
+  width: 100%;
+  height: auto;
+  object-fit: unset;
+}
+.step-phone .step-icon {
+  height: calc(var(--icon-w) * 680 / 473);
+  border-radius: 6px 6px 0 0;
+}
+.step-phone {
+  position: relative;
+  display: block;
+  flex: none;
+  padding: 5px 2px 0;
+  border: 1.5px solid #111;
+  border-bottom: 0;
+  border-radius: 14px 14px 0 0;
+  background: #111;
+  line-height: 0;
+}
+.step-phone::before {
   content: "";
   position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, .3);
-  pointer-events: none;
+  top: 2px;
+  left: 50%;
+  width: 14px;
+  height: 2px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: #3a3a3a;
 }
+.step-next {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  margin-left: 28px;
+  color: #fbc133;
+  flex: none;
+}
+.step-next svg { display: block; width: 14px; height: 14px; }
 .quote-swiper { margin-top: 36px; }
 .quote-viewport { overflow: hidden; }
 .quote-track {
@@ -1039,106 +1129,122 @@ onBeforeUnmount(() => {
 .quote-dots button.on { background: #e2b15a; }
 .review-note { margin-top: 16px !important; text-align: center; color: #a8988c; font-size: 13px; }
 
-.plan {
-  margin: 40px auto 0;
-  max-width: 920px;
+.plans {
+  margin: 42px auto 0;
   display: grid;
-  grid-template-columns: 280px minmax(0, 1fr);
-  gap: 8px 36px;
-  align-items: center;
-  padding: 28px 36px 28px 28px;
-  background:
-    linear-gradient(180deg, rgba(255, 253, 249, .4), rgba(255, 253, 249, 0) 72px),
-    #fff;
-  border: 1px solid #f0e3d4;
-  border-radius: 8px;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .9),
-    0 22px 50px rgba(92, 54, 20, .07);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+  align-items: stretch;
 }
-.stack { position: relative; height: 250px; }
-.issue {
-  position: absolute;
-  width: 148px;
-  height: 206px;
-  border-radius: 3px 8px 8px 3px;
-  background: #f6ecdf;
-  box-shadow: 0 12px 24px rgba(70, 40, 20, .1);
-}
-.back-a { left: 18px; top: 28px; transform: rotate(-12deg); background: #f3e4d2; }
-.back-b { left: 48px; top: 18px; transform: rotate(-3deg); background: #f8f1e6; }
-.front {
-  left: 86px;
-  top: 8px;
-  transform: rotate(6deg);
-  background: #fffdf8;
-  padding: 14px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.front span { font-size: 11px; color: #a15a32; letter-spacing: .08em; }
-.front strong { font-family: "Songti SC", serif; font-size: 28px; line-height: 1; }
-.front i { flex: 1; border-radius: 3px; }
-.front small { color: #8d7f74; font-size: 11px; }
-.plan-copy {
+.price-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   min-width: 0;
-  padding: 8px 4px 4px 8px;
+  padding: 26px 24px 22px;
+  background:
+    linear-gradient(180deg, rgba(251, 193, 51, .32), rgba(251, 193, 51, 0) 108px),
+    #fffdf9;
+  border: 1px solid #fbc133;
+  border-radius: 22px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .95),
+    0 0 0 1px #fbc133,
+    0 22px 44px rgba(210, 160, 40, .16);
 }
-.plan-copy h3 {
+.price-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 28px;
+}
+.price-term {
   margin: 0;
-  font-size: 22px;
+  color: #a15a32;
+  font-size: 13px;
   font-weight: 700;
-  letter-spacing: .06em;
-  color: #241c16;
+  letter-spacing: .12em;
 }
-.page .amount {
+.price-badge {
+  flex: none;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #fbc133;
+  color: #2a2118;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  line-height: 1;
+}
+.price-card h3 {
+  margin: 14px 0 0;
+  color: #241c16;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  line-height: 1;
+}
+.price-card h3::after {
+  content: "";
+  display: block;
+  width: 36px;
+  height: 2px;
+  margin-top: 14px;
+  border-radius: 2px;
+  background: #fbc133;
+}
+.page .price-card .amount {
   display: flex;
   align-items: flex-end;
-  gap: 3px;
-  margin: 10px 0 0;
+  gap: 2px;
+  margin: 18px 0 0;
   color: #fbc133;
 }
-.amount span { font-size: 24px; font-weight: 700; margin-bottom: 10px; }
-.amount strong {
-  font-size: 76px;
-  line-height: .8;
+.price-card .amount span {
+  margin-bottom: 8px;
+  font-size: 22px;
   font-weight: 700;
+  line-height: 1;
+}
+.price-card .amount strong {
+  font-size: 58px;
+  font-weight: 700;
+  line-height: .82;
   letter-spacing: -.04em;
+  font-variant-numeric: tabular-nums;
 }
-.amount em {
-  margin: 0 0 12px 6px;
-  font-style: normal;
-  font-size: 16px;
-  font-weight: 600;
-  letter-spacing: .04em;
+.price-note {
+  margin: 12px 0 0;
   color: #9a8878;
-  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
 }
-.perks {
+.price-note b {
+  color: #fbc133;
+  font-weight: 700;
+}
+.price-card .perks {
   list-style: none;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0 28px;
-  margin: 22px 0 26px;
-  padding: 6px 0 2px;
+  gap: 0;
+  margin: 20px 0 22px;
+  padding: 4px 0 0;
   border-top: 1px solid #f4e8da;
 }
-.perks li {
+.price-card .perks li {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 0;
+  padding: 11px 0;
   border-bottom: 1px solid #f7efe6;
   color: #4a4038;
   font-size: 14px;
-  line-height: 1.4;
+  line-height: 1.45;
 }
-.perks i {
-  width: 20px;
-  height: 20px;
+.price-card .perks i {
+  width: 18px;
+  height: 18px;
   display: grid;
   place-items: center;
   border-radius: 50%;
@@ -1148,13 +1254,12 @@ onBeforeUnmount(() => {
   font-size: 11px;
   font-weight: 700;
   flex: none;
-  box-shadow: 0 4px 10px rgba(210, 160, 40, .22);
 }
-.plan-btn {
-  align-self: flex-start;
-  min-width: 220px;
-  padding: 14px 28px;
-  box-shadow: 0 10px 22px rgba(210, 160, 40, .28);
+.price-card .plan-btn {
+  width: 100%;
+  margin-top: auto;
+  padding: 14px 18px;
+  box-shadow: 0 10px 22px rgba(210, 160, 40, .24);
 }
 
 .faq-list { max-width: 760px; margin: 28px auto 0; }
@@ -1257,6 +1362,14 @@ footer { border-top: 1px solid #efe4d6; padding: 36px 0 28px; }
   flex-direction: column;
   overflow: hidden;
 }
+.dialog.story { width: min(760px, 100%); }
+.story-video {
+  display: block;
+  width: 100%;
+  margin-top: 16px;
+  border-radius: 14px;
+  background: #1c1612;
+}
 .dialog h3 { font-size: 28px; line-height: 1.3; padding-right: 36px; }
 .dialog h3.wechat-title { padding-right: 0; text-align: center; }
 .dialog-kicker { color: #a15a32; font-size: 13px; font-weight: 700; letter-spacing: .08em; }
@@ -1346,25 +1459,42 @@ footer { border-top: 1px solid #efe4d6; padding: 36px 0 28px; }
   }
   .nav-links.open { display: grid; }
   .nav-links a, .nav-links button { text-align: left; padding: 13px 8px; border-bottom: 1px solid #f6eee6; font-size: 15px; }
-  .hero, .sample-layout, .steps, .plan { grid-template-columns: minmax(0, 1fr); }
-  .steps { max-width: 460px; margin-inline: auto; row-gap: 36px; }
-  .steps li:not(:last-child) .step-no::after { display: none; }
+  .hero, .sample-layout, .plans { grid-template-columns: minmax(0, 1fr); }
+  .steps {
+    flex-direction: column;
+    align-items: center;
+    width: fit-content;
+    max-width: 100%;
+    gap: 4px;
+  }
+  .steps li { flex-direction: column; align-items: center; }
+  .step-body { width: auto; justify-content: flex-start; gap: 10px; }
+  .step-next { align-self: center; margin: 10px 0 6px; transform: rotate(90deg); }
   .hero { min-height: 0; padding: 36px 0 48px; gap: 32px; }
   .hero-copy { gap: 22px; }
   .lead { display: none; }
   .hero-scene { order: -1; height: min(78vw, 460px); min-height: 0; }
   .section { padding: 64px 0; }
   .book { min-height: 0; }
-  .plan { padding: 28px 22px 24px; gap: 8px; }
-  .plan-copy { padding: 4px 2px 0; }
-  .stack {
-    width: 248px;
-    height: 230px;
-    justify-self: center;
-    margin-bottom: 8px;
+  .plans {
+    width: 70vw;
+    max-width: 70vw;
+    margin-inline: auto;
+    gap: 16px;
   }
-  .plan-copy h3 { text-align: center; }
-  .page .amount { justify-content: center; }
+  .price-card { padding: 18px 14px 16px; }
+  .price-main {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .price-card h3 { margin: 0; }
+  .price-card h3::after { display: none; }
+  .page .price-card .amount { margin: 0; }
+  .price-card .amount span { margin-bottom: 2px; font-size: 16px; }
+  .price-card .amount strong { font-size: 36px; }
   .foot { width: min(1120px, calc(100% - 32px)); }
 }
 @media (max-width: 640px) {
@@ -1387,9 +1517,7 @@ footer { border-top: 1px solid #efe4d6; padding: 36px 0 28px; }
     font-size: 12px;
     letter-spacing: .02em;
   }
-  .perks { grid-template-columns: 1fr; }
-  .amount strong { font-size: 64px; }
-  .plan-btn, .dialog .btn.solid { width: 100%; }
+  .dialog .btn.solid { width: 100%; }
   .hero-actions {
     display: grid;
     grid-template-columns: 1fr 1fr;
