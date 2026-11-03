@@ -215,12 +215,25 @@
 
       <section id="faq" class="section band band-faq">
         <div class="wrap">
-        <h2 class="section-title">常见问题</h2>
-        <div class="faq-list">
-          <details v-for="item in faqs" :key="item.q">
-            <summary>{{ item.q }}<i class="chev" aria-hidden="true"></i></summary>
-            <p>{{ item.a }}</p>
-          </details>
+        <h2 class="section-title">关于家书，你可能想知道</h2>
+        <p class="section-desc">你负责分享生活，家书负责把爱送到家。</p>
+        <div class="faq-groups">
+          <section v-for="group in faqGroups" :key="group.title" class="faq-group">
+            <h3><span aria-hidden="true">{{ group.icon }}</span>{{ group.title }}</h3>
+            <div class="faq-list">
+              <details v-for="item in group.items" :key="item.q" :class="{ featured: item.featured }">
+                <summary>{{ item.q }}<i class="chev" aria-hidden="true"></i></summary>
+                <p>{{ item.a }}</p>
+              </details>
+            </div>
+          </section>
+        </div>
+        <div class="faq-cta">
+          <div>
+            <strong>把想念，变成一份可以收到的礼物。</strong>
+            <span>全家一起分享生活，每月把一份纸质家书送到牵挂的人手中。</span>
+          </div>
+          <button class="btn solid" type="button" @click="openModal('wechat')">立即制作第一份家书</button>
         </div>
         </div>
       </section>
@@ -462,22 +475,91 @@ const onQuoteTouchEnd = (event: TouchEvent) => {
   if (delta < -48) stepQuote(1)
 }
 
-const faqs = [
+const faqGroups = [
   {
-    q: '父母需要使用小程序吗？',
-    a: '不需要。父母只要在家收下纸质月刊，翻开就能看到你们的照片和近况。上传和开通都在微信小程序里完成。',
+    title: '了解家书',
+    icon: '📖',
+    items: [
+      {
+        q: '家书是什么？',
+        a: '家书是一份专属于你们家庭的纸质月刊。家人通过微信小程序上传照片、分享生活，每期由平台自动排版、覆膜高清打印，再寄到父母或其他亲人手中。',
+      },
+      {
+        q: '家书和微信相册有什么不同？',
+        a: '微信里的照片容易被聊天记录淹没，家书则把散落的日常整理成可以翻阅和珍藏的纸质回忆。对不擅长使用智能手机的长辈来说，阅读也更简单。',
+      },
+      {
+        q: '父母需要使用小程序吗？',
+        a: '不需要。父母只要像收快递一样，等待纸质家书送到家中。上传照片、邀请家人、编辑内容和开通订阅等操作，都可以由子女在微信小程序里完成。',
+      },
+      {
+        q: '可以邀请其他家人一起制作吗？',
+        a: '可以。你可以邀请兄弟姐妹、伴侣或其他家庭成员加入同一个家庭，大家共同上传照片和分享生活，让一份家书记录全家人的近况。',
+      },
+      {
+        q: '为什么要给父母订阅家书？',
+        a: '我们每天都在拍照，却很少把这些生活完整地分享给父母。每个月，一份可以拿在手里、反复翻阅的家书，让远方的牵挂看得见，也让陪伴持续送达。',
+        featured: true,
+      },
+    ],
   },
   {
-    q: '家人都需要付费吗？',
-    a: '不需要。开通一份家书月刊，全家都可以一起上传。家人数量不限，不用每人单独付费。',
+    title: '制作与寄送',
+    icon: '📸',
+    items: [
+      {
+        q: '每期家书可以放多少张照片？',
+        a: '每期最多可以上传 28 张照片。家庭中的所有成员共享这 28 张额度，大家可以在本期截止前持续上传、删除或调整内容。',
+      },
+      {
+        q: '可以自己选择照片和调整排版吗？',
+        a: '你可以自由选择、上传和编辑本期照片，也可以补充文字。页面版式由平台自动编排，目前暂不支持逐页手动调整，让制作家书尽量简单省心。',
+      },
+      {
+        q: '每期家书什么时候寄出？',
+        a: '每月 15 日为本期内容上传截止日。截止后系统会自动排版并进入印刷流程，通常在 5 个工作日内完成印刷和寄出，具体进度可在小程序查看。',
+      },
+      {
+        q: '可以同时寄给多位家人吗？',
+        a: '可以。订阅默认包含一个地址、每期寄送 1 份；如需同时寄给其他家人，可以添加收件地址并购买加印，当前每期合计最多寄送 3 份。',
+      },
+      {
+        q: '家书支持哪些地区配送？',
+        a: '目前支持中国大陆大部分地区配送。内蒙古、西藏、青海、宁夏、新疆、海南及港澳台暂不支持，最终请以小程序保存收件地址时的提示为准。',
+      },
+    ],
   },
   {
-    q: '每期什么时候寄出？',
-    a: '每期在上传截止后自动排版、印刷，并免费寄出。具体的截止日期和寄送进度，可以在微信小程序里查看。',
+    title: '订阅与费用',
+    icon: '💳',
+    items: [
+      {
+        q: '家人都需要付费吗？',
+        a: '不需要。一位家人开通订阅后，其他受邀家庭成员都可以共同上传照片和文字，家庭成员数量不限。只有额外收件地址需要按期购买加印。',
+      },
+      {
+        q: '可以先免费体验吗？',
+        a: '可以先免费创建家庭、邀请家人并体验照片和故事的记录流程。自动生成纸质家书、覆膜高清打印和寄送属于付费订阅权益，具体以小程序订阅页为准。',
+      },
+      {
+        q: '订阅后可以随时取消吗？',
+        a: '可以在小程序中关闭自动续费，关闭后不会影响已经支付的服务周期，到期后不再自动续订。已支付订单的退款与售后，按照服务条款和实际履约情况处理。',
+      },
+    ],
   },
   {
-    q: '家庭照片会公开吗？',
-    a: '不会公开展示。照片和文字只供你的家庭制作这本月刊，受邀家人可以一起上传，不会用于公开传播。',
+    title: '隐私与安全',
+    icon: '🔒',
+    items: [
+      {
+        q: '家庭照片会公开吗？',
+        a: '不会。照片和文字仅用于你的家庭空间及家书制作，只有受邀家庭成员可以查看和共同上传。我们不会把家庭内容公开展示或用于无关用途。',
+      },
+      {
+        q: '可以下载电子版家书吗？',
+        a: '可以。每期家书生成后，家庭成员可以在小程序的“我的家书”中预览并下载 PDF 电子版，既方便随时查看，也可以作为家庭资料长期保存。',
+      },
+    ],
   },
 ]
 
@@ -1262,8 +1344,26 @@ onBeforeUnmount(() => {
   box-shadow: 0 10px 22px rgba(210, 160, 40, .24);
 }
 
-.faq-list { max-width: 760px; margin: 28px auto 0; }
+.faq-groups { max-width: 860px; margin: 42px auto 0; display: grid; gap: 42px; }
+.faq-group h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 6px;
+  color: #392f28;
+  font-size: 21px;
+}
+.faq-group h3 span { font-size: 19px; }
+.faq-list { margin: 0; }
 .faq-list details { border-bottom: 1px solid #efe4d6; }
+.faq-list details.featured {
+  margin-top: 12px;
+  padding: 0 18px;
+  border: 1px solid #efddbf;
+  border-radius: 10px;
+  background: #fff9ec;
+}
+.faq-list details.featured summary { color: #684824; }
 .faq-list summary {
   display: flex;
   align-items: center;
@@ -1276,7 +1376,7 @@ onBeforeUnmount(() => {
   list-style: none;
 }
 .faq-list summary::-webkit-details-marker { display: none; }
-.faq-list p { margin: -2px 4px 18px; max-width: 640px; color: #6f645c; font-size: 14px; line-height: 1.8; }
+.faq-list p { margin: -2px 4px 20px; max-width: 720px; color: #6f645c; font-size: 14px; line-height: 1.9; }
 .chev {
   width: 28px;
   height: 28px;
@@ -1297,6 +1397,22 @@ onBeforeUnmount(() => {
   transform: rotate(45deg);
 }
 details[open] .chev::before { top: 11px; transform: rotate(225deg); }
+.faq-cta {
+  max-width: 860px;
+  margin: 54px auto 0;
+  padding: 30px 34px;
+  border-radius: 12px;
+  background: #382f29;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+}
+.faq-cta div { display: grid; gap: 8px; }
+.faq-cta strong { font-size: 20px; }
+.faq-cta span { color: #d8cec7; font-size: 13px; line-height: 1.7; }
+.faq-cta .btn { flex: none; }
 
 .finale-wrap { padding-bottom: 0; }
 .finale {
@@ -1475,6 +1591,8 @@ footer { border-top: 1px solid #efe4d6; padding: 36px 0 28px; }
   .lead { display: none; }
   .hero-scene { order: -1; height: min(78vw, 460px); min-height: 0; }
   .section { padding: 64px 0; }
+  .faq-groups { gap: 34px; }
+  .faq-cta { align-items: flex-start; flex-direction: column; padding: 26px; }
   .book { min-height: 0; }
   .plans {
     width: 70vw;
@@ -1504,6 +1622,10 @@ footer { border-top: 1px solid #efe4d6; padding: 36px 0 28px; }
   .nav-cta .cta-short { display: inline; }
   .title-break { display: block; }
   .section-title, .finale h2 { font-size: 28px; }
+  .faq-group h3 { font-size: 19px; }
+  .faq-list summary { padding-block: 18px; font-size: 15px; }
+  .faq-list details.featured { padding-inline: 14px; }
+  .faq-cta .btn { width: 100%; }
   .foot-links { justify-content: flex-start; }
   .brand-logo img { height: 40px; }
   .hero-copy h1 { font-size: 34px; }
