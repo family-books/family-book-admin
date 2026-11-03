@@ -221,7 +221,7 @@
           <section v-for="group in faqGroups" :key="group.title" class="faq-group">
             <h3><span aria-hidden="true">{{ group.icon }}</span>{{ group.title }}</h3>
             <div class="faq-list">
-              <details v-for="item in group.items" :key="item.q" :class="{ featured: item.featured }">
+              <details v-for="item in group.items" :key="item.q">
                 <summary>{{ item.q }}<i class="chev" aria-hidden="true"></i></summary>
                 <p>{{ item.a }}</p>
               </details>
@@ -499,7 +499,6 @@ const faqGroups = [
       {
         q: '为什么要给父母订阅家书？',
         a: '我们每天都在拍照，却很少把这些生活完整地分享给父母。每个月，一份可以拿在手里、反复翻阅的家书，让远方的牵挂看得见，也让陪伴持续送达。',
-        featured: true,
       },
     ],
   },
@@ -1356,14 +1355,6 @@ onBeforeUnmount(() => {
 .faq-group h3 span { font-size: 19px; }
 .faq-list { margin: 0; }
 .faq-list details { border-bottom: 1px solid #efe4d6; }
-.faq-list details.featured {
-  margin-top: 12px;
-  padding: 0 18px;
-  border: 1px solid #efddbf;
-  border-radius: 10px;
-  background: #fff9ec;
-}
-.faq-list details.featured summary { color: #684824; }
 .faq-list summary {
   display: flex;
   align-items: center;
@@ -1624,7 +1615,6 @@ footer { border-top: 1px solid #efe4d6; padding: 36px 0 28px; }
   .section-title, .finale h2 { font-size: 28px; }
   .faq-group h3 { font-size: 19px; }
   .faq-list summary { padding-block: 18px; font-size: 15px; }
-  .faq-list details.featured { padding-inline: 14px; }
   .faq-cta .btn { width: 100%; }
   .foot-links { justify-content: flex-start; }
   .brand-logo img { height: 40px; }
