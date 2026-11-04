@@ -84,7 +84,7 @@
         <el-table-column label="操作" width="170">
           <template #default="{ row }">
             <div class="row-actions">
-            <el-button size="small" type="primary" plain @click="regenerate(row)">重新生成全部PDF</el-button>
+            <el-button class="regenerate-button" size="small" type="primary" plain @click="regenerate(row)">重新生成全部PDF</el-button>
             </div>
           </template>
         </el-table-column>
@@ -439,6 +439,11 @@ onMounted(() => {
 
 .row-actions :deep(.el-button + .el-button) {
   margin-left: 0;
+}
+
+.row-actions :deep(.regenerate-button) {
+  --el-button-text-color: #000;
+  --el-button-hover-text-color: #000;
 }
 
 .capability-alert {
