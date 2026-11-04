@@ -57,7 +57,7 @@
         <p class="section-desc">照片、文字和一家人的近况，翻开就能看见。</p>
         <div class="sample-layout">
           <button class="book" type="button" aria-label="在线翻看样刊" @click="openSample(1)">
-            <img src="/images/home/sample-book.png?v=3" alt="家书样刊：封面与内页" />
+            <img src="/images/home/sample-book.png?v=4" alt="家书样刊：封面与内页" />
           </button>
           <div class="sample-points">
             <article>
@@ -193,22 +193,35 @@
         <div class="wrap">
         <h2 class="section-title">选一份家书，<span class="title-break">把全家的近况寄回家</span></h2>
         <p class="section-desc">纸质月刊按月寄出。开通一份，全家都可以一起上传。</p>
+        <div class="pricing-layout">
+        <aside class="plan-benefits">
+          <h3>每份订阅都包含</h3>
+          <p>不论月卡、季卡还是年卡，权益都一样。</p>
+          <ul class="plan-perks">
+            <li v-for="perk in planPerks" :key="perk"><i>✓</i>{{ perk }}</li>
+          </ul>
+        </aside>
         <div class="plans">
-          <article v-for="plan in plans" :key="plan.name" class="price-card">
+          <article
+            v-for="plan in plans"
+            :key="plan.name"
+            class="price-card"
+            :class="{ featured: !!plan.badge }"
+          >
             <header class="price-head">
-              <p class="price-term">{{ plan.term }}</p>
-              <span v-if="plan.badge" class="price-badge">{{ plan.badge }}</span>
+              <div class="price-term-wrap">
+                <p class="price-term">{{ plan.term }}</p>
+                <span v-if="plan.badge" class="price-badge">{{ plan.badge }}</span>
+              </div>
             </header>
             <div class="price-main">
               <h3>{{ plan.name }}</h3>
               <p class="amount"><span>¥</span><strong>{{ plan.price }}</strong></p>
             </div>
             <p class="price-note">约合每月 <b>¥{{ plan.monthly }}</b></p>
-            <ul class="perks">
-              <li v-for="perk in planPerks" :key="perk"><i>✓</i>{{ perk }}</li>
-            </ul>
             <button class="btn solid plan-btn" type="button" @click="openModal('wechat')">开通{{ plan.name }}</button>
           </article>
+        </div>
         </div>
         </div>
       </section>
@@ -984,7 +997,7 @@ onBeforeUnmount(() => {
 .section { padding: 88px 0; }
 .band { width: 100%; }
 .band-hero { background: #fff9f3; }
-.band-sample { background: #f3eee4; }
+.band-sample { background: #fefefe; }
 .band-how { background: #fff4e4; }
 .band-reviews { background: #f2f6f1; }
 .band-pricing { background: #fff6ea; }
@@ -1210,11 +1223,70 @@ onBeforeUnmount(() => {
 .quote-dots button.on { background: #e2b15a; }
 .review-note { margin-top: 16px !important; text-align: center; color: #a8988c; font-size: 13px; }
 
+.pricing-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
+  gap: 28px;
+  align-items: stretch;
+  margin-top: 36px;
+}
+.plan-benefits {
+  display: flex;
+  flex-direction: column;
+  padding: 28px 26px;
+  border-radius: 20px;
+  background: #fffdf9;
+  border: 1px solid #f0e4d4;
+}
+.plan-benefits h3 {
+  margin: 0;
+  color: #241c16;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: .04em;
+}
+.plan-benefits > p {
+  margin: 8px 0 0;
+  color: #9a8878;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.plan-perks {
+  list-style: none;
+  display: grid;
+  gap: 16px;
+  margin: 22px 0 0;
+  padding: 0;
+}
+.plan-perks li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 0;
+  color: #3f352f;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.plan-perks i {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  flex: none;
+  margin-top: 1px;
+  border-radius: 50%;
+  background: #fbc133;
+  color: #2a2118;
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 700;
+}
 .plans {
-  margin: 42px auto 0;
+  margin: 0;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 22px;
+  gap: 14px;
   align-items: stretch;
 }
 .price-card {
@@ -1222,30 +1294,36 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  padding: 26px 24px 22px;
-  background:
-    linear-gradient(180deg, rgba(251, 193, 51, .32), rgba(251, 193, 51, 0) 108px),
-    #fffdf9;
-  border: 1px solid #fbc133;
-  border-radius: 22px;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .95),
-    0 0 0 1px #fbc133,
-    0 22px 44px rgba(210, 160, 40, .16);
+  padding: 22px 22px 20px;
+  background: #fffdf9;
+  border: 1px solid #f0e4d4;
+  border-radius: 18px;
+  box-shadow: 0 10px 28px rgba(90, 60, 30, .05);
+}
+.price-card.featured {
+  border-color: #f3c15a;
+  box-shadow: 0 14px 32px rgba(210, 160, 40, .12);
 }
 .price-head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  min-height: 28px;
+  min-height: 26px;
+}
+.price-term-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
 }
 .price-term {
   margin: 0;
   color: #a15a32;
   font-size: 13px;
   font-weight: 700;
-  letter-spacing: .12em;
+  letter-spacing: .08em;
 }
 .price-badge {
   flex: none;
@@ -1258,89 +1336,58 @@ onBeforeUnmount(() => {
   letter-spacing: .04em;
   line-height: 1;
 }
-.price-card h3 {
-  margin: 14px 0 0;
-  color: #241c16;
-  font-size: 28px;
-  font-weight: 700;
-  letter-spacing: .08em;
-  line-height: 1;
+.price-main {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 18px;
 }
-.price-card h3::after {
-  content: "";
-  display: block;
-  width: 36px;
-  height: 2px;
-  margin-top: 14px;
-  border-radius: 2px;
-  background: #fbc133;
+.price-card h3 {
+  margin: 0;
+  color: #241c16;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  line-height: 1;
 }
 .page .price-card .amount {
   display: flex;
   align-items: flex-end;
   gap: 2px;
-  margin: 18px 0 0;
-  color: #fbc133;
+  margin: 0;
+  color: #e2a322;
 }
 .price-card .amount span {
-  margin-bottom: 8px;
-  font-size: 22px;
+  margin-bottom: 5px;
+  font-size: 18px;
   font-weight: 700;
   line-height: 1;
 }
 .price-card .amount strong {
-  font-size: 58px;
+  font-size: 44px;
   font-weight: 700;
-  line-height: .82;
-  letter-spacing: -.04em;
+  line-height: .85;
+  letter-spacing: -.03em;
   font-variant-numeric: tabular-nums;
 }
 .price-note {
-  margin: 12px 0 0;
+  margin: 35px 0 0 !important;
   color: #9a8878;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
+  text-align: center;
+  line-height: 1.3;
 }
 .price-note b {
-  color: #fbc133;
+  color: #c4892a;
   font-weight: 700;
-}
-.price-card .perks {
-  list-style: none;
-  display: grid;
-  gap: 0;
-  margin: 20px 0 22px;
-  padding: 4px 0 0;
-  border-top: 1px solid #f4e8da;
-}
-.price-card .perks li {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 11px 0;
-  border-bottom: 1px solid #f7efe6;
-  color: #4a4038;
-  font-size: 14px;
-  line-height: 1.45;
-}
-.price-card .perks i {
-  width: 18px;
-  height: 18px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: #fbc133;
-  color: #2a2118;
-  font-style: normal;
-  font-size: 11px;
-  font-weight: 700;
-  flex: none;
 }
 .price-card .plan-btn {
   width: 100%;
-  margin-top: auto;
-  padding: 14px 18px;
-  box-shadow: 0 10px 22px rgba(210, 160, 40, .24);
+  margin-top: 22px;
+  padding: 13px 18px;
+  box-shadow: none;
 }
 
 .faq-groups { max-width: 860px; margin: 42px auto 0; display: grid; gap: 42px; }
@@ -1566,7 +1613,7 @@ footer { border-top: 1px solid #efe4d6; padding: 36px 0 28px; }
   }
   .nav-links.open { display: grid; }
   .nav-links a, .nav-links button { text-align: left; padding: 13px 8px; border-bottom: 1px solid #f6eee6; font-size: 15px; }
-  .hero, .sample-layout, .plans { grid-template-columns: minmax(0, 1fr); }
+  .hero, .sample-layout, .plans, .pricing-layout { grid-template-columns: minmax(0, 1fr); }
   .steps {
     flex-direction: column;
     align-items: center;
@@ -1585,24 +1632,22 @@ footer { border-top: 1px solid #efe4d6; padding: 36px 0 28px; }
   .faq-groups { gap: 34px; }
   .faq-cta { align-items: flex-start; flex-direction: column; padding: 26px; }
   .book { min-height: 0; }
+  .pricing-layout { gap: 18px; margin-top: 28px; }
+  .plan-benefits,
   .plans {
+    margin-inline: auto;
+  }
+  .plan-benefits {
     width: 70vw;
     max-width: 70vw;
-    margin-inline: auto;
-    gap: 16px;
   }
-  .price-card { padding: 18px 14px 16px; }
-  .price-main {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 8px;
-    margin-top: 12px;
+  .plans {
+    width: 60vw;
+    max-width: 60vw;
+    gap: 14px;
   }
-  .price-card h3 { margin: 0; }
-  .price-card h3::after { display: none; }
-  .page .price-card .amount { margin: 0; }
-  .price-card .amount span { margin-bottom: 2px; font-size: 16px; }
+  .price-card { padding: 18px 16px 16px; }
+  .price-card .amount span { margin-bottom: 3px; font-size: 16px; }
   .price-card .amount strong { font-size: 36px; }
   .foot { width: min(1120px, calc(100% - 32px)); }
 }
