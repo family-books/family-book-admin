@@ -191,38 +191,71 @@
 
       <section id="pricing" class="section band band-pricing">
         <div class="wrap">
-        <h2 class="section-title">选一份家书，<span class="title-break">把全家的近况寄回家</span></h2>
-        <p class="section-desc">纸质月刊按月寄出。开通一份，全家都可以一起上传。</p>
-        <div class="pricing-layout">
-        <aside class="plan-benefits">
-          <h3>每份订阅都包含</h3>
-          <p>不论月卡、季卡还是年卡，权益都一样。</p>
-          <ul class="plan-perks">
-            <li v-for="perk in planPerks" :key="perk"><i>✓</i>{{ perk }}</li>
-          </ul>
-        </aside>
-        <div class="plans">
-          <article
-            v-for="plan in plans"
-            :key="plan.name"
-            class="price-card"
-            :class="{ featured: !!plan.badge }"
-          >
-            <header class="price-head">
-              <div class="price-term-wrap">
-                <p class="price-term">{{ plan.term }}</p>
-                <span v-if="plan.badge" class="price-badge">{{ plan.badge }}</span>
+          <header class="pricing-head">
+            <h2 class="section-title">选一份家书，<span class="title-break">把全家的近况寄回家</span></h2>
+            <p class="section-desc">纸质月刊按月寄出。开通一份，全家都可以一起上传。</p>
+            <p class="pricing-gift">为父母选一份可以全家参与的礼物</p>
+          </header>
+          <div class="pricing-layout">
+            <aside class="plan-benefits">
+              <h3>每份订阅都包含</h3>
+              <p class="benefits-lead">不论月卡、季卡还是年卡，<br />权益都一样。</p>
+              <ul class="plan-perks">
+                <li v-for="perk in planPerks" :key="perk.title">
+                  <span class="perk-ico" aria-hidden="true">
+                    <svg class="perk-check" viewBox="0 0 16 16"><path d="M3.2 8.3 6.3 11.4 12.8 4.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <svg v-if="perk.icon === 'calendar'" class="perk-line" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 3.5v3M16 3.5v3M4 10h16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                    <svg v-else-if="perk.icon === 'photo'" class="perk-line" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="9" cy="10" r="1.3" fill="currentColor"/><path d="m4.5 16 4.2-4 3 3 2.6-2.6 5.2 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <svg v-else-if="perk.icon === 'family'" class="perk-line" viewBox="0 0 24 24"><circle cx="9" cy="9" r="2.1" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="15.6" cy="9.6" r="1.7" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4.6 17.6c.5-2.3 2.2-3.5 4.4-3.5s3.9 1.2 4.4 3.5M13.4 14.3c1.2-.4 2.4-.3 3.4.5.9.8 1.4 1.9 1.6 3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                    <svg v-else class="perk-line" viewBox="0 0 24 24"><path d="M4.5 7.2 12 4.2l7.5 3v10.2L12 20.4 4.5 17.4V7.2z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M4.5 7.2 12 10.4l7.5-3.2M12 10.4V20.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+                  </span>
+                  <span class="perk-copy">
+                    <strong>{{ perk.title }}</strong>
+                    <small>{{ perk.desc }}</small>
+                  </span>
+                </li>
+              </ul>
+            </aside>
+            <article
+              v-for="plan in plans"
+              :key="plan.name"
+              class="price-card"
+              :class="{ featured: plan.featured }"
+            >
+              <p v-if="plan.badge" class="price-ribbon">
+                <svg viewBox="0 0 20 16" aria-hidden="true"><path fill="currentColor" d="M1.6 12.8 3.2 4.8 7.2 8.2 10 1.8l2.8 6.4 4 3.4 1.6 8H1.6z"/><path fill="currentColor" d="M2 13.6h16v1.6H2z"/></svg>
+                {{ plan.badge }}
+              </p>
+              <div class="price-body">
+                <div class="price-main">
+                  <p class="price-term">{{ plan.term }}</p>
+                  <h3>{{ plan.name }}</h3>
+                  <p class="price-sub">{{ plan.subtitle }}</p>
+                  <p class="price-mobile-note">
+                    <span class="note-ico" aria-hidden="true">
+                      <svg v-if="plan.noteIcon === 'info'" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M8 7.2V11.2M8 5.1v.6" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                      <svg v-else-if="plan.noteIcon === 'star'" viewBox="0 0 16 16"><path d="m8 2.4 1.5 3.2 3.5.4-2.6 2.4.7 3.4L8 10.2 4.9 11.8l.7-3.4L3 6l3.5-.4L8 2.4z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+                      <svg v-else viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M8 11.1s-2.6-1.6-2.6-3.2a1.5 1.5 0 0 1 2.6-1 1.5 1.5 0 0 1 2.6 1C10.6 9.5 8 11.1 8 11.1z" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg>
+                    </span>
+                    {{ plan.mobileNote }}
+                  </p>
+                </div>
+                <div class="price-pay">
+                  <div class="price-figure">
+                    <p class="amount"><span>¥</span><strong>{{ plan.price }}</strong></p>
+                    <span v-if="plan.save" class="price-save price-save-desk">省¥{{ plan.save }}</span>
+                  </div>
+                  <div class="price-foot">
+                    <div class="price-foot-main">
+                      <p class="price-note">约合每月¥{{ plan.monthly }}</p>
+                      <span v-if="plan.save" class="price-save price-save-mob">省¥{{ plan.save }}</span>
+                    </div>
+                  </div>
+                  <button class="btn solid plan-btn" :class="{ year: plan.featured }" type="button" @click="openModal('wechat')">开通{{ plan.name }}</button>
+                </div>
               </div>
-            </header>
-            <div class="price-main">
-              <h3>{{ plan.name }}</h3>
-              <p class="amount"><span>¥</span><strong>{{ plan.price }}</strong></p>
-            </div>
-            <p class="price-note">约合每月 <b>¥{{ plan.monthly }}</b></p>
-            <button class="btn solid plan-btn" type="button" @click="openModal('wechat')">开通{{ plan.name }}</button>
-          </article>
-        </div>
-        </div>
+            </article>
+          </div>
         </div>
       </section>
 
@@ -430,15 +463,48 @@ const reviews = [
 ]
 
 const planPerks = [
-  '每月寄送 1 本纸质月刊',
-  '每期最多上传 28 张照片',
-  '家人数量不限，全家参与',
-  '自动排版印刷，免费配送',
+  { icon: 'calendar', title: '每月寄送1本纸质月刊', desc: '一本温暖的纸质月刊' },
+  { icon: 'photo', title: '每期最多上传28张照片', desc: '多照片共同记录' },
+  { icon: 'family', title: '家人数量不限，全家参与', desc: '全家共同参与' },
+  { icon: 'print', title: '自动排版印刷，免费配送', desc: '印刷与配送都包含' },
 ]
 const plans = [
-  { name: '月卡', term: '寄出 1 期', price: '29', monthly: '29', badge: '' },
-  { name: '季卡', term: '寄出 3 期', price: '79', monthly: '26.3', badge: '' },
-  { name: '年卡', term: '寄出 12 期', price: '299', monthly: '24.9', badge: '一年十二期' },
+  {
+    name: '月卡',
+    term: '寄出1期',
+    price: '29',
+    monthly: '29',
+    save: '',
+    subtitle: '体验家庭月刊',
+    mobileNote: '单月体验，适合初次尝试的家庭',
+    noteIcon: 'info',
+    featured: false,
+    badge: '',
+  },
+  {
+    name: '季卡',
+    term: '寄出3期',
+    price: '79',
+    monthly: '26.3',
+    save: '8',
+    subtitle: '连续3个月收录',
+    mobileNote: '记录一季的家庭温暖，性价比更高',
+    noteIcon: 'star',
+    featured: false,
+    badge: '',
+  },
+  {
+    name: '年卡',
+    term: '寄出12期',
+    price: '299',
+    monthly: '24.9',
+    save: '49',
+    subtitle: '全年12期，家庭记忆不断档',
+    mobileNote: '全年陪伴，记录一整年的家庭美好时光',
+    noteIcon: 'heart',
+    featured: true,
+    badge: '一年十二期 · 最受欢迎',
+  },
 ]
 
 const quoteMax = computed(() => Math.max(0, reviews.length - quoteVisible.value))
@@ -1000,7 +1066,6 @@ onBeforeUnmount(() => {
 .band-sample { background: #fefefe; }
 .band-how { background: #fff4e4; }
 .band-reviews { background: #f2f6f1; }
-.band-pricing { background: #fff6ea; }
 .band-faq { background: #f7f1ea; }
 .band-finale { background: #f7f1ea; padding: 72px 0 88px; }
 .section-title {
@@ -1223,39 +1288,59 @@ onBeforeUnmount(() => {
 .quote-dots button.on { background: #e2b15a; }
 .review-note { margin-top: 16px !important; text-align: center; color: #a8988c; font-size: 13px; }
 
+.band-pricing { background: #fff8f1; }
+.band-pricing .pricing-head { text-align: center; }
+.band-pricing .section-title { color: #7a3f18; }
+.band-pricing .section-desc {
+  max-width: 760px;
+  color: #c4a06a;
+  font-size: 16px;
+}
+.band-pricing .pricing-gift {
+  margin: 6px 0 0;
+  color: #c4a06a;
+  font-size: 16px;
+  line-height: 1.8;
+  text-align: center;
+}
 .pricing-layout {
   display: grid;
-  grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
-  gap: 28px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
   align-items: stretch;
-  margin-top: 36px;
+  margin-top: 42px;
+}
+.plan-benefits,
+.price-card {
+  min-width: 0;
+  border: 1px solid #f3e4d2;
+  border-radius: 22px;
+  background: #fffdfb;
+  box-shadow: 0 12px 32px rgba(120, 78, 30, .05);
 }
 .plan-benefits {
   display: flex;
   flex-direction: column;
-  padding: 28px 26px;
-  border-radius: 20px;
-  background: #fffdf9;
-  border: 1px solid #f0e4d4;
+  padding: 28px 24px 24px;
+  background: #fffaf4;
 }
 .plan-benefits h3 {
   margin: 0;
-  color: #241c16;
+  color: #6b3a1c;
   font-size: 22px;
   font-weight: 700;
-  letter-spacing: .04em;
 }
-.plan-benefits > p {
+.band-pricing .benefits-lead {
   margin: 8px 0 0;
-  color: #9a8878;
+  color: #b08968;
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.7;
 }
 .plan-perks {
   list-style: none;
   display: grid;
-  gap: 16px;
-  margin: 22px 0 0;
+  gap: 18px;
+  margin: 26px 0 0;
   padding: 0;
 }
 .plan-perks li {
@@ -1263,12 +1348,8 @@ onBeforeUnmount(() => {
   align-items: flex-start;
   gap: 12px;
   margin: 0;
-  color: #3f352f;
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 1.5;
 }
-.plan-perks i {
+.perk-ico {
   width: 22px;
   height: 22px;
   display: grid;
@@ -1276,119 +1357,169 @@ onBeforeUnmount(() => {
   flex: none;
   margin-top: 1px;
   border-radius: 50%;
-  background: #fbc133;
-  color: #2a2118;
-  font-style: normal;
-  font-size: 12px;
-  font-weight: 700;
+  background: #f6c445;
+  color: #fff;
 }
-.plans {
-  margin: 0;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-  align-items: stretch;
+.perk-check, .perk-line { display: block; }
+.perk-check { width: 12px; height: 12px; }
+.perk-line { display: none; width: 22px; height: 22px; }
+.perk-copy { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.perk-copy strong {
+  color: #5c3418;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+.perk-copy small {
+  color: #b08968;
+  font-size: 13px;
+  line-height: 1.45;
 }
 .price-card {
   position: relative;
   display: flex;
-  flex-direction: column;
-  min-width: 0;
-  padding: 22px 22px 20px;
-  background: #fffdf9;
-  border: 1px solid #f0e4d4;
-  border-radius: 18px;
-  box-shadow: 0 10px 28px rgba(90, 60, 30, .05);
+  padding: 26px 22px 22px;
 }
 .price-card.featured {
-  border-color: #f3c15a;
-  box-shadow: 0 14px 32px rgba(210, 160, 40, .12);
+  margin-top: -14px;
+  height: calc(100% + 14px);
+  border-color: #f0cb78;
+  background: linear-gradient(180deg, #fffdf8 0%, #fff4d2 46%, #f6c85a 100%);
+  box-shadow: 0 16px 36px rgba(210, 160, 40, .16);
 }
-.price-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  min-height: 26px;
-}
-.price-term-wrap {
-  display: flex;
-  flex-wrap: wrap;
+.price-ribbon {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 50%;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  min-width: 0;
-}
-.price-term {
+  gap: 6px;
   margin: 0;
-  color: #a15a32;
+  padding: 7px 14px 7px 12px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #8d5a32 0%, #6e3e1e 100%);
+  color: #f8e7c4;
   font-size: 13px;
   font-weight: 700;
-  letter-spacing: .08em;
+  line-height: 1;
+  white-space: nowrap;
+  transform: translate(-50%, -58%);
+  box-shadow: 0 8px 16px rgba(90, 40, 10, .16);
 }
-.price-badge {
-  flex: none;
+.price-ribbon svg { width: 16px; height: 13px; color: #f6c445; flex: none; }
+.price-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  text-align: center;
+}
+.price-main,
+.price-pay { display: contents; }
+.band-pricing .price-term {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  margin: 0;
   padding: 5px 10px;
   border-radius: 999px;
-  background: #fbc133;
-  color: #2a2118;
+  background: #f6c445;
+  color: #6a3e12;
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: .04em;
   line-height: 1;
-}
-.price-main {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 18px;
 }
 .price-card h3 {
-  margin: 0;
-  color: #241c16;
-  font-size: 26px;
+  margin: 36px 0 0;
+  color: #6b3a1c;
+  font-size: 32px;
   font-weight: 700;
-  letter-spacing: .06em;
-  line-height: 1;
+  letter-spacing: .04em;
+  line-height: 1.1;
+}
+.band-pricing .price-sub {
+  margin: 8px 0 0;
+  color: #a08068;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.price-figure {
+  position: relative;
+  width: fit-content;
+  margin: 22px auto 0;
 }
 .page .price-card .amount {
   display: flex;
   align-items: flex-end;
+  justify-content: center;
   gap: 2px;
   margin: 0;
-  color: #e2a322;
+  color: #c47d12;
 }
 .price-card .amount span {
-  margin-bottom: 5px;
-  font-size: 18px;
+  margin-bottom: 8px;
+  font-size: 22px;
   font-weight: 700;
   line-height: 1;
 }
 .price-card .amount strong {
-  font-size: 44px;
+  font-size: 56px;
   font-weight: 700;
-  line-height: .85;
+  line-height: .82;
   letter-spacing: -.03em;
   font-variant-numeric: tabular-nums;
 }
-.price-note {
-  margin: 35px 0 0 !important;
-  color: #9a8878;
-  font-size: 13px;
-  font-weight: 600;
-  text-align: center;
-  line-height: 1.3;
-}
-.price-note b {
-  color: #c4892a;
+.price-save {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #f0a04a;
+  color: #fff;
+  font-size: 12px;
   font-weight: 700;
+  line-height: 1.3;
+  white-space: nowrap;
 }
-.price-card .plan-btn {
+.price-save-desk {
+  position: absolute;
+  top: 2px;
+  left: calc(100% + 6px);
+}
+.price-save-mob { display: none; }
+.price-foot {
+  display: flex;
+  justify-content: center;
   width: 100%;
-  margin-top: 22px;
-  padding: 13px 18px;
-  box-shadow: none;
+  margin-top: 12px;
 }
+.price-foot-main { display: flex; flex-direction: column; align-items: center; }
+.band-pricing .price-note {
+  margin: 0;
+  color: #c4a06a;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.price-mobile-note { display: none; }
+.price-card .plan-btn {
+  width: 78%;
+  min-width: 132px;
+  margin-top: auto;
+  padding: 12px 18px;
+  background: #f6c445;
+  color: #6a3e12;
+  box-shadow: 0 8px 16px rgba(210, 160, 40, .18);
+}
+.price-card .plan-btn.year {
+  background: #7a4522;
+  color: #fff8ef;
+  box-shadow: 0 8px 16px rgba(90, 40, 10, .18);
+}
+.price-card .plan-btn.year:hover { background: #69391b; }
 
 .faq-groups { max-width: 860px; margin: 42px auto 0; display: grid; gap: 42px; }
 .faq-group h3 {
@@ -1613,7 +1744,7 @@ footer { border-top: 1px solid #efe4d6; padding: 36px 0 28px; }
   }
   .nav-links.open { display: grid; }
   .nav-links a, .nav-links button { text-align: left; padding: 13px 8px; border-bottom: 1px solid #f6eee6; font-size: 15px; }
-  .hero, .sample-layout, .plans, .pricing-layout { grid-template-columns: minmax(0, 1fr); }
+  .hero, .sample-layout { grid-template-columns: minmax(0, 1fr); }
   .steps {
     flex-direction: column;
     align-items: center;
@@ -1632,23 +1763,6 @@ footer { border-top: 1px solid #efe4d6; padding: 36px 0 28px; }
   .faq-groups { gap: 34px; }
   .faq-cta { align-items: flex-start; flex-direction: column; padding: 26px; }
   .book { min-height: 0; }
-  .pricing-layout { gap: 18px; margin-top: 28px; }
-  .plan-benefits,
-  .plans {
-    margin-inline: auto;
-  }
-  .plan-benefits {
-    width: 70vw;
-    max-width: 70vw;
-  }
-  .plans {
-    width: 60vw;
-    max-width: 60vw;
-    gap: 14px;
-  }
-  .price-card { padding: 18px 16px 16px; }
-  .price-card .amount span { margin-bottom: 3px; font-size: 16px; }
-  .price-card .amount strong { font-size: 36px; }
   .foot { width: min(1120px, calc(100% - 32px)); }
 }
 @media (max-width: 640px) {
@@ -1689,6 +1803,131 @@ footer { border-top: 1px solid #efe4d6; padding: 36px 0 28px; }
   .copyright, .foot-links { grid-column: 1; justify-self: start; }
   .foot { grid-template-columns: 1fr; }
   .finale { min-height: 240px; padding: 48px 18px; }
+}
+@media (max-width: 1100px) {
+  .band-pricing .pricing-head,
+  .band-pricing .section-title,
+  .band-pricing .section-desc,
+  .band-pricing .pricing-gift { text-align: left; }
+  .band-pricing .section-title {
+    overflow-wrap: normal;
+    font-size: clamp(20px, 5.5vw, 26px);
+    line-height: 1.35;
+    letter-spacing: -.02em;
+  }
+  .band-pricing .section-desc { margin: 10px 0 0; font-size: 14px; line-height: 1.7; }
+  .band-pricing .title-break { display: inline; }
+  .band-pricing .pricing-gift { display: none; }
+  .pricing-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    margin-top: 22px;
+  }
+  .plan-benefits,
+  .price-card {
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(120, 78, 30, .05);
+  }
+  .plan-benefits { padding: 22px 18px 18px; }
+  .plan-benefits h3 { font-size: 20px; }
+  .benefits-lead { display: none; }
+  .plan-perks { gap: 16px; margin-top: 18px; }
+  .perk-ico {
+    width: 22px;
+    height: 22px;
+    margin-top: 0;
+    border-radius: 0;
+    background: transparent;
+    color: #8a5a32;
+  }
+  .perk-check { display: none; }
+  .perk-line { display: block; }
+  .perk-copy small { display: none; }
+  .perk-copy strong { font-size: 15px; font-weight: 600; }
+  .price-card { padding: 16px 16px 14px; }
+  .price-card.featured {
+    height: auto;
+    margin-top: 18px;
+    border-color: #f3e0c4;
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(120, 78, 30, .05);
+  }
+  .price-ribbon { font-size: 12px; padding: 6px 12px; }
+  .price-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 12px;
+    text-align: left;
+  }
+  .price-main,
+  .price-pay { display: flex; min-width: 0; }
+  .price-main {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .price-pay {
+    flex-direction: column;
+    align-items: flex-end;
+    text-align: right;
+  }
+  .band-pricing .price-term {
+    position: static;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+    color: #c4a06a;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .price-card h3 {
+    margin: 2px 0 0;
+    font-size: 26px;
+    letter-spacing: 0;
+  }
+  .price-sub { display: none; }
+  .price-figure { margin: 0; }
+  .page .price-card .amount { justify-content: flex-end; color: #e2a322; }
+  .price-card .amount span { margin-bottom: 3px; font-size: 16px; }
+  .price-card .amount strong { font-size: 32px; }
+  .price-save-desk { display: none; }
+  .price-save-mob { display: inline-flex; margin-top: 4px; }
+  .price-foot {
+    justify-content: flex-end;
+    width: auto;
+    margin-top: 2px;
+  }
+  .price-foot-main { align-items: flex-end; }
+  .band-pricing .price-note { font-size: 12px; }
+  .band-pricing .price-mobile-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 4px;
+    max-width: 11em;
+    margin: 6px 0 0;
+    color: #c4a06a;
+    font-size: 12px;
+    line-height: 1.5;
+    text-align: left;
+  }
+  .note-ico {
+    width: 14px;
+    height: 14px;
+    flex: none;
+    margin-top: 1px;
+    color: #d4a24c;
+  }
+  .note-ico svg { display: block; width: 14px; height: 14px; }
+  .price-card .plan-btn {
+    width: auto;
+    min-width: 108px;
+    margin-top: 8px;
+    align-self: flex-end;
+    padding: 11px 16px;
+    font-size: 14px;
+    box-shadow: none;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   :global(html.home-scroll) { scroll-behavior: auto; }
