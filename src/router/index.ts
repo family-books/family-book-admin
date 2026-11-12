@@ -35,6 +35,12 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '家庭管理' },
       },
       {
+        path: 'content-moderation',
+        name: 'ContentModeration',
+        component: () => import('@/views/moderation/ContentModerationView.vue'),
+        meta: { title: '内容审核' },
+      },
+      {
         path: 'enterprises',
         name: 'Enterprises',
         component: () => import('@/views/enterprises/EnterprisesView.vue'),

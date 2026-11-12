@@ -26,6 +26,20 @@ export interface FamilyMember {
   joinedAt: string
 }
 
+export interface ModerationPost {
+  id: string
+  familyId: string
+  userId: string
+  userNickname?: string
+  content?: string
+  images?: string[]
+  moderationStatus: 'pending' | 'approved' | 'rejected' | 'manual_review'
+  moderationReason?: string
+  moderationAttempts?: number
+  createdAt?: string
+  moderatedAt?: string
+}
+
 export interface GazettePrintTask {
   id: string
   recipientId?: string
