@@ -14,6 +14,10 @@ export function regenerateGazette(gazetteId: string): Promise<ApiResponse<null>>
   return request.post(`/api/admin/gazette/${gazetteId}/generate`)
 }
 
+export function cancelGazetteGeneration(gazetteId: string): Promise<ApiResponse<null>> {
+  return request.post(`/api/admin/gazette/${gazetteId}/cancel-generation`)
+}
+
 export function updatePrintStatus(gazetteId: string, printStatus: string): Promise<ApiResponse<null>> {
   return request.put(`/api/admin/gazette/${gazetteId}/print-status`, { printStatus })
 }

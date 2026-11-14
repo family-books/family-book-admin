@@ -75,6 +75,7 @@ export interface Gazette {
   wechatShippingSyncedAt?: string
   deliveryCount?: number
   shippedCount?: number
+  canCancelGeneration?: boolean
   prints?: GazettePrintTask[]
 }
 

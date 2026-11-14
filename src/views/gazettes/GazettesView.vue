@@ -81,10 +81,18 @@
           <template #default="{ row }"><el-tag v-if="row.printStatus" :type="getPrintStatusType(row.printStatus)" size="small">{{ getPrintStatusLabel(row.printStatus) }}</el-tag><span v-else>—</span></template>
         </el-table-column>
         <el-table-column prop="generatedAt" label="生成时间" width="170" />
-        <el-table-column label="操作" width="170">
+        <el-table-column label="操作" width="290">
           <template #default="{ row }">
             <div class="row-actions">
-            <el-button class="regenerate-button" size="small" type="primary" plain @click="regenerate(row)">重新生成全部PDF</el-button>
+              <el-button class="regenerate-button" size="small" type="primary" plain @click="regenerate(row)">重新生成全部PDF</el-button>
+              <el-button
+                v-if="row.canCancelGeneration"
+                size="small"
+                type="danger"
+                plain
+                :loading="cancelling[row.id]"
+                @click="cancelGeneration(row)"
+              >撤销生成</el-button>
             </div>
           </template>
         </el-table-column>
@@ -160,6 +168,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   getGazetteList,
   regenerateGazette,
+  cancelGazetteGeneration,
   getWechatShippingCapability,
   getPrintAddress,
   downloadPrintPdf,
@@ -177,6 +186,7 @@ const statusFilter = ref('')
 const page = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
+const cancelling = ref<Record<string, boolean>>({})
 const shippingVisible = ref(false)
 const shippingSubmitting = ref(false)
 const shippingPrint = ref<GazettePrintTask | null>(null)
@@ -336,6 +346,33 @@ function handleSearch() {
 }
 
 async function regenerate(gazette: Gazette) { try { await regenerateGazette(gazette.id); ElMessage.success('已提交重新生成任务') } catch {} }
+
+async function cancelGeneration(gazette: Gazette) {
+  try {
+    await ElMessageBox.confirm(
+      '撤销后，用户还可以手动重新生成，或等待下一次自动生成。确定撤销这期家书吗？',
+      '撤销家书生成',
+      {
+        type: 'warning',
+        confirmButtonText: '确认撤销',
+        cancelButtonText: '取消',
+      },
+    )
+  } catch {
+    return
+  }
+
+  cancelling.value[gazette.id] = true
+  try {
+    await cancelGazetteGeneration(gazette.id)
+    ElMessage.success('家书生成已撤销')
+    await fetchGazettes()
+  } catch {
+    // handled by interceptor
+  } finally {
+    delete cancelling.value[gazette.id]
+  }
+}
 
 function openPrintShippingDialog(task: GazettePrintTask) {
   shippingPrint.value = task
