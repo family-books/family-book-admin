@@ -20,28 +20,8 @@ jobs:
       github.event.workflow_run.event == 'push' &&
       github.event.workflow_run.head_branch == 'main'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
-      - name: Check out the CI-verified commit
-        uses: actions/checkout@v7
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
-          persist-credentials: false
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: '24'
-          cache: npm
-
-      - name: Build website and admin
-        run: |
-          npm ci --no-audit --no-fund
-          npm run build
-          test -s dist/index.html
-          test -d dist/assets
-          tar -C dist -czf family-book-admin.tar.gz .
-
       - name: Configure production SSH
         env:
           SSH_PRIVATE_KEY: ${{ secrets.TENCENT_SSH_PRIVATE_KEY }}
@@ -59,7 +39,5 @@ jobs:
           USER: ${{ secrets.TENCENT_SSH_USER }}
           SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
-          REMOTE="/tmp/family-book-admin-$SHA.tar.gz"
-          cat family-book-admin.tar.gz | ssh -o ConnectTimeout=15 -o ServerAliveInterval=15 -o ServerAliveCountMax=3 -i ~/.ssh/id_familybook_deploy "$USER@$HOST" "umask 077; cat > '$REMOTE'"
           ssh -o ConnectTimeout=15 -o ServerAliveInterval=15 -o ServerAliveCountMax=3 -i ~/.ssh/id_familybook_deploy "$USER@$HOST" \
-            "sudo /usr/local/sbin/deploy-family-book-admin '$SHA' '$REMOTE'"
+            "sudo /usr/local/sbin/deploy-family-book-admin '$SHA'"

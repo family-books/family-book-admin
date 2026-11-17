@@ -2,27 +2,39 @@
 set -euo pipefail
 
 SHA="${1:-}"
-ARCHIVE="${2:-}"
 ROOT=/opt/family-book-admin
 RELEASES="$ROOT/releases"
 CURRENT="$ROOT/dist"
+SOURCE="$ROOT/source"
+REPOSITORY=git@github.com:family-books/family-book-admin.git
+GITHUB_KEY=/root/.ssh/familybook_admin
 
-EXPECTED="/tmp/family-book-admin-$SHA.tar.gz"
-if [[ ! "$SHA" =~ ^[0-9a-f]{40}$ || "$ARCHIVE" != "$EXPECTED" || ! -f "$ARCHIVE" ]]; then
-  echo "Expected a commit SHA and a tar.gz artifact." >&2
+if [[ ! "$SHA" =~ ^[0-9a-f]{40}$ || ! -f "$GITHUB_KEY" ]]; then
+  echo "Expected a commit SHA and the admin GitHub deploy key." >&2
   exit 2
-fi
-if tar -tzf "$ARCHIVE" | grep -Eq '(^/|(^|/)\.\.(/|$))'; then
-  echo "Unsafe path in frontend archive." >&2
-  exit 1
 fi
 
 mkdir -p "$RELEASES"
 RELEASE="$RELEASES/$SHA"
 if [[ ! -d "$RELEASE" ]]; then
+  export GIT_SSH_COMMAND="ssh -i $GITHUB_KEY -o IdentitiesOnly=yes -o BatchMode=yes"
+  if [[ ! -d "$SOURCE/.git" ]]; then
+    git clone --filter=blob:none --no-checkout "$REPOSITORY" "$SOURCE"
+  fi
+  git -C "$SOURCE" fetch --prune origin "$SHA"
+  git -C "$SOURCE" checkout --detach --force "$SHA"
+  git -C "$SOURCE" clean -ffd
+
+  cd "$SOURCE"
+  export NODE_OPTIONS="--max-old-space-size=768"
+  npm ci --no-audit --no-fund
+  npm run build
+  test -s dist/index.html
+  test -d dist/assets
+
   STAGE="$(mktemp -d "$RELEASES/.staging.$SHA.XXXXXX")"
   trap 'rm -rf "$STAGE"' EXIT
-  tar --no-same-owner -xzf "$ARCHIVE" -C "$STAGE"
+  cp -a dist/. "$STAGE/"
   test -s "$STAGE/index.html"
   test -d "$STAGE/assets"
   PREVIOUS_DIR="$(readlink -f "$CURRENT" 2>/dev/null || true)"
@@ -32,7 +44,6 @@ if [[ ! -d "$RELEASE" ]]; then
   mv "$STAGE" "$RELEASE"
   trap - EXIT
 fi
-rm -f -- "$ARCHIVE"
 
 test -s "$RELEASE/index.html"
 test -d "$RELEASE/assets"
