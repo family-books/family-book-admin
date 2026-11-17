@@ -344,20 +344,15 @@
         </template>
 
         <template v-else-if="modal === 'story'">
-          <p class="dialog-kicker">品牌故事</p>
-          <h3 id="dialog-title">让亲情可以被触摸</h3>
-          <video
-            ref="storyVideo"
-            class="story-video"
-            src="/videos/brand-story.mp4"
-            controls
-            playsinline
-            preload="auto"
-          >
-            您的浏览器无法播放这段视频。
-          </video>
-          <p class="dialog-copy">家书想把散落在聊天窗口里的日常，变成父母手里可以一页页翻看的月刊。</p>
-          <p class="dialog-copy">家人在微信里分享照片和文字，我们负责排版、印刷，并免费寄到家里。让远方的生活被看见，也让珍贵的回忆留在手里。</p>
+          <div class="story-head">
+            <h3 id="dialog-title">品牌故事</h3>
+          </div>
+          <div class="story-body">
+            <section v-for="(part, index) in storyParagraphs" :key="index" class="story-part">
+              <h4>{{ part.title }}</h4>
+              <p class="dialog-copy">{{ part.text }}</p>
+            </section>
+          </div>
         </template>
 
         <template v-else-if="modal === 'contact'">
@@ -419,11 +414,45 @@ const samplePages = Array.from({ length: 16 }, (_, index) => `/images/home/sampl
 const sampleIndex = ref(0)
 const sampleCount = samplePages.length
 const closeBtn = ref<HTMLButtonElement | null>(null)
-const storyVideo = ref<HTMLVideoElement | null>(null)
 const touchStartX = ref(0)
 const quoteTouchX = ref(0)
 const quoteIndex = ref(0)
 const quoteVisible = ref(typeof window !== 'undefined' && window.matchMedia('(max-width: 900px)').matches ? 1 : 3)
+
+const storyParagraphs = [
+  {
+    title: '初到爱德华王子岛',
+    text: '2023年，我们一家来到加拿大爱德华王子岛，开始了新的生活。孩子慢慢长大，我们也在适应新的语言、工作和日常。与国内家人的每一次见面，都变成了需要提前很久安排的事。'
+  },
+  {
+    title: '隔着时差想与家人的小事',
+    text: '隔着距离和时差，我们想与家人分享的，往往都是些小事：孩子学会了什么，今天做了什么饭，周末去了哪里。我们也惦记着家里的长辈，想知道他们身体怎么样，兄弟姐妹最近在忙什么。'
+  },
+  {
+    title: '照片多的装不下了也很难找',
+    text: '微信让分享很方便。照片越拍越多，连256G的手机也渐渐装不下，但发过的照片和聊过的近况，常常随着新的消息被翻了过去。我开始想，能不能把一家人分享的照片和文字整理在一起，印下来，定期寄到家人手里？让他们坐在沙发上慢慢翻，也能在亲友来访时拿出来，一起聊聊我们的生活。'
+  },
+  {
+    title: '微信小程序来记录我家专属的日常',
+    text: '在加拿大，我们接触到了这样的家庭刊物服务，也有了一个具体的想法：用大家熟悉的微信小程序，让家人随手上传照片、写几句话，再由我们完成排版、印刷和邮寄，让这件事自然地融入更多中国家庭的日常。'
+  },
+  {
+    title: '和北漂老同事一起',
+    text: '我把这个想法分享给了一群相识多年的北漂老同事。我们做了多年互联网产品，也都经历过离家工作、与家人分隔两地的生活。这一次，我们想一起做一件朴素的事：把一家人的日常，变成可以拿在手里、留在家中的记忆。'
+  },
+  {
+    title: '就这样开始了',
+    text: '家书就这样开始了。'
+  },
+  {
+    title: '一家人的故事',
+    text: '一本家书里，可以有孩子的成长、家人做的一桌饭、一次旅行、一场团聚，也可以有长辈种的花、兄弟姐妹的新生活。每个人都能留下自己的日常，也看见其他家人的日常。日子久了，一期一期放在一起，就是这个家庭共同写下的故事。'
+  },
+  {
+    title: '给长辈每个月的小期待',
+    text: '我们希望，家书能成为家人每个月的一份小期待。即使暂时不能见面，也能翻开它，看看彼此最近过得怎么样。'
+  }
+]
 
 const scenarios = [
   {
@@ -839,12 +868,6 @@ watch(modal, async (value) => {
   if (!value) return
   await nextTick()
   closeBtn.value?.focus()
-  if (value === 'story') {
-    const video = storyVideo.value
-    if (!video) return
-    video.currentTime = 0
-    video.play().catch(() => {})
-  }
 })
 
 onMounted(() => {
@@ -1739,14 +1762,38 @@ footer { border-top: 1px solid #efe4d6; padding: 36px 0 28px; }
   flex-direction: column;
   overflow: hidden;
 }
-.dialog.story { width: min(760px, 100%); }
-.story-video {
-  display: block;
-  width: 100%;
-  margin-top: 16px;
-  border-radius: 14px;
-  background: #1c1612;
+.dialog.story {
+  width: min(680px, 100%);
+  height: min(84vh, 780px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
 }
+.story-head {
+  flex: none;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 28px 62px 16px 26px;
+  background: #fffdf9;
+  border-bottom: 1px solid #f3eadf;
+}
+.story-head h3 { margin: 0; }
+.story-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 4px 26px 24px;
+}
+.story-part h4 {
+  margin: 20px 0 0;
+  color: #3a312b;
+  font-size: 16px;
+  line-height: 1.4;
+}
+.story-part:first-of-type h4 { margin-top: 16px; }
+.story-part .dialog-copy { margin-top: 6px; }
 .dialog h3 { font-size: 28px; line-height: 1.3; padding-right: 36px; }
 .dialog h3.wechat-title { padding-right: 0; text-align: center; }
 .dialog-kicker { color: #a15a32; font-size: 13px; font-weight: 700; letter-spacing: .08em; }
@@ -1774,6 +1821,7 @@ footer { border-top: 1px solid #efe4d6; padding: 36px 0 28px; }
   position: absolute;
   top: 16px;
   right: 16px;
+  z-index: 3;
   width: 36px;
   height: 36px;
   border: 1px solid #efe4d6;
