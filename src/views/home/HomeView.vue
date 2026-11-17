@@ -28,7 +28,7 @@
         <div class="wrap hero">
         <div class="hero-copy">
           <span class="kicker">让亲情可以被触摸</span>
-          <h1>把一家人的日常测试<br><span class="hero-title-accent">打印成家庭报纸</span><br><span class="hero-title-accent">邮寄到长辈手中
+          <h1>把一家人的日常<br><span class="hero-title-accent">打印成家庭报纸</span><br><span class="hero-title-accent">邮寄到长辈手中
           </span></h1>
           <p class="gift">送给长辈的贴心礼物， 每个月，让他们多一份笑容。</p>
           <p class="lead">分享照片和文字，家书帮你自动排版印刷，每月寄送专属家庭月刊，<br/>让远方的家人看见你的生活，也把珍贵的回忆留在手里。</p>
