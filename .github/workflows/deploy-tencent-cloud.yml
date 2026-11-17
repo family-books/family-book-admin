@@ -60,6 +60,6 @@ jobs:
           SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
           REMOTE="/tmp/family-book-admin-$SHA.tar.gz"
-          scp -O -o ConnectTimeout=15 -o ServerAliveInterval=15 -o ServerAliveCountMax=3 -i ~/.ssh/id_familybook_deploy family-book-admin.tar.gz "$USER@$HOST:$REMOTE"
+          cat family-book-admin.tar.gz | ssh -o ConnectTimeout=15 -o ServerAliveInterval=15 -o ServerAliveCountMax=3 -i ~/.ssh/id_familybook_deploy "$USER@$HOST" "umask 077; cat > '$REMOTE'"
           ssh -o ConnectTimeout=15 -o ServerAliveInterval=15 -o ServerAliveCountMax=3 -i ~/.ssh/id_familybook_deploy "$USER@$HOST" \
             "sudo /usr/local/sbin/deploy-family-book-admin '$SHA' '$REMOTE'"
