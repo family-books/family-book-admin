@@ -1,10 +1,6 @@
-name: Deploy website and admin to Mac mini
+name: Legacy manual deploy website and admin to Mac mini
 
-on:
-  workflow_run:
-    workflows: [Website CI]
-    types: [completed]
-    branches: [main]
+on: workflow_dispatch
 
 permissions:
   contents: read
@@ -15,21 +11,17 @@ concurrency:
 
 jobs:
   deploy:
-    if: >-
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.event == 'push' &&
-      github.event.workflow_run.head_branch == 'main'
     runs-on: [self-hosted, macOS, ARM64, familybook-admin-prod]
     timeout-minutes: 15
     steps:
       - name: Check out the CI-verified commit
         uses: actions/checkout@v7
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: main
           fetch-depth: 0
           persist-credentials: false
 
       - name: Build and atomically deploy the verified commit
         env:
-          VERIFIED_SHA: ${{ github.event.workflow_run.head_sha }}
+          VERIFIED_SHA: ${{ github.sha }}
         run: /bin/bash deploy/prod/deploy-on-mac-mini.sh "$VERIFIED_SHA" "$GITHUB_WORKSPACE"

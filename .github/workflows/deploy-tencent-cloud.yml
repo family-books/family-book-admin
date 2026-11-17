@@ -1,0 +1,65 @@
+name: Deploy website and admin to Tencent Cloud
+
+on:
+  workflow_run:
+    workflows: [Website CI]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: familybook-website-tencent-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out the CI-verified commit
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Build website and admin
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build
+          test -s dist/index.html
+          test -d dist/assets
+          tar -C dist -czf family-book-admin.tar.gz .
+
+      - name: Configure production SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.TENCENT_SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.TENCENT_SSH_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_familybook_deploy
+          chmod 600 ~/.ssh/id_familybook_deploy
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Deploy and verify
+        env:
+          HOST: ${{ secrets.TENCENT_SSH_HOST }}
+          USER: ${{ secrets.TENCENT_SSH_USER }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          REMOTE="/tmp/family-book-admin-$SHA.tar.gz"
+          cat family-book-admin.tar.gz | ssh -o ConnectTimeout=15 -o ServerAliveInterval=15 -o ServerAliveCountMax=3 -i ~/.ssh/id_familybook_deploy "$USER@$HOST" "umask 077; cat > '$REMOTE'"
+          ssh -o ConnectTimeout=15 -o ServerAliveInterval=15 -o ServerAliveCountMax=3 -i ~/.ssh/id_familybook_deploy "$USER@$HOST" \
+            "sudo /usr/local/sbin/deploy-family-book-admin '$SHA' '$REMOTE'"
