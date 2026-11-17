@@ -150,7 +150,7 @@
       <section class="section reviews band band-reviews">
         <div class="wrap">
         <h2 class="section-title">用家人喜欢的方式，<span class="title-break">分享你的生活</span></h2>
-        <p class="section-desc">一份订阅，全家参与。在微信上传照片和文字，把一家人的近况，送到长辈手里。</p>
+        <p class="section-desc">这些场景，看看像不像你们。</p>
         <div
           class="quote-swiper"
           @touchstart.passive="onQuoteTouchStart"
@@ -158,34 +158,36 @@
         >
           <div class="quote-viewport">
             <div class="quote-track" :style="{ '--i': quoteIndex, '--visible': quoteVisible }">
-              <blockquote v-for="item in reviews" :key="item.name">
-                <header class="quote-user">
-                  <img class="quote-avatar" :src="item.avatar" :alt="item.name" />
-                  <div>
-                    <strong>{{ item.name }}</strong>
-                    <time :datetime="item.datetime">{{ item.time }}</time>
-                  </div>
-                </header>
-                <p>{{ item.text }}</p>
+              <blockquote v-for="item in scenarios" :key="item.id">
+                <h3>{{ item.title }}</h3>
+                <p>{{ expandedScenes[item.id] ? item.text : previewScene(item.text) }}</p>
+                <button
+                  v-if="sceneNeedsExpand(item.text)"
+                  class="scene-toggle"
+                  type="button"
+                  @click="toggleScene(item.id)"
+                >{{ expandedScenes[item.id] ? '收起' : '展开' }}</button>
+                <ul class="scene-tags">
+                  <li v-for="tag in item.tags" :key="tag">{{ tag }}</li>
+                </ul>
               </blockquote>
             </div>
           </div>
           <div class="quote-controls">
-            <button class="quote-arrow" type="button" aria-label="上一条评价" :disabled="quoteIndex === 0" @click="stepQuote(-1)">‹</button>
+            <button class="quote-arrow" type="button" aria-label="上一个场景" :disabled="quoteIndex === 0" @click="stepQuote(-1)">‹</button>
             <div class="quote-dots">
               <button
                 v-for="page in quotePageCount"
                 :key="page"
                 type="button"
                 :class="{ on: quoteIndex === page - 1 }"
-                :aria-label="`第 ${page} 屏评价`"
+                :aria-label="`第 ${page} 屏场景`"
                 @click="goQuote(page - 1)"
               ></button>
             </div>
-            <button class="quote-arrow" type="button" aria-label="下一条评价" :disabled="quoteIndex >= quoteMax" @click="stepQuote(1)">›</button>
+            <button class="quote-arrow" type="button" aria-label="下一个场景" :disabled="quoteIndex >= quoteMax" @click="stepQuote(1)">›</button>
           </div>
         </div>
-        <p class="review-note">示例文案，后续替换为真实用户评价。</p>
         </div>
       </section>
 
@@ -199,7 +201,7 @@
           <div class="pricing-layout">
             <aside class="plan-benefits">
               <h3>每份订阅都包含</h3>
-              <p class="benefits-lead">不论月卡、季卡还是年卡，<br />权益都一样。</p>
+              <p class="benefits-lead">不论首月体验、季卡、半年卡还是年卡，权益都一样。</p>
               <ul class="plan-perks">
                 <li v-for="perk in planPerks" :key="perk.title">
                   <span class="perk-ico" aria-hidden="true">
@@ -216,6 +218,7 @@
                 </li>
               </ul>
             </aside>
+            <div class="price-grid">
             <article
               v-for="plan in plans"
               :key="plan.name"
@@ -223,7 +226,7 @@
               :class="{ featured: plan.featured }"
             >
               <p v-if="plan.badge" class="price-ribbon">
-                <svg viewBox="0 0 20 16" aria-hidden="true"><path fill="currentColor" d="M1.6 12.8 3.2 4.8 7.2 8.2 10 1.8l2.8 6.4 4 3.4 1.6 8H1.6z"/><path fill="currentColor" d="M2 13.6h16v1.6H2z"/></svg>
+                <svg viewBox="0 0 20 16" aria-hidden="true"><path fill="currentColor" d="M1.8 12.2 4.2 4.4 7.3 8.4 10 1.6l2.7 6.8 3.1-4 2.4 7.8H1.8z"/><path fill="currentColor" d="M1.6 12h16.8v2.4H1.6z"/></svg>
                 {{ plan.badge }}
               </p>
               <div class="price-body">
@@ -242,12 +245,13 @@
                 </div>
                 <div class="price-pay">
                   <div class="price-figure">
+                    <p v-if="plan.original" class="price-original"><s>¥{{ plan.original }}</s></p>
                     <p class="amount"><span>¥</span><strong>{{ plan.price }}</strong></p>
                     <span v-if="plan.save" class="price-save price-save-desk">省¥{{ plan.save }}</span>
                   </div>
                   <div class="price-foot">
                     <div class="price-foot-main">
-                      <p class="price-note">约合每月¥{{ plan.monthly }}</p>
+                      <p class="price-note">约合每月¥{{ plan.monthly }}<template v-if="plan.discount"> · {{ plan.discount }}</template></p>
                       <span v-if="plan.save" class="price-save price-save-mob">省¥{{ plan.save }}</span>
                     </div>
                   </div>
@@ -255,6 +259,7 @@
                 </div>
               </div>
             </article>
+            </div>
           </div>
         </div>
       </section>
@@ -419,48 +424,59 @@ const quoteTouchX = ref(0)
 const quoteIndex = ref(0)
 const quoteVisible = ref(typeof window !== 'undefined' && window.matchMedia('(max-width: 900px)').matches ? 1 : 3)
 
-const reviews = [
+const scenarios = [
   {
-    name: '林晓雯',
-    initial: '林',
-    avatar: '/images/home/avatar-lin.png',
-    time: '2026年10月18日',
-    datetime: '2026-10-18',
-    text: '妈妈收到九月那期的当晚就给我打了电话。她一边翻，一边问宝宝新学的歌、公园里的合影，连午饭那盘番茄都认出来了。纸质的比聊天记录踏实多了。',
+    id: 'beijing',
+    title: '在北京工作十几年，终于把生活寄回了老家。',
+    text: '在北京的互联网大厂工作十几年，忙起来经常晚上十点才下班。爸妈一直住在老家，每次打电话都说“我们挺好的，你忙你的”。现在我会随手把吃饭、旅行和周末生活的照片放进家书里，每个月寄回去一本。以前觉得没什么可分享，现在才发现，爸妈最想知道的，就是这些普通的小事。',
+    tags: ['异地子女', '随手上传', '每月邮寄'],
   },
   {
-    name: '周予安',
-    initial: '周',
-    avatar: '/images/home/avatar-zhou.png',
-    time: '2026年9月26日',
-    datetime: '2026-09-26',
-    text: '我和弟弟、妹妹分住三个城市，近况以前散落在家族群里。现在各自上传到同一本里，爸妈翻开就能看见每个人最近在忙什么，不用再来回翻聊天记录。',
+    id: 'canada',
+    title: '在加拿大生活，也能每个月给爸妈寄一封家书。',
+    text: '来加拿大以后，和国内有了十几个小时的时差。平时上班、照顾孩子，想打电话时国内往往已经是深夜。现在每个月把孩子在雪地里玩耍、周末去海边、家里做饭的照片放进家书。虽然相隔万里，爸妈依然可以通过一本纸质家书，慢慢了解我们在这边的生活。',
+    tags: ['海外家庭', '跨国分享', '亲情连接'],
   },
   {
-    name: '陈一诺',
-    initial: '陈',
-    avatar: '/images/home/avatar-chen.png',
-    time: '2026年10月3日',
-    datetime: '2026-10-03',
-    text: '我最怕整理相册和对版式。家书把随手拍的照片和几句近况自动排成月刊，我只要在微信里上传，月底就能变成一本可以寄回家的杂志。',
+    id: 'elders',
+    title: '不用教爸妈操作手机，他们也能慢慢看。',
+    text: '以前往家庭群里发照片，爸妈看过以后经常找不到。现在每个月寄一本纸质家书，他们拿到手就能翻。不用下载软件，不用翻聊天记录，也不用担心手机屏幕太小。有时候还会把家书拿给邻居和老朋友看。原来对他们来说，能拿在手里的照片，真的不一样。',
+    tags: ['老人友好', '纸质阅读', '反复翻阅'],
   },
   {
-    name: '赵晚宁',
-    initial: '赵',
-    avatar: '/images/home/avatar-zhao.png',
-    time: '2026年8月12日',
-    datetime: '2026-08-12',
-    text: '爷爷不太会用手机，视频通话也常常听不清。家书寄到家，他可以拿在手里慢慢看，看完还会放到书架上，说下个月还想再收一本。',
+    id: 'siblings',
+    title: '一本家书，不用一个人完成。',
+    text: '我们兄弟姐妹几个都在不同城市工作，平时各忙各的。现在大家可以一起往同一本家书里上传照片。哥哥分享出差见闻，妹妹上传孩子的照片，我放一些自己的日常。每个人花一点时间，就能让爸妈看到全家人的近况。不是一个人在寄照片，而是全家人一起写家书。',
+    tags: ['家庭协作', '多人上传', '共同记录'],
   },
   {
-    name: '苏小满',
-    initial: '苏',
-    avatar: '/images/home/avatar-su.png',
-    time: '2026年10月22日',
-    datetime: '2026-10-22',
-    text: '开通后把爸妈和姑姑都拉进来了。一份订阅全家都能传，照片不会公开，月底又会印成一本留得住的刊物。爸妈说，这比红包更想收到。',
+    id: 'growth',
+    title: '孩子长得太快了，想让爷爷奶奶也参与他的成长。',
+    text: '手机里存了几千张孩子的照片，却很少认真整理。爷爷奶奶不在身边，错过了孩子第一次骑车、第一次上台表演。现在每个月把这些成长瞬间放进家书，让他们看到孩子最近学会了什么、去了哪里。对爷爷奶奶是每月的期待，对孩子也是一份珍贵的成长记录。',
+    tags: ['儿童成长', '祖孙互动', '长期珍藏'],
+  },
+  {
+    id: 'layout',
+    title: '想给爸妈做相册很多年，终于不用一直拖着了。',
+    text: '以前每次旅行回来，都想给爸妈做一本相册。可选照片、排版、找打印店，每一步都很花时间，最后总是不了了之。现在看到喜欢的照片就随手上传，到了约定时间系统自动整理成家书，再安排印刷邮寄。不用自己设计版面，原来给爸妈准备一份用心的礼物，也可以这么简单。',
+    tags: ['自动排版', '定期制作', '省时省心'],
   },
 ]
+const expandedScenes = ref<Record<string, boolean>>({})
+const sceneLength = (text: string) => Array.from(text).length
+const sceneNeedsExpand = (text: string) => sceneLength(text) > 130
+const previewScene = (text: string) => {
+  if (!sceneNeedsExpand(text)) return text
+  const slice = Array.from(text).slice(0, 120).join('')
+  const cut = Math.max(slice.lastIndexOf('。'), slice.lastIndexOf('，'))
+  if (cut >= 80) return `${slice.slice(0, cut + 1)}…`
+  return `${slice}…`
+}
+const toggleScene = (id: string) => {
+  expandedScenes.value = { ...expandedScenes.value, [id]: !expandedScenes.value[id] }
+  if (Object.values(expandedScenes.value).some(Boolean)) stopQuoteAutoplay()
+  else startQuoteAutoplay()
+}
 
 const planPerks = [
   { icon: 'calendar', title: '每月寄送1本纸质月刊', desc: '一本温暖的纸质月刊' },
@@ -470,13 +486,14 @@ const planPerks = [
 ]
 const plans = [
   {
-    name: '月卡',
+    name: '首月体验卡',
     term: '寄出1期',
     price: '29',
+    original: '49',
     monthly: '29',
-    save: '',
-    subtitle: '体验家庭月刊',
-    mobileNote: '单月体验，适合初次尝试的家庭',
+    save: '20',
+    subtitle: '首次开通29元，标准月费49元。首次优惠原则上每个订阅家庭一次',
+    mobileNote: '首次开通29元，标准月费49元。首次优惠原则上每个订阅家庭一次',
     noteIcon: 'info',
     featured: false,
     badge: '',
@@ -484,9 +501,10 @@ const plans = [
   {
     name: '季卡',
     term: '寄出3期',
-    price: '79',
-    monthly: '26.3',
-    save: '8',
+    price: '119',
+    original: '147',
+    monthly: '39.7',
+    save: '28',
     subtitle: '连续3个月收录',
     mobileNote: '记录一季的家庭温暖，性价比更高',
     noteIcon: 'star',
@@ -494,22 +512,37 @@ const plans = [
     badge: '',
   },
   {
+    name: '半年卡',
+    term: '寄出6期',
+    price: '219',
+    original: '294',
+    monthly: '36.50',
+    discount: '7.4折',
+    save: '75',
+    subtitle: '连续6个月收录',
+    mobileNote: '半年不断档，记录更完整的家庭近况',
+    noteIcon: 'star',
+    featured: false,
+    badge: '',
+  },
+  {
     name: '年卡',
     term: '寄出12期',
-    price: '299',
-    monthly: '24.9',
-    save: '49',
+    price: '399',
+    original: '588',
+    monthly: '33.3',
+    save: '189',
     subtitle: '全年12期，家庭记忆不断档',
     mobileNote: '全年陪伴，记录一整年的家庭美好时光',
     noteIcon: 'heart',
     featured: true,
-    badge: '一年十二期 · 最受欢迎',
+    badge: '推荐套餐',
   },
 ]
 
-const quoteMax = computed(() => Math.max(0, reviews.length - quoteVisible.value))
+const quoteMax = computed(() => Math.max(0, scenarios.length - quoteVisible.value))
 const quotePageCount = computed(() => quoteMax.value + 1)
-const QUOTE_FRAME_MS = 3000
+const QUOTE_FRAME_MS = 10000
 let quoteTimer: number | undefined
 
 const stopQuoteAutoplay = () => {
@@ -564,7 +597,7 @@ const faqGroups = [
         a: '家书是一份专属于你们家庭的纸质月刊。家人通过微信小程序上传照片、分享生活，每期由平台自动排版、覆膜高清打印，再寄到父母或其他亲人手中。',
       },
       {
-        q: '家书和微信相册有什么不同？',
+        q: '家书和家庭群聊有什么不同？',
         a: '微信里的照片容易被聊天记录淹没，家书则把散落的日常整理成可以翻阅和珍藏的纸质回忆。对不擅长使用智能手机的长辈来说，阅读也更简单。',
       },
       {
@@ -595,15 +628,27 @@ const faqGroups = [
       },
       {
         q: '每期家书什么时候寄出？',
-        a: '每月 15 日为本期内容上传截止日。截止后系统会自动排版并进入印刷流程，通常在 5 个工作日内完成印刷和寄出，具体进度可在小程序查看。',
+        a: '每月 7 日、14日、21日、28日为本期内容上传截止日，用户可自行选择。截止后系统会自动排版并进入印刷流程，通常在 5 个工作日内完成印刷和寄出，具体进度可在小程序查看。',
       },
       {
         q: '可以同时寄给多位家人吗？',
-        a: '可以。订阅默认包含一个地址、每期寄送 1 份；如需同时寄给其他家人，可以添加收件地址并购买加印，当前每期合计最多寄送 3 份。',
+        a: '可以。订阅默认包含一个地址、每期寄送 1 份；如需同时寄给其他家人，可以添加收件地址并购买加印。',
       },
       {
         q: '家书支持哪些地区配送？',
-        a: '目前支持中国大陆大部分地区配送。内蒙古、西藏、青海、宁夏、新疆、海南及港澳台暂不支持，最终请以小程序保存收件地址时的提示为准。',
+        a: '目前支持中国大陆大部分地区配送。内蒙古、西藏、青海、宁夏、新疆、海南及港澳台暂未开放，后续将逐渐开放，最终请以小程序保存收件地址时的提示为准。',
+      },
+      {
+        q: 'PDF生成后，还能取消并重新生成吗？',
+        a: '如果本期PDF已生成但尚未进入不可取消的印刷流程，可在小程序中取消本次生成，调整照片后重新生成，或选择等待下次生成日期。具体操作与权益规则以小程序显示为准。',
+      },
+      {
+        q: '家书有印刷问题或者没有收到怎么办？',
+        a: '请通过小程序客服入口联系，我们将免费补寄。',
+      },
+      {
+        q: '担心忘记上传，有提醒功能吗？',
+        a: '可以绑定手机号，我们会在每期生成前3天发送短信提醒，提醒及时上传照片。',
       },
     ],
   },
@@ -620,8 +665,12 @@ const faqGroups = [
         a: '可以先免费创建家庭、邀请家人并体验照片和故事的记录流程。自动生成纸质家书、覆膜高清打印和寄送属于付费订阅权益，具体以小程序订阅页为准。',
       },
       {
-        q: '订阅后可以随时取消吗？',
-        a: '可以在小程序中关闭自动续费，关闭后不会影响已经支付的服务周期，到期后不再自动续订。已支付订单的退款与售后，按照服务条款和实际履约情况处理。',
+        q: '订阅到期后怎么办？',
+        a: '可根据平台套餐继续购买或续订。',
+      },
+      {
+        q: '首月29元是什么优惠？',
+        a: '首月29元为开业体验价格，标准月费49元；季卡、半年卡和年卡有对应优惠。',
       },
     ],
   },
@@ -1249,19 +1298,42 @@ onBeforeUnmount(() => {
   background: #fff;
   border: 1px solid #f3e9dd;
   border-radius: 8px;
-  box-shadow: 0 10px 30px rgba(80, 50, 20, .04);
+  box-shadow: 0 2px 4px rgba(80, 50, 20, .06), 0 16px 36px rgba(80, 50, 20, .12);
 }
-.quote-user { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
-.quote-avatar {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex: none;
+.quote-track h3 {
+  margin: 0 0 12px;
+  color: #241c16;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.45;
 }
-.quote-user strong { display: block; color: #241c16; font-size: 15px; font-weight: 700; }
-.quote-user time { color: #a8988c; font-size: 12px; }
 .quote-track p { font-size: 15px; line-height: 1.8; color: #3f352f; }
+.scene-toggle {
+  margin-top: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #c47d12;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.scene-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.scene-tags li {
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #fff6e8;
+  color: #8a5a32;
+  font-size: 12px;
+  line-height: 1.4;
+}
 .quote-controls { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 18px; }
 .quote-arrow {
   width: 36px;
@@ -1286,7 +1358,6 @@ onBeforeUnmount(() => {
   cursor: pointer;
 }
 .quote-dots button.on { background: #e2b15a; }
-.review-note { margin-top: 16px !important; text-align: center; color: #a8988c; font-size: 13px; }
 
 .band-pricing { background: #fff8f1; }
 .band-pricing .pricing-head { text-align: center; }
@@ -1304,11 +1375,17 @@ onBeforeUnmount(() => {
   text-align: center;
 }
 .pricing-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  margin-top: 42px;
+}
+.price-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px;
   align-items: stretch;
-  margin-top: 42px;
+  padding-top: 18px;
 }
 .plan-benefits,
 .price-card {
@@ -1339,8 +1416,9 @@ onBeforeUnmount(() => {
 .plan-perks {
   list-style: none;
   display: grid;
-  gap: 18px;
-  margin: 26px 0 0;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px 24px;
+  margin: 20px 0 0;
   padding: 0;
 }
 .plan-perks li {
@@ -1435,10 +1513,10 @@ onBeforeUnmount(() => {
 .price-card h3 {
   margin: 36px 0 0;
   color: #6b3a1c;
-  font-size: 32px;
+  font-size: 26px;
   font-weight: 700;
-  letter-spacing: .04em;
-  line-height: 1.1;
+  letter-spacing: .02em;
+  line-height: 1.2;
 }
 .band-pricing .price-sub {
   margin: 8px 0 0;
@@ -1448,8 +1526,26 @@ onBeforeUnmount(() => {
 }
 .price-figure {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   width: fit-content;
-  margin: 22px auto 0;
+  margin: 18px auto 0;
+}
+.price-save-desk {
+  position: static;
+  margin-top: 10px;
+}
+.price-original {
+  margin: 0 0 6px;
+  color: #b7a08c;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1;
+  text-align: center;
+}
+.price-original s {
+  text-decoration-thickness: 1px;
 }
 .page .price-card .amount {
   display: flex;
@@ -1466,7 +1562,7 @@ onBeforeUnmount(() => {
   line-height: 1;
 }
 .price-card .amount strong {
-  font-size: 56px;
+  font-size: 48px;
   font-weight: 700;
   line-height: .82;
   letter-spacing: -.03em;
@@ -1483,11 +1579,6 @@ onBeforeUnmount(() => {
   font-weight: 700;
   line-height: 1.3;
   white-space: nowrap;
-}
-.price-save-desk {
-  position: absolute;
-  top: 2px;
-  left: calc(100% + 6px);
 }
 .price-save-mob { display: none; }
 .price-foot {
@@ -1819,9 +1910,18 @@ footer { border-top: 1px solid #efe4d6; padding: 36px 0 28px; }
   .band-pricing .title-break { display: inline; }
   .band-pricing .pricing-gift { display: none; }
   .pricing-layout {
-    grid-template-columns: minmax(0, 1fr);
     gap: 14px;
     margin-top: 22px;
+  }
+  .price-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    padding-top: 8px;
+  }
+  .plan-perks {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    margin-top: 18px;
   }
   .plan-benefits,
   .price-card {
