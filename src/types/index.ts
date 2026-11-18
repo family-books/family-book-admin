@@ -95,6 +95,31 @@ export interface Payment {
   paidAt: string
 }
 
+export interface StorybookOrder {
+  id: string
+  orderNo: string
+  userId: string
+  projectId: string
+  templateName: string
+  childName: string
+  childAge: number
+  childInterest?: string
+  photoUrl: string
+  coverTitle: string
+  dedication?: string
+  quantity: number
+  totalAmount: number
+  orderStatus: string
+  recipientName: string
+  phone: string
+  fullAddress: string
+  expressCompany?: string
+  trackingNo?: string
+  paidAt?: string
+  shippedAt?: string
+  createdAt: string
+}
+
 export interface Referral {
   id: number
   referrerNickname: string
