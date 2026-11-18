@@ -8,13 +8,13 @@
     </el-card>
     <el-card>
       <el-table :data="orders" stripe v-loading="loading">
-        <el-table-column label="绘本" min-width="240"><template #default="{row}"><div class="book"><el-image :src="row.photoUrl" fit="cover" :preview-src-list="[row.photoUrl]"/><div><b>{{row.childName}}的{{row.templateName}}</b><span>{{row.childAge}}岁 · {{row.childInterest||'未填写兴趣'}}</span><small>{{row.coverTitle}}</small></div></div></template></el-table-column>
+        <el-table-column label="绘本" min-width="250"><template #default="{row}"><div class="book"><el-image :src="row.photoUrl" fit="cover" :preview-src-list="[row.photoUrl]"/><div><b>{{row.childName}}的{{row.templateName}}</b><span>{{row.productName}} · {{row.childAge}}岁 · {{row.childInterest||'未填写兴趣'}}</span><small>{{row.coverTitle}}</small></div></div></template></el-table-column>
         <el-table-column prop="orderNo" label="订单号" width="195" show-overflow-tooltip />
         <el-table-column label="金额" width="130"><template #default="{row}"><div>合计 ¥{{row.totalAmount}}</div><small>¥{{row.unitPrice}} × {{row.quantity}}</small></template></el-table-column>
         <el-table-column label="状态" width="100"><template #default="{row}"><el-tag :type="tagType(row.orderStatus)">{{statusLabel(row.orderStatus)}}</el-tag></template></el-table-column>
-        <el-table-column label="收货信息" min-width="240"><template #default="{row}"><div>{{row.recipientName}} {{row.phone}}</div><small>{{row.fullAddress}}</small></template></el-table-column>
+        <el-table-column label="交付信息" min-width="240"><template #default="{row}"><template v-if="row.productType==='digital'"><a v-if="row.digitalFileUrl" :href="row.digitalFileUrl" target="_blank">查看电子绘本 PDF</a><span v-else>等待上传电子文件</span></template><template v-else><div>{{row.recipientName}} {{row.phone}}</div><small>{{row.fullAddress}}</small></template></template></el-table-column>
         <el-table-column prop="createdAt" label="创建时间" width="170" />
-        <el-table-column label="操作" width="310" fixed="right"><template #default="{row}"><el-button size="small" @click="copyProduction(row)">复制制作资料</el-button><el-dropdown v-if="nextActions(row.orderStatus).length" @command="(value:string)=>changeStatus(row,value)"><el-button size="small">更新状态<el-icon class="el-icon--right"><ArrowDown/></el-icon></el-button><template #dropdown><el-dropdown-menu><el-dropdown-item v-for="item in nextActions(row.orderStatus)" :key="item.value" :command="item.value">{{item.label}}</el-dropdown-item></el-dropdown-menu></template></el-dropdown><el-button v-if="row.orderStatus==='printing'" size="small" type="primary" @click="openShip(row)">发货</el-button></template></el-table-column>
+        <el-table-column label="操作" width="360" fixed="right"><template #default="{row}"><el-button size="small" @click="copyProduction(row)">复制资料</el-button><el-upload v-if="row.productType==='digital'&&['generating','reviewing'].includes(row.orderStatus)" :show-file-list="false" accept="application/pdf" :http-request="(options:any)=>uploadDigital(row,options)"><el-button size="small" type="primary">上传PDF</el-button></el-upload><el-dropdown v-if="nextActions(row).length" @command="(value:string)=>changeStatus(row,value)"><el-button size="small">更新状态<el-icon class="el-icon--right"><ArrowDown/></el-icon></el-button><template #dropdown><el-dropdown-menu><el-dropdown-item v-for="item in nextActions(row)" :key="item.value" :command="item.value">{{item.label}}</el-dropdown-item></el-dropdown-menu></template></el-dropdown><el-button v-if="row.orderStatus==='printing'" size="small" type="primary" @click="openShip(row)">发货</el-button></template></el-table-column>
       </el-table>
       <el-pagination class="pagination" v-model:current-page="page" v-model:page-size="pageSize" :total="total" layout="total, prev, pager, next, sizes" :page-sizes="[10,20,50]" @current-change="load" @size-change="load" />
     </el-card>
@@ -26,12 +26,12 @@
 import { onMounted, ref } from 'vue'
 import { ArrowDown } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import { getStorybookOrders, shipStorybookOrder, updateStorybookOrderStatus } from '@/api/storybooks'
+import { getStorybookOrders, shipStorybookOrder, updateStorybookOrderStatus, uploadStorybookDigitalFile } from '@/api/storybooks'
 import type { StorybookOrder } from '@/types'
 const loading=ref(false),orders=ref<StorybookOrder[]>([]),status=ref(''),page=ref(1),pageSize=ref(20),total=ref(0),shipVisible=ref(false),submitting=ref(false),selected=ref<StorybookOrder|null>(null),expressCompany=ref('顺丰速运'),trackingNo=ref('')
 const statusOptions=[{label:'已支付',value:'paid'},{label:'制作中',value:'generating'},{label:'人工校对',value:'reviewing'},{label:'印刷中',value:'printing'},{label:'已发货',value:'shipped'},{label:'已完成',value:'completed'},{label:'已取消',value:'cancelled'},{label:'已退款',value:'refunded'}]
-const transitionMap:Record<string,Array<{label:string,value:string}>>={paid:[{label:'开始制作',value:'generating'}],generating:[{label:'提交人工校对',value:'reviewing'}],reviewing:[{label:'退回制作',value:'generating'},{label:'校对通过，进入印刷',value:'printing'}],shipped:[{label:'确认完成',value:'completed'}]}
-const nextActions=(value:string)=>transitionMap[value]||[]
+const transitionMap:Record<string,Array<{label:string,value:string}>>={paid:[{label:'开始制作',value:'generating'}],generating:[{label:'提交人工校对',value:'reviewing'}],shipped:[{label:'确认完成',value:'completed'}]}
+const nextActions=(row:StorybookOrder)=>row.orderStatus==='reviewing'?(row.productType==='digital'?[{label:'退回制作',value:'generating'},...(row.digitalFileUrl?[{label:'确认交付完成',value:'completed'}]:[])]:[{label:'退回制作',value:'generating'},{label:'校对通过，进入印刷',value:'printing'}]):transitionMap[row.orderStatus]||[]
 const statusLabel=(value:string)=>statusOptions.find(i=>i.value===value)?.label||({pending_payment:'待支付'} as Record<string,string>)[value]||value
 const tagType=(value:string)=>value==='completed'?'success':value==='shipped'?'primary':value==='cancelled'?'info':value==='paid'?'warning':''
 const load=async()=>{loading.value=true;try{const res=await getStorybookOrders({page:page.value,pageSize:pageSize.value,status:status.value||undefined});orders.value=res.data.list;total.value=res.data.total}finally{loading.value=false}}
@@ -39,7 +39,8 @@ const search=()=>{page.value=1;load()}
 const changeStatus=async(row:StorybookOrder,value:string)=>{await updateStorybookOrderStatus(row.id,value);ElMessage.success('状态已更新');load()}
 const openShip=(row:StorybookOrder)=>{selected.value=row;trackingNo.value='';shipVisible.value=true}
 const submitShip=async()=>{if(!selected.value||!expressCompany.value.trim()||!trackingNo.value.trim()){ElMessage.warning('请填写完整快递信息');return}submitting.value=true;try{await shipStorybookOrder(selected.value.id,expressCompany.value,trackingNo.value);ElMessage.success('已确认发货');shipVisible.value=false;load()}finally{submitting.value=false}}
-const copyProduction=async(row:StorybookOrder)=>{const text=[`订单：${row.orderNo}`,`模板：${row.templateName}`,`孩子：${row.childName}（${row.childAge}岁）`,`兴趣：${row.childInterest||'未填写'}`,`封面：${row.coverTitle||''}`,`寄语：${row.dedication||''}`,`数量：${row.quantity}`,`照片：${row.photoUrl}`,`收件：${row.recipientName} ${row.phone} ${row.fullAddress}`].join('\n');await navigator.clipboard.writeText(text);ElMessage.success('制作资料已复制')}
+const uploadDigital=async(row:StorybookOrder,options:any)=>{try{await uploadStorybookDigitalFile(row.id,options.file as File);options.onSuccess?.({});ElMessage.success('电子绘本已上传');load()}catch(e){options.onError?.(e)}}
+const copyProduction=async(row:StorybookOrder)=>{const lines=[`订单：${row.orderNo}`,`版本：${row.productName}`,`模板：${row.templateName}`,`孩子：${row.childName}（${row.childAge}岁）`,`兴趣：${row.childInterest||'未填写'}`,`封面：${row.coverTitle||''}`,`寄语：${row.dedication||''}`,`数量：${row.quantity}`,`照片：${row.photoUrl}`];if(row.productType!=='digital')lines.push(`收件：${row.recipientName} ${row.phone} ${row.fullAddress}`);await navigator.clipboard.writeText(lines.join('\n'));ElMessage.success('制作资料已复制')}
 onMounted(load)
 </script>
 

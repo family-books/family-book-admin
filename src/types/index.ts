@@ -101,6 +101,8 @@ export interface StorybookOrder {
   userId: string
   projectId: string
   paymentId?: string
+  productType: string
+  productName: string
   templateName: string
   childName: string
   childAge: number
@@ -117,6 +119,7 @@ export interface StorybookOrder {
   fullAddress: string
   expressCompany?: string
   trackingNo?: string
+  digitalFileUrl?: string
   paidAt?: string
   shippedAt?: string
   createdAt: string

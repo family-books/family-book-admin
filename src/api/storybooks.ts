@@ -9,3 +9,9 @@ export const updateStorybookOrderStatus = (id: string, status: string): Promise<
 
 export const shipStorybookOrder = (id: string, expressCompany: string, trackingNo: string): Promise<ApiResponse<null>> =>
   request.post(`/api/admin/storybook/orders/${id}/ship`, { expressCompany, trackingNo })
+
+export const uploadStorybookDigitalFile = (id: string, file: File): Promise<ApiResponse<null>> => {
+  const data = new FormData()
+  data.append('file', file)
+  return request.post(`/api/admin/storybook/orders/${id}/digital-file`, data, { headers: { 'Content-Type': 'multipart/form-data' } })
+}
