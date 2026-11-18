@@ -72,7 +72,7 @@
     </el-card>
 
     <el-dialog v-model="refundDialogVisible" title="申请微信支付退款" width="480px">
-      <p class="refund-warning">仅支持纯微信支付的家书订阅；每笔订单首版只能申请一次（含部分退款）。微信受理不代表最终成功。退款后请人工核对订阅权益及已寄送家书。</p>
+      <p class="refund-warning">仅支持纯微信支付的家书订阅或专属绘本；每笔订单只能申请一次（含部分退款）。微信受理不代表最终成功，请继续查询退款结果。</p>
       <el-form label-width="90px">
         <el-form-item label="订单号">{{ selectedPayment?.orderNo }}</el-form-item>
         <el-form-item label="微信实付">¥{{ selectedPayment?.wxAmount }}</el-form-item>
@@ -156,7 +156,7 @@ function handleSearch() {
 function canRefund(payment: Payment) {
   return userStore.userInfo?.sysRole === 'super_admin'
     && payment.payStatus === 'success'
-    && payment.orderType === 'subscription'
+    && ['subscription', 'storybook'].includes(payment.orderType || '')
     && payment.payChannel === 'wxpay'
     && Number(payment.wxAmount) > 0
     && Number(payment.walletAmount || 0) === 0
@@ -191,7 +191,7 @@ async function submitRefund() {
   }
   try {
     await ElMessageBox.confirm(
-      `将向微信申请退还 ¥${refundAmount.value.toFixed(2)}，订单 ${payment.orderNo}。微信受理后仍需查询最终结果，并人工处理订阅权益。确认继续？`,
+      `将向微信申请退还 ¥${refundAmount.value.toFixed(2)}，订单 ${payment.orderNo}。微信受理后仍需查询最终结果。确认继续？`,
       '最终确认',
       { type: 'warning', confirmButtonText: '确认向微信申请', cancelButtonText: '取消' },
     )

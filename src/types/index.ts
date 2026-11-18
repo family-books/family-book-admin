@@ -100,6 +100,7 @@ export interface StorybookOrder {
   orderNo: string
   userId: string
   projectId: string
+  paymentId?: string
   templateName: string
   childName: string
   childAge: number
@@ -108,6 +109,7 @@ export interface StorybookOrder {
   coverTitle: string
   dedication?: string
   quantity: number
+  unitPrice: number
   totalAmount: number
   orderStatus: string
   recipientName: string
