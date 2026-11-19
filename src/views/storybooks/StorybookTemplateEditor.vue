@@ -7,7 +7,7 @@
       </el-select>
       <template v-if="draft && published">
         <p>当前发布版本 {{ published.baseVersion }}</p>
-        <el-alert v-if="!published.materials.length" title="这是首版素材草稿。请先生成联动修订并逐页审阅，再发布。" :closable="false" />
+        <el-alert v-if="!published.materials.length" title="这是首版素材草稿。请先重新编排整本并逐页审阅，再发布。" :closable="false" />
         <el-collapse>
           <el-collapse-item title="10 个固定素材">
             <article v-for="(material, index) in draft.materials" :key="index" class="material">
@@ -39,14 +39,22 @@
           </el-collapse-item>
         </el-collapse>
         <div class="actions">
-          <el-button @click="selectImpact">选择受影响页</el-button>
-          <el-button :disabled="!selected.length" type="primary" @click="revise">生成选中页的联动修订</el-button>
+          <el-button type="primary" @click="replan">重新编排整本</el-button>
           <el-button @click="save">保存草稿</el-button>
         </div>
-        <p>建议复核 {{ impact.length ? impact.join('、') + ' 页' : '暂无' }}。可在下方增减修订范围。</p>
-        <el-checkbox-group v-model="selected">
-          <el-checkbox v-for="page in draft.pages" :key="page.number" :value="page.number">{{ page.number }}</el-checkbox>
-        </el-checkbox-group>
+        <p>建议复核 {{ impact.length ? impact.join('、') + ' 页' : '暂无' }}。</p>
+        <el-collapse>
+          <el-collapse-item title="局部修订">
+            <p>适合调整素材外观、参考图或单页镜头。</p>
+            <el-checkbox-group v-model="selected">
+              <el-checkbox v-for="page in draft.pages" :key="page.number" :value="page.number">{{ page.number }}</el-checkbox>
+            </el-checkbox-group>
+            <div class="actions">
+              <el-button @click="selectImpact">选择受影响页</el-button>
+              <el-button :disabled="!selected.length" @click="revise">生成选中页修订</el-button>
+            </div>
+          </el-collapse-item>
+        </el-collapse>
         <el-collapse v-model="expanded">
           <el-collapse-item v-for="(page, index) in draft.pages" :key="page.number" :name="page.number"
             :title="pageLabel(page) + ' · ' + page.title + (changed(page, index) ? '（已修改）' : '')">
@@ -253,6 +261,27 @@ async function editorialJob<T>(path: string, body: unknown): Promise<T> {
     throw new Error(response.data.error || '绘本任务失败')
   }
   throw new Error('绘本任务等待超时，请稍后重试')
+}
+
+async function replan() {
+  if (!draft.value || busy.value) return
+  try {
+    await ElMessageBox.confirm(
+      '将根据这 10 个固定素材重写全书分镜和文案，并更新素材出现页。结果会替换编辑区中的当前草稿，已发布版本继续有效。',
+      '重新编排整本',
+      { confirmButtonText: '开始编排' },
+    )
+  } catch {
+    return
+  }
+  void run(async () => {
+    if (!draft.value) return
+    const revised = await editorialJob<Draft>(`${endpoint}/${code.value}/replan`, draft.value)
+    draft.value = revised
+    selectImpact()
+    expanded.value = [revised.pages[0]?.number ?? 1]
+    ElMessage.success('整本编排已生成，可逐页对照、试画并保存草稿')
+  })
 }
 
 function revise() {
