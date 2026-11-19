@@ -2,6 +2,7 @@
   <div>
     <el-card class="filter-card">
       <el-form inline>
+        <el-form-item><StorybookTemplateEditor /></el-form-item>
         <el-form-item label="订单状态"><el-select v-model="status" clearable placeholder="全部状态" style="width:160px" @change="search"><el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" /></el-select></el-form-item>
         <el-form-item><el-button type="primary" @click="search">查询</el-button></el-form-item>
       </el-form>
@@ -48,6 +49,7 @@
 </template>
 
 <script setup lang="ts">
+import StorybookTemplateEditor from './StorybookTemplateEditor.vue'
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { ArrowDown } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
