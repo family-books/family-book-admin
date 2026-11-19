@@ -38,7 +38,8 @@ export const queueStorybookArtwork = (id: string, pageNumber?: number): Promise<
 
 export interface StorybookPreview {
   id: string; userId: string; templateName: string; childName: string; childAge: number
-  coverTitle: string; status: string; aiStatus: string; aiError?: string; createdAt: string
+  coverTitle: string; status: string; aiStatus: string; productionStatus?: string
+  aiError?: string; productionError?: string; createdAt: string
 }
 export const getStorybookPreviews = (params: { page: number; pageSize: number }): Promise<ApiResponse<PageResult<StorybookPreview>>> =>
   request.get('/api/admin/storybook/previews', { params })
