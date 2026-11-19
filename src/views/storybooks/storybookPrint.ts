@@ -37,6 +37,7 @@ const styles = `
     print-color-adjust: exact; -webkit-print-color-adjust: exact;
   }
   .FULL_BLEED p { font-size: 16pt; line-height: 1.52; }
+  .caption-line { position: absolute; white-space: nowrap; font-family: sans-serif; line-height: 1.15; }
   .DEDICATION { display: grid; place-items: center; text-align: center; }
   @media print { body { background: white; } article { margin: 0; } }
 `
@@ -65,6 +66,20 @@ export async function openStorybookPrint(pages: StorybookArtwork['pages']) {
       image.src = page.imageUrl
       sheet.append(image)
       images.push(image)
+    }
+    if (page.caption) {
+      for (const line of page.caption.lines) {
+        const element = doc.createElement('span')
+        element.className = 'caption-line'
+        element.textContent = line.text
+        element.style.left = `${line.left}%`
+        element.style.top = `${line.top}%`
+        element.style.color = page.caption.color
+        element.style.fontSize = `${page.caption.fontWidthPercent * 2.4}mm`
+        sheet.append(element)
+      }
+      doc.body.append(sheet)
+      continue
     }
     const copy = doc.createElement('section')
     const title = doc.createElement('h1')

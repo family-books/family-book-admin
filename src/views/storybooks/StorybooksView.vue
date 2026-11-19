@@ -49,15 +49,19 @@
         <el-alert v-if="artwork?.error" :title="artwork.error" type="warning" :closable="false" />
         <div v-if="artwork" class="artwork-pages">
           <article v-for="page in artwork.pages" :key="page.number">
-            <div v-if="page.imageUrl" class="artwork-frame">
+            <div v-if="page.imageUrl" class="artwork-frame" :class="{ 'with-caption': page.caption }">
               <el-image :src="page.imageUrl" fit="contain" :preview-src-list="[page.imageUrl]" preview-teleported />
-              <p v-if="page.textBox" class="artwork-caption" :style="{
+              <template v-if="page.caption">
+                <span v-for="(line, index) in page.caption.lines" :key="index" class="laid-out-caption"
+                  :style="{left: line.left + '%', top: line.top + '%', color: page.caption.color, fontSize: page.caption.fontWidthPercent + 'cqw'}">{{ line.text }}</span>
+              </template>
+              <p v-else-if="page.textBox" class="artwork-caption" :style="{
                 left: page.textBox.left + '%', width: page.textBox.width + '%',
                 [page.textBox.fromBottom ? 'bottom' : 'top']: page.textBox.offset + '%',
               }">{{ page.text }}</p>
             </div>
             <strong>第 {{ page.number }} 页 · {{ page.title }}</strong>
-            <p v-if="!page.textBox || !page.imageUrl">{{ page.text }}</p>
+            <p v-if="(!page.textBox && !page.caption) || !page.imageUrl">{{ page.text }}</p>
             <el-button v-if="page.imageUrl && !artworkOrder?.automaticArtwork && artworkOrder?.orderStatus === 'generating' && artwork.status?.startsWith('full_')"
               size="small" :disabled="artworkBusy || artwork.status === 'full_running'" @click="generateArtwork(page.number)">只重画这一页</el-button>
           </article>
@@ -162,5 +166,8 @@ onMounted(load)
 .artwork-pages .el-image{display:block;width:100%;height:180px;margin-bottom:8px}
 .artwork-frame{position:relative;width:100%}
 .artwork-frame .el-image{display:block;width:100%}
+.artwork-frame.with-caption{aspect-ratio:4/3;container-type:inline-size}
+.artwork-frame.with-caption .el-image{height:100%;margin:0}
+.laid-out-caption{position:absolute;white-space:nowrap;pointer-events:none;line-height:1.15}
 .artwork-frame .artwork-caption{position:absolute;margin:0;pointer-events:none;padding:5px 7px;box-sizing:border-box;color:#fff8e9;background:rgba(9,19,34,.72);border-radius:5px;font-size:12px;line-height:1.5}
 </style>

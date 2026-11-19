@@ -18,10 +18,15 @@ export const uploadStorybookDigitalFile = (id: string, file: File): Promise<ApiR
 
 export interface StorybookTextBox { left: number; offset: number; width: number; fromBottom: boolean }
 
+interface StorybookCaption {
+  color: string
+  fontWidthPercent: number
+  lines: Array<{ text: string; left: number; top: number }>
+}
 export interface StorybookArtwork {
   status?: string
   error?: string
-  pages: Array<{ number: number; title: string; text?: string; imageUrl?: string; layout?: string; textBox?: StorybookTextBox }>
+  pages: Array<{ number: number; title: string; text?: string; imageUrl?: string; layout?: string; textBox?: StorybookTextBox; caption?: StorybookCaption }>
 }
 
 export const getStorybookArtwork = (id: string): Promise<ApiResponse<StorybookArtwork>> =>
