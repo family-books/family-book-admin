@@ -10,6 +10,10 @@
         <p>编辑中 {{ draft.pages.length + 1 }} 页（含封面和寄语）</p>
         <el-alert v-if="!published.materials.length" title="这是首版素材草稿。请先重新编排整本并逐页审阅，再发布。" :closable="false" />
         <el-collapse>
+          <el-collapse-item v-if="code === 'space-station'" title="全书配色">
+            <el-input v-model="draft.palette" type="textarea" :rows="4" maxlength="650" show-word-limit
+              placeholder="填写全书主色、道具固定颜色和留白要求" />
+          </el-collapse-item>
           <el-collapse-item title="10 个固定素材">
             <article v-for="(material, index) in draft.materials" :key="index" class="material">
               <el-form label-position="top">
@@ -69,12 +73,17 @@
                 <p>{{ published.pages[index]?.text }}</p>
                 <p>{{ published.pages[index]?.wardrobe }}</p>
                 <p>{{ published.pages[index]?.shot }}</p>
+                <p v-if="published.pages[index]?.colorDirection">{{ published.pages[index]?.colorDirection }}</p>
               </section>
               <el-form label-position="top">
                 <el-form-item label="页标题"><el-input v-model="page.title" /></el-form-item>
                 <el-form-item v-if="index" label="正文"><el-input v-model="page.text" type="textarea" /></el-form-item>
                 <el-form-item label="着装"><el-input v-model="page.wardrobe" /></el-form-item>
                 <el-form-item label="剧情动作和画面分镜"><el-input v-model="page.shot" type="textarea" :rows="4" /></el-form-item>
+                <el-form-item v-if="code === 'space-station'" label="本页配色与亮色焦点">
+                  <el-input v-model="page.colorDirection" type="textarea" :rows="3" maxlength="350" show-word-limit
+                    placeholder="填写本页主色、视觉焦点和正文留白的颜色" />
+                </el-form-item>
                 <div v-if="page.textBox" class="fields">
                   <el-form-item label="正文左边距 (%)"><el-input-number v-model="page.textBox.left" :min="5" :max="95 - page.textBox.width" /></el-form-item>
                   <el-form-item label="正文宽度 (%)"><el-input-number v-model="page.textBox.width" :min="33" :max="Math.min(75, 95 - page.textBox.left)" /></el-form-item>
@@ -128,6 +137,7 @@ interface Page {
   wardrobe: string
   shot: string
   layout: string
+  colorDirection?: string
   textBox?: StorybookTextBox | null
   photoInset?: { sourcePage: number; x: number; y: number; width: number; height: number } | null
 }
@@ -141,6 +151,7 @@ interface Material {
 }
 interface Draft {
   baseVersion: string
+  palette?: string
   previewNumbers?: number[]
   materials: Material[]
   pages: Page[]
@@ -184,6 +195,7 @@ function changed(page: Page, index: number) {
 const impact = computed(() => {
   if (!draft.value || !published.value) return []
   const pages = draft.value.pages
+  if ((draft.value.palette || '') !== (published.value.palette || '')) return pages.map(page => page.number)
   if (!published.value.materials.length) return pages.map(page => page.number)
   const affected = new Set<number>()
   draft.value.materials.forEach((material, index) => {
