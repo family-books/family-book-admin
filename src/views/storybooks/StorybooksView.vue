@@ -2,7 +2,6 @@
   <div>
     <el-card class="filter-card">
       <el-form inline>
-        <el-form-item><StorybookTemplateEditor /></el-form-item>
         <el-form-item label="订单状态"><el-select v-model="status" clearable placeholder="全部状态" style="width:160px" @change="search"><el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" /></el-select></el-form-item>
         <el-form-item><el-button type="primary" @click="search">查询</el-button></el-form-item>
       </el-form>
@@ -28,24 +27,24 @@
         <el-table-column prop="orderNo" label="订单号" width="195" show-overflow-tooltip />
         <el-table-column label="金额" width="130"><template #default="{row}"><div>合计 ¥{{row.totalAmount}}</div><small>¥{{row.unitPrice}} × {{row.quantity}}</small></template></el-table-column>
         <el-table-column label="状态" width="100"><template #default="{row}"><el-tag :type="tagType(row.orderStatus)">{{statusLabel(row.orderStatus)}}</el-tag></template></el-table-column>
-        <el-table-column label="交付信息" min-width="240"><template #default="{row}"><template v-if="row.productType==='digital'"><a v-if="row.digitalFileUrl" :href="row.digitalFileUrl" target="_blank">查看电子绘本 PDF</a><span v-else>等待上传电子文件</span></template><template v-else><div>{{row.recipientName}} {{row.phone}}</div><small>{{row.fullAddress}}</small></template></template></el-table-column>
+        <el-table-column label="交付信息" min-width="240"><template #default="{row}"><template v-if="row.productType==='digital'"><a v-if="row.digitalFileUrl" :href="row.digitalFileUrl" target="_blank">查看电子绘本 PDF</a><span v-else>{{ row.automaticArtwork ? '等待自动生成 PDF' : '等待上传电子文件' }}</span></template><template v-else><div>{{row.recipientName}} {{row.phone}}</div><small>{{row.fullAddress}}</small><div v-if="row.digitalFileUrl"><a :href="row.digitalFileUrl" target="_blank" rel="noopener">下载印刷 PDF</a></div></template></template></el-table-column>
         <el-table-column prop="createdAt" label="创建时间" width="170" />
-        <el-table-column label="操作" width="360" fixed="right"><template #default="{row}"><el-button size="small" :disabled="!hasBookDetails(row)" @click="copyProduction(row)">复制资料</el-button><el-button v-if="row.artworkSupported" size="small" @click="openArtwork(row)">插画</el-button><el-upload v-if="row.productType==='digital'&&['generating','reviewing'].includes(row.orderStatus)" :show-file-list="false" accept="application/pdf" :http-request="(options:any)=>uploadDigital(row,options)"><el-button size="small" type="primary">上传PDF</el-button></el-upload><el-dropdown v-if="nextActions(row).length" @command="(value:string)=>changeStatus(row,value)"><el-button size="small">更新状态<el-icon class="el-icon--right"><ArrowDown/></el-icon></el-button><template #dropdown><el-dropdown-menu><el-dropdown-item v-for="item in nextActions(row)" :key="item.value" :command="item.value">{{item.label}}</el-dropdown-item></el-dropdown-menu></template></el-dropdown><el-button v-if="row.orderStatus==='printing'" size="small" type="primary" @click="openShip(row)">发货</el-button></template></el-table-column>
+        <el-table-column label="操作" width="360" fixed="right"><template #default="{row}"><el-button size="small" :disabled="!hasBookDetails(row)" @click="copyProduction(row)">复制资料</el-button><el-button v-if="row.artworkSupported" size="small" @click="openArtwork(row)">插画</el-button><el-upload v-if="!row.automaticArtwork&&row.productType==='digital'&&['generating','reviewing'].includes(row.orderStatus)" :show-file-list="false" accept="application/pdf" :http-request="(options:any)=>uploadDigital(row,options)"><el-button size="small" type="primary">上传PDF</el-button></el-upload><el-dropdown v-if="nextActions(row).length" @command="(value:string)=>changeStatus(row,value)"><el-button size="small">更新状态<el-icon class="el-icon--right"><ArrowDown/></el-icon></el-button><template #dropdown><el-dropdown-menu><el-dropdown-item v-for="item in nextActions(row)" :key="item.value" :command="item.value">{{item.label}}</el-dropdown-item></el-dropdown-menu></template></el-dropdown><el-button v-if="row.orderStatus==='printing'" size="small" type="primary" @click="openShip(row)">发货</el-button></template></el-table-column>
       </el-table>
       <el-pagination class="pagination" v-model:current-page="page" v-model:page-size="pageSize" :total="total" layout="total, prev, pager, next, sizes" :page-sizes="[10,20,50]" @current-change="load" @size-change="load" />
     </el-card>
     <el-dialog v-model="artworkVisible" title="绘本插画与分镜" width="min(820px, 94vw)" @closed="closeArtwork">
       <div v-loading="artworkBusy">
         <div class="artwork-actions">
-          <el-button v-if="artworkOrder?.orderStatus === 'generating' && artwork?.status !== 'full_completed'"
+          <el-button v-if="artworkOrder?.orderStatus === 'generating' && artwork?.status !== 'full_completed' && (!artworkOrder.automaticArtwork || artwork?.status === 'full_failed')"
             type="primary" :disabled="!artwork || artworkBusy || artwork.status === 'full_running'" @click="generateArtwork()">
-            生成缺少的插画
+            {{ artworkOrder?.automaticArtwork ? '重试自动制作' : '生成缺少的插画' }}
           </el-button>
           <el-button :disabled="artworkBusy" @click="refreshArtwork()">刷新进度</el-button>
-          <el-button v-if="artwork?.status === 'full_completed' && artwork.pages[0]?.layout === 'COVER'"
+          <el-button v-if="!artworkOrder?.automaticArtwork && artwork?.status === 'full_completed' && artwork.pages[0]?.layout === 'COVER'"
             @click="printArtwork">排版并保存 PDF</el-button>
           <span v-if="artwork?.status === 'full_running'">正在后台生成</span>
-          <span v-else-if="artwork?.status === 'full_completed'">插画已齐，可以进行人工校对</span>
+          <span v-else-if="artwork?.status === 'full_completed'">{{ artworkOrder?.automaticArtwork ? '绘本已自动排版完成' : '插画已齐，可以进行人工校对' }}</span>
         </div>
         <el-alert v-if="artwork?.error" :title="artwork.error" type="warning" :closable="false" />
         <div v-if="artwork" class="artwork-pages">
@@ -59,7 +58,7 @@
             </div>
             <strong>第 {{ page.number }} 页 · {{ page.title }}</strong>
             <p v-if="!page.textBox || !page.imageUrl">{{ page.text }}</p>
-            <el-button v-if="page.imageUrl && artworkOrder?.orderStatus === 'generating' && artwork.status?.startsWith('full_')"
+            <el-button v-if="page.imageUrl && !artworkOrder?.automaticArtwork && artworkOrder?.orderStatus === 'generating' && artwork.status?.startsWith('full_')"
               size="small" :disabled="artworkBusy || artwork.status === 'full_running'" @click="generateArtwork(page.number)">只重画这一页</el-button>
           </article>
         </div>
@@ -70,7 +69,6 @@
 </template>
 
 <script setup lang="ts">
-import StorybookTemplateEditor from './StorybookTemplateEditor.vue'
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { ArrowDown } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
@@ -81,7 +79,7 @@ import type { StorybookOrder } from '@/types'
 const loading=ref(false),orders=ref<StorybookOrder[]>([]),status=ref(''),page=ref(1),pageSize=ref(20),total=ref(0),shipVisible=ref(false),submitting=ref(false),selected=ref<StorybookOrder|null>(null),expressCompany=ref('顺丰速运'),trackingNo=ref('')
 const statusOptions=[{label:'已支付',value:'paid'},{label:'制作中',value:'generating'},{label:'人工校对',value:'reviewing'},{label:'印刷中',value:'printing'},{label:'已发货',value:'shipped'},{label:'已完成',value:'completed'},{label:'已取消',value:'cancelled'},{label:'已退款',value:'refunded'}]
 const transitionMap:Record<string,Array<{label:string,value:string}>>={paid:[{label:'开始制作',value:'generating'}],generating:[{label:'提交人工校对',value:'reviewing'}],shipped:[{label:'确认完成',value:'completed'}]}
-const nextActions=(row:StorybookOrder)=>row.orderStatus==='reviewing'?(row.productType==='digital'?[{label:'退回制作',value:'generating'},...(row.digitalFileUrl?[{label:'确认交付完成',value:'completed'}]:[])]:[{label:'退回制作',value:'generating'},{label:'校对通过，进入印刷',value:'printing'}]):transitionMap[row.orderStatus]||[]
+const nextActions=(row:StorybookOrder)=>row.automaticArtwork&&row.orderStatus!=='shipped'?[]:row.orderStatus==='reviewing'?(row.productType==='digital'?[{label:'退回制作',value:'generating'},...(row.digitalFileUrl?[{label:'确认交付完成',value:'completed'}]:[])]:[{label:'退回制作',value:'generating'},{label:'校对通过，进入印刷',value:'printing'}]):transitionMap[row.orderStatus]||[]
 const statusLabel=(value:string)=>statusOptions.find(i=>i.value===value)?.label||({pending_payment:'待支付'} as Record<string,string>)[value]||value
 const tagType=(value:string)=>value==='completed'?'success':value==='shipped'?'primary':value==='cancelled'?'info':value==='paid'?'warning':''
 const load=async()=>{loading.value=true;try{const res=await getStorybookOrders({page:page.value,pageSize:pageSize.value,status:status.value||undefined});orders.value=res.data.list;total.value=res.data.total}finally{loading.value=false}}
