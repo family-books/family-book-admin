@@ -14,19 +14,43 @@
         <el-table-column label="状态" width="100"><template #default="{row}"><el-tag :type="tagType(row.orderStatus)">{{statusLabel(row.orderStatus)}}</el-tag></template></el-table-column>
         <el-table-column label="交付信息" min-width="240"><template #default="{row}"><template v-if="row.productType==='digital'"><a v-if="row.digitalFileUrl" :href="row.digitalFileUrl" target="_blank">查看电子绘本 PDF</a><span v-else>等待上传电子文件</span></template><template v-else><div>{{row.recipientName}} {{row.phone}}</div><small>{{row.fullAddress}}</small></template></template></el-table-column>
         <el-table-column prop="createdAt" label="创建时间" width="170" />
-        <el-table-column label="操作" width="360" fixed="right"><template #default="{row}"><el-button size="small" @click="copyProduction(row)">复制资料</el-button><el-upload v-if="row.productType==='digital'&&['generating','reviewing'].includes(row.orderStatus)" :show-file-list="false" accept="application/pdf" :http-request="(options:any)=>uploadDigital(row,options)"><el-button size="small" type="primary">上传PDF</el-button></el-upload><el-dropdown v-if="nextActions(row).length" @command="(value:string)=>changeStatus(row,value)"><el-button size="small">更新状态<el-icon class="el-icon--right"><ArrowDown/></el-icon></el-button><template #dropdown><el-dropdown-menu><el-dropdown-item v-for="item in nextActions(row)" :key="item.value" :command="item.value">{{item.label}}</el-dropdown-item></el-dropdown-menu></template></el-dropdown><el-button v-if="row.orderStatus==='printing'" size="small" type="primary" @click="openShip(row)">发货</el-button></template></el-table-column>
+        <el-table-column label="操作" width="360" fixed="right"><template #default="{row}"><el-button size="small" @click="copyProduction(row)">复制资料</el-button><el-button v-if="row.artworkSupported" size="small" @click="openArtwork(row)">插画</el-button><el-upload v-if="row.productType==='digital'&&['generating','reviewing'].includes(row.orderStatus)" :show-file-list="false" accept="application/pdf" :http-request="(options:any)=>uploadDigital(row,options)"><el-button size="small" type="primary">上传PDF</el-button></el-upload><el-dropdown v-if="nextActions(row).length" @command="(value:string)=>changeStatus(row,value)"><el-button size="small">更新状态<el-icon class="el-icon--right"><ArrowDown/></el-icon></el-button><template #dropdown><el-dropdown-menu><el-dropdown-item v-for="item in nextActions(row)" :key="item.value" :command="item.value">{{item.label}}</el-dropdown-item></el-dropdown-menu></template></el-dropdown><el-button v-if="row.orderStatus==='printing'" size="small" type="primary" @click="openShip(row)">发货</el-button></template></el-table-column>
       </el-table>
       <el-pagination class="pagination" v-model:current-page="page" v-model:page-size="pageSize" :total="total" layout="total, prev, pager, next, sizes" :page-sizes="[10,20,50]" @current-change="load" @size-change="load" />
     </el-card>
+    <el-dialog v-model="artworkVisible" title="绘本插画与分镜" width="min(820px, 94vw)" @closed="closeArtwork">
+      <div v-loading="artworkBusy">
+        <div class="artwork-actions">
+          <el-button v-if="artworkOrder?.orderStatus === 'generating' && artwork?.status !== 'full_completed'"
+            type="primary" :disabled="!artwork || artworkBusy || artwork.status === 'full_running'" @click="generateArtwork()">
+            生成缺少的插画
+          </el-button>
+          <el-button :disabled="artworkBusy" @click="refreshArtwork()">刷新进度</el-button>
+          <span v-if="artwork?.status === 'full_running'">正在后台生成</span>
+          <span v-else-if="artwork?.status === 'full_completed'">插画已齐，可以进行人工校对</span>
+        </div>
+        <el-alert v-if="artwork?.error" :title="artwork.error" type="warning" :closable="false" />
+        <div v-if="artwork" class="artwork-pages">
+          <article v-for="page in artwork.pages" :key="page.number">
+            <el-image v-if="page.imageUrl" :src="page.imageUrl" fit="contain" :preview-src-list="[page.imageUrl]" preview-teleported />
+            <strong>第 {{ page.number }} 页 · {{ page.title }}</strong>
+            <p>{{ page.text }}</p>
+            <el-button v-if="page.imageUrl && artworkOrder?.orderStatus === 'generating' && artwork.status?.startsWith('full_')"
+              size="small" :disabled="artworkBusy || artwork.status === 'full_running'" @click="generateArtwork(page.number)">只重画这一页</el-button>
+          </article>
+        </div>
+      </div>
+    </el-dialog>
     <el-dialog v-model="shipVisible" title="确认绘本发货" width="460px"><el-form label-width="90px"><el-form-item label="订单号">{{selected?.orderNo}}</el-form-item><el-form-item label="快递公司"><el-input v-model="expressCompany" placeholder="例如：顺丰速运"/></el-form-item><el-form-item label="快递单号"><el-input v-model="trackingNo" placeholder="请输入快递单号"/></el-form-item></el-form><template #footer><el-button @click="shipVisible=false">取消</el-button><el-button type="primary" :loading="submitting" @click="submitShip">确认发货</el-button></template></el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { ArrowDown } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import { getStorybookOrders, shipStorybookOrder, updateStorybookOrderStatus, uploadStorybookDigitalFile } from '@/api/storybooks'
+import { getStorybookArtwork, getStorybookOrders, queueStorybookArtwork, shipStorybookOrder, updateStorybookOrderStatus, uploadStorybookDigitalFile } from '@/api/storybooks'
+import type { StorybookArtwork } from '@/api/storybooks'
 import type { StorybookOrder } from '@/types'
 const loading=ref(false),orders=ref<StorybookOrder[]>([]),status=ref(''),page=ref(1),pageSize=ref(20),total=ref(0),shipVisible=ref(false),submitting=ref(false),selected=ref<StorybookOrder|null>(null),expressCompany=ref('顺丰速运'),trackingNo=ref('')
 const statusOptions=[{label:'已支付',value:'paid'},{label:'制作中',value:'generating'},{label:'人工校对',value:'reviewing'},{label:'印刷中',value:'printing'},{label:'已发货',value:'shipped'},{label:'已完成',value:'completed'},{label:'已取消',value:'cancelled'},{label:'已退款',value:'refunded'}]
@@ -41,9 +65,60 @@ const openShip=(row:StorybookOrder)=>{selected.value=row;trackingNo.value='';shi
 const submitShip=async()=>{if(!selected.value||!expressCompany.value.trim()||!trackingNo.value.trim()){ElMessage.warning('请填写完整快递信息');return}submitting.value=true;try{await shipStorybookOrder(selected.value.id,expressCompany.value,trackingNo.value);ElMessage.success('已确认发货');shipVisible.value=false;load()}finally{submitting.value=false}}
 const uploadDigital=async(row:StorybookOrder,options:any)=>{try{await uploadStorybookDigitalFile(row.id,options.file as File);options.onSuccess?.({});ElMessage.success('电子绘本已上传');load()}catch(e){options.onError?.(e)}}
 const copyProduction=async(row:StorybookOrder)=>{const lines=[`订单：${row.orderNo}`,`版本：${row.productName}`,`模板：${row.templateName}`,`孩子：${row.childName}（${row.childAge}岁）`,`兴趣：${row.childInterest||'未填写'}`,`封面：${row.coverTitle||''}`,`寄语：${row.dedication||''}`,`数量：${row.quantity}`,`照片：${row.photoUrl}`];if(row.productType!=='digital')lines.push(`收件：${row.recipientName} ${row.phone} ${row.fullAddress}`);await navigator.clipboard.writeText(lines.join('\n'));ElMessage.success('制作资料已复制')}
+
+const artworkVisible = ref(false)
+const artworkBusy = ref(false)
+const artworkOrder = ref<StorybookOrder | null>(null)
+const artwork = ref<StorybookArtwork | null>(null)
+let artworkTimer: ReturnType<typeof setTimeout> | undefined
+
+const closeArtwork = () => {
+  clearTimeout(artworkTimer)
+  artworkOrder.value = null
+  artwork.value = null
+}
+
+const refreshArtwork = async () => {
+  clearTimeout(artworkTimer)
+  const id = artworkOrder.value?.id
+  if (!id) return
+  try {
+    const response = await getStorybookArtwork(id)
+    if (!artworkVisible.value || artworkOrder.value?.id !== id) return
+    artwork.value = response.data
+    if (artwork.value.status === 'full_running') artworkTimer = setTimeout(refreshArtwork, 5000)
+  } catch {
+    // The request layer displays the error. Refresh is available in the dialog.
+  }
+}
+
+const openArtwork = async (order: StorybookOrder) => {
+  closeArtwork()
+  artworkOrder.value = order
+  artworkVisible.value = true
+  await refreshArtwork()
+}
+
+const generateArtwork = async (pageNumber?: number) => {
+  const id = artworkOrder.value?.id
+  if (!id || artworkBusy.value) return
+  artworkBusy.value = true
+  try {
+    await queueStorybookArtwork(id, pageNumber)
+    await refreshArtwork()
+  } finally {
+    artworkBusy.value = false
+  }
+}
+
+onBeforeUnmount(closeArtwork)
 onMounted(load)
 </script>
 
 <style scoped>
 .filter-card{margin-bottom:20px}.pagination{margin-top:20px;justify-content:flex-end}.book{display:flex;align-items:center;gap:12px}.book .el-image{width:52px;height:66px;border-radius:6px;background:#eee}.book>div{display:flex;min-width:0;flex-direction:column;gap:4px}.book span,.book small,td small{color:#909399;font-size:12px}.book b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.artwork-actions{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.artwork-pages{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:16px}
+.artwork-pages article{border:1px solid var(--el-border-color);border-radius:8px;padding:12px}
+.artwork-pages .el-image{display:block;width:100%;height:180px;margin-bottom:8px}
 </style>

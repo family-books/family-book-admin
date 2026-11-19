@@ -96,6 +96,7 @@ export interface Payment {
 }
 
 export interface StorybookOrder {
+  artworkSupported?: boolean
   id: string
   orderNo: string
   userId: string
