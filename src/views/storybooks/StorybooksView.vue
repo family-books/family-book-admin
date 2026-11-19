@@ -1,5 +1,7 @@
 <template>
   <div>
+    <el-tabs v-model="activeTab" @tab-change="switchTab"><el-tab-pane label="订单管理" name="orders" /><el-tab-pane label="预览记录" name="previews" /></el-tabs>
+    <template v-if="activeTab === 'orders'">
     <el-card class="filter-card">
       <el-form inline>
         <el-form-item label="订单状态"><el-select v-model="status" clearable placeholder="全部状态" style="width:160px" @change="search"><el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" /></el-select></el-form-item>
@@ -30,6 +32,19 @@
         <el-table-column label="交付信息" min-width="240"><template #default="{row}"><template v-if="row.productType==='digital'"><a v-if="row.digitalFileUrl" :href="row.digitalFileUrl" target="_blank">查看电子绘本 PDF</a><span v-else>{{ row.automaticArtwork ? '等待自动生成 PDF' : '等待上传电子文件' }}</span></template><template v-else><div>{{row.recipientName}} {{row.phone}}</div><small>{{row.fullAddress}}</small><div v-if="row.digitalFileUrl"><a :href="row.digitalFileUrl" target="_blank" rel="noopener">下载印刷 PDF</a></div></template></template></el-table-column>
         <el-table-column prop="createdAt" label="创建时间" width="170" />
         <el-table-column label="操作" width="360" fixed="right"><template #default="{row}"><el-button size="small" :disabled="!hasBookDetails(row)" @click="copyProduction(row)">复制资料</el-button><el-button v-if="row.artworkSupported" size="small" @click="openArtwork(row)">插画</el-button><el-upload v-if="!row.automaticArtwork&&row.productType==='digital'&&['generating','reviewing'].includes(row.orderStatus)" :show-file-list="false" accept="application/pdf" :http-request="(options:any)=>uploadDigital(row,options)"><el-button size="small" type="primary">上传PDF</el-button></el-upload><el-dropdown v-if="nextActions(row).length" @command="(value:string)=>changeStatus(row,value)"><el-button size="small">更新状态<el-icon class="el-icon--right"><ArrowDown/></el-icon></el-button><template #dropdown><el-dropdown-menu><el-dropdown-item v-for="item in nextActions(row)" :key="item.value" :command="item.value">{{item.label}}</el-dropdown-item></el-dropdown-menu></template></el-dropdown><el-button v-if="row.orderStatus==='printing'" size="small" type="primary" @click="openShip(row)">发货</el-button></template></el-table-column>
+      </el-table>
+      <el-pagination class="pagination" v-model:current-page="page" v-model:page-size="pageSize" :total="total" layout="total, prev, pager, next, sizes" :page-sizes="[10,20,50]" @current-change="load" @size-change="load" />
+    </el-card>
+    </template>
+    <el-card v-else>
+      <el-table :data="previews" stripe v-loading="loading">
+        <el-table-column prop="id" label="项目 ID" min-width="180" />
+        <el-table-column prop="userId" label="用户 ID" min-width="180" />
+        <el-table-column label="绘本" min-width="200"><template #default="{row}">{{ row.childName }} · {{ row.templateName }}<br/><small>{{ row.coverTitle }}</small></template></el-table-column>
+        <el-table-column label="生成状态" min-width="120"><template #default="{row}">{{ previewStatus(row.aiStatus) }}</template></el-table-column>
+        <el-table-column prop="aiError" label="错误信息" min-width="180" show-overflow-tooltip />
+        <el-table-column prop="createdAt" label="创建时间" width="170" />
+        <el-table-column label="操作" width="110"><template #default="{row}"><el-button size="small" @click="openPreview(row)">查看预览</el-button></template></el-table-column>
       </el-table>
       <el-pagination class="pagination" v-model:current-page="page" v-model:page-size="pageSize" :total="total" layout="total, prev, pager, next, sizes" :page-sizes="[10,20,50]" @current-change="load" @size-change="load" />
     </el-card>
@@ -76,17 +91,20 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { ArrowDown } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import { getStorybookArtwork, getStorybookOrders, queueStorybookArtwork, shipStorybookOrder, updateStorybookOrderStatus, uploadStorybookDigitalFile } from '@/api/storybooks'
-import type { StorybookArtwork } from '@/api/storybooks'
+import { getStorybookArtwork, getStorybookOrders, getStorybookPreviews, getStorybookPreviewArtwork, queueStorybookArtwork, shipStorybookOrder, updateStorybookOrderStatus, uploadStorybookDigitalFile } from '@/api/storybooks'
+import type { StorybookArtwork, StorybookPreview } from '@/api/storybooks'
 import { openStorybookPrint } from './storybookPrint'
 import type { StorybookOrder } from '@/types'
+const activeTab=ref('orders'), previews=ref<StorybookPreview[]>([]), previewId=ref<string | null>(null)
+const previewStatus=(s:string)=>({queued:'排队中',running:'生成中',completed:'预览完成',failed:'生成失败',full_running:'成书生成中',full_completed:'成书完成',full_failed:'成书生成失败'} as Record<string,string>)[s] || s
+const switchTab=()=>{page.value=1;load()}
 const loading=ref(false),orders=ref<StorybookOrder[]>([]),status=ref(''),page=ref(1),pageSize=ref(20),total=ref(0),shipVisible=ref(false),submitting=ref(false),selected=ref<StorybookOrder|null>(null),expressCompany=ref('顺丰速运'),trackingNo=ref('')
 const statusOptions=[{label:'已支付',value:'paid'},{label:'制作中',value:'generating'},{label:'人工校对',value:'reviewing'},{label:'印刷中',value:'printing'},{label:'已发货',value:'shipped'},{label:'已完成',value:'completed'},{label:'已取消',value:'cancelled'},{label:'已退款',value:'refunded'}]
 const transitionMap:Record<string,Array<{label:string,value:string}>>={paid:[{label:'开始制作',value:'generating'}],generating:[{label:'提交人工校对',value:'reviewing'}],shipped:[{label:'确认完成',value:'completed'}]}
 const nextActions=(row:StorybookOrder)=>row.automaticArtwork&&row.orderStatus!=='shipped'?[]:row.orderStatus==='reviewing'?(row.productType==='digital'?[{label:'退回制作',value:'generating'},...(row.digitalFileUrl?[{label:'确认交付完成',value:'completed'}]:[])]:[{label:'退回制作',value:'generating'},{label:'校对通过，进入印刷',value:'printing'}]):transitionMap[row.orderStatus]||[]
 const statusLabel=(value:string)=>statusOptions.find(i=>i.value===value)?.label||({pending_payment:'待支付'} as Record<string,string>)[value]||value
 const tagType=(value:string)=>value==='completed'?'success':value==='shipped'?'primary':value==='cancelled'?'info':value==='paid'?'warning':''
-const load=async()=>{loading.value=true;try{const res=await getStorybookOrders({page:page.value,pageSize:pageSize.value,status:status.value||undefined});orders.value=res.data.list;total.value=res.data.total}finally{loading.value=false}}
+const load=async()=>{loading.value=true;try{if(activeTab.value === 'previews'){const res=await getStorybookPreviews({page:page.value,pageSize:pageSize.value});previews.value=res.data.list;total.value=res.data.total}else{const res=await getStorybookOrders({page:page.value,pageSize:pageSize.value,status:status.value||undefined});orders.value=res.data.list;total.value=res.data.total}}finally{loading.value=false}}
 const search=()=>{page.value=1;load()}
 const changeStatus=async(row:StorybookOrder,value:string)=>{await updateStorybookOrderStatus(row.id,value);ElMessage.success('状态已更新');load()}
 const openShip=(row:StorybookOrder)=>{selected.value=row;trackingNo.value='';shipVisible.value=true}
@@ -109,18 +127,19 @@ let artworkTimer: ReturnType<typeof setTimeout> | undefined
 const closeArtwork = () => {
   clearTimeout(artworkTimer)
   artworkOrder.value = null
+  previewId.value = null
   artwork.value = null
 }
 
 const refreshArtwork = async () => {
   clearTimeout(artworkTimer)
-  const id = artworkOrder.value?.id
+  const id = previewId.value || artworkOrder.value?.id
   if (!id) return
   try {
-    const response = await getStorybookArtwork(id)
-    if (!artworkVisible.value || artworkOrder.value?.id !== id) return
+    const response = previewId.value ? await getStorybookPreviewArtwork(id) : await getStorybookArtwork(id)
+    if (!artworkVisible.value || (previewId.value || artworkOrder.value?.id) !== id) return
     artwork.value = response.data
-    if (artwork.value.status === 'full_running') artworkTimer = setTimeout(refreshArtwork, 5000)
+    if (['full_running','running','queued'].includes(artwork.value.status || '')) artworkTimer = setTimeout(refreshArtwork, 5000)
   } catch {
     // The request layer displays the error. Refresh is available in the dialog.
   }
@@ -133,6 +152,13 @@ const printArtwork = async () => {
   } catch (error) {
     ElMessage.warning(error instanceof Error ? error.message : '暂时无法打开绘本排版')
   }
+}
+
+const openPreview = async (project: StorybookPreview) => {
+  closeArtwork()
+  previewId.value = project.id
+  artworkVisible.value = true
+  await refreshArtwork()
 }
 
 const openArtwork = async (order: StorybookOrder) => {

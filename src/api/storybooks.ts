@@ -34,3 +34,12 @@ export const getStorybookArtwork = (id: string): Promise<ApiResponse<StorybookAr
 
 export const queueStorybookArtwork = (id: string, pageNumber?: number): Promise<ApiResponse<null>> =>
   request.post(`/api/admin/storybook/orders/${id}/artwork`, null, { params: { pageNumber } })
+
+export interface StorybookPreview {
+  id: string; userId: string; templateName: string; childName: string; childAge: number
+  coverTitle: string; status: string; aiStatus: string; aiError?: string; createdAt: string
+}
+export const getStorybookPreviews = (params: { page: number; pageSize: number }): Promise<ApiResponse<PageResult<StorybookPreview>>> =>
+  request.get('/api/admin/storybook/previews', { params })
+export const getStorybookPreviewArtwork = (id: string): Promise<ApiResponse<StorybookArtwork>> =>
+  request.get(`/api/admin/storybook/previews/${id}/artwork`)
