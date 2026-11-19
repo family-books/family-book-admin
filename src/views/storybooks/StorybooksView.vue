@@ -9,13 +9,28 @@
     </el-card>
     <el-card>
       <el-table :data="orders" stripe v-loading="loading">
-        <el-table-column label="绘本" min-width="250"><template #default="{row}"><div class="book"><el-image :src="row.photoUrl" fit="cover" :preview-src-list="[row.photoUrl]"/><div><b>{{row.childName}}的{{row.templateName}}</b><span>{{row.productName}} · {{row.childAge}}岁 · {{row.childInterest||'未填写兴趣'}}</span><small>{{row.coverTitle}}</small></div></div></template></el-table-column>
+        <el-table-column label="绘本" min-width="250">
+          <template #default="{ row }">
+            <div class="book">
+              <el-image v-if="row.photoUrl" :src="row.photoUrl" fit="cover" :preview-src-list="[row.photoUrl]">
+                <template #error><div class="book-photo-placeholder">加载失败</div></template>
+              </el-image>
+              <div v-else class="book-photo-placeholder">无照片</div>
+              <div class="book-details">
+                <b>{{ bookTitle(row) }}</b>
+                <span v-if="hasBookDetails(row)">{{ [row.productName, row.childAge == null ? null : row.childAge + '岁', row.childInterest || '未填写兴趣'].filter(Boolean).join(' · ') }}</span>
+                <span v-else>{{ row.productName }}</span>
+                <small v-if="row.coverTitle">{{ row.coverTitle }}</small>
+              </div>
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column prop="orderNo" label="订单号" width="195" show-overflow-tooltip />
         <el-table-column label="金额" width="130"><template #default="{row}"><div>合计 ¥{{row.totalAmount}}</div><small>¥{{row.unitPrice}} × {{row.quantity}}</small></template></el-table-column>
         <el-table-column label="状态" width="100"><template #default="{row}"><el-tag :type="tagType(row.orderStatus)">{{statusLabel(row.orderStatus)}}</el-tag></template></el-table-column>
         <el-table-column label="交付信息" min-width="240"><template #default="{row}"><template v-if="row.productType==='digital'"><a v-if="row.digitalFileUrl" :href="row.digitalFileUrl" target="_blank">查看电子绘本 PDF</a><span v-else>等待上传电子文件</span></template><template v-else><div>{{row.recipientName}} {{row.phone}}</div><small>{{row.fullAddress}}</small></template></template></el-table-column>
         <el-table-column prop="createdAt" label="创建时间" width="170" />
-        <el-table-column label="操作" width="360" fixed="right"><template #default="{row}"><el-button size="small" @click="copyProduction(row)">复制资料</el-button><el-button v-if="row.artworkSupported" size="small" @click="openArtwork(row)">插画</el-button><el-upload v-if="row.productType==='digital'&&['generating','reviewing'].includes(row.orderStatus)" :show-file-list="false" accept="application/pdf" :http-request="(options:any)=>uploadDigital(row,options)"><el-button size="small" type="primary">上传PDF</el-button></el-upload><el-dropdown v-if="nextActions(row).length" @command="(value:string)=>changeStatus(row,value)"><el-button size="small">更新状态<el-icon class="el-icon--right"><ArrowDown/></el-icon></el-button><template #dropdown><el-dropdown-menu><el-dropdown-item v-for="item in nextActions(row)" :key="item.value" :command="item.value">{{item.label}}</el-dropdown-item></el-dropdown-menu></template></el-dropdown><el-button v-if="row.orderStatus==='printing'" size="small" type="primary" @click="openShip(row)">发货</el-button></template></el-table-column>
+        <el-table-column label="操作" width="360" fixed="right"><template #default="{row}"><el-button size="small" :disabled="!hasBookDetails(row)" @click="copyProduction(row)">复制资料</el-button><el-button v-if="row.artworkSupported" size="small" @click="openArtwork(row)">插画</el-button><el-upload v-if="row.productType==='digital'&&['generating','reviewing'].includes(row.orderStatus)" :show-file-list="false" accept="application/pdf" :http-request="(options:any)=>uploadDigital(row,options)"><el-button size="small" type="primary">上传PDF</el-button></el-upload><el-dropdown v-if="nextActions(row).length" @command="(value:string)=>changeStatus(row,value)"><el-button size="small">更新状态<el-icon class="el-icon--right"><ArrowDown/></el-icon></el-button><template #dropdown><el-dropdown-menu><el-dropdown-item v-for="item in nextActions(row)" :key="item.value" :command="item.value">{{item.label}}</el-dropdown-item></el-dropdown-menu></template></el-dropdown><el-button v-if="row.orderStatus==='printing'" size="small" type="primary" @click="openShip(row)">发货</el-button></template></el-table-column>
       </el-table>
       <el-pagination class="pagination" v-model:current-page="page" v-model:page-size="pageSize" :total="total" layout="total, prev, pager, next, sizes" :page-sizes="[10,20,50]" @current-change="load" @size-change="load" />
     </el-card>
@@ -69,6 +84,12 @@ const changeStatus=async(row:StorybookOrder,value:string)=>{await updateStoryboo
 const openShip=(row:StorybookOrder)=>{selected.value=row;trackingNo.value='';shipVisible.value=true}
 const submitShip=async()=>{if(!selected.value||!expressCompany.value.trim()||!trackingNo.value.trim()){ElMessage.warning('请填写完整快递信息');return}submitting.value=true;try{await shipStorybookOrder(selected.value.id,expressCompany.value,trackingNo.value);ElMessage.success('已确认发货');shipVisible.value=false;load()}finally{submitting.value=false}}
 const uploadDigital=async(row:StorybookOrder,options:any)=>{try{await uploadStorybookDigitalFile(row.id,options.file as File);options.onSuccess?.({});ElMessage.success('电子绘本已上传');load()}catch(e){options.onError?.(e)}}
+const hasBookDetails = (row: StorybookOrder) => !!row.childName && row.childName !== '已删除' && !!row.templateName
+const bookTitle = (row: StorybookOrder) => {
+  if (row.childName === '已删除') return '绘本资料已清理'
+  if (hasBookDetails(row)) return `${row.childName}的${row.templateName}`
+  return row.coverTitle || row.templateName || '绘本资料不可用'
+}
 const copyProduction=async(row:StorybookOrder)=>{const lines=[`订单：${row.orderNo}`,`版本：${row.productName}`,`模板：${row.templateName}`,`孩子：${row.childName}（${row.childAge}岁）`,`兴趣：${row.childInterest||'未填写'}`,`封面：${row.coverTitle||''}`,`寄语：${row.dedication||''}`,`数量：${row.quantity}`,`照片：${row.photoUrl}`];if(row.productType!=='digital')lines.push(`收件：${row.recipientName} ${row.phone} ${row.fullAddress}`);await navigator.clipboard.writeText(lines.join('\n'));ElMessage.success('制作资料已复制')}
 
 const artworkVisible = ref(false)
@@ -130,7 +151,7 @@ onMounted(load)
 </script>
 
 <style scoped>
-.filter-card{margin-bottom:20px}.pagination{margin-top:20px;justify-content:flex-end}.book{display:flex;align-items:center;gap:12px}.book .el-image{width:52px;height:66px;border-radius:6px;background:#eee}.book>div{display:flex;min-width:0;flex-direction:column;gap:4px}.book span,.book small,td small{color:#909399;font-size:12px}.book b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.filter-card{margin-bottom:20px}.pagination{margin-top:20px;justify-content:flex-end}.book{display:flex;align-items:center;gap:12px}.book .el-image,.book-photo-placeholder{width:52px;height:66px;flex-shrink:0;border-radius:6px;background:#f4f4f5}.book-photo-placeholder{display:grid;place-items:center;color:#606266;font-size:12px}.book-details{display:flex;min-width:0;flex-direction:column;gap:4px}.book span,.book small,td small{color:#909399;font-size:12px}.book b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .artwork-actions{display:flex;align-items:center;gap:12px;margin-bottom:12px}
 .artwork-pages{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:16px}
 .artwork-pages article{border:1px solid var(--el-border-color);border-radius:8px;padding:12px}
