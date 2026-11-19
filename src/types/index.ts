@@ -100,6 +100,7 @@ export interface StorybookOrder {
   automaticArtwork?: boolean
   id: string
   orderNo: string
+  redeemedWithCode?: boolean
   userId: string
   projectId: string
   paymentId?: string

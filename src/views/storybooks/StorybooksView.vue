@@ -27,7 +27,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="orderNo" label="订单号" width="195" show-overflow-tooltip />
-        <el-table-column label="金额" width="130"><template #default="{row}"><div>合计 ¥{{row.totalAmount}}</div><small>¥{{row.unitPrice}} × {{row.quantity}}</small></template></el-table-column>
+        <el-table-column label="金额" width="130"><template #default="{row}"><div v-if="row.redeemedWithCode">兑换码兑换</div><template v-else><div>合计 ¥{{row.totalAmount}}</div><small>¥{{row.unitPrice}} × {{row.quantity}}</small></template></template></el-table-column>
         <el-table-column label="状态" width="100"><template #default="{row}"><el-tag :type="tagType(row.orderStatus)">{{statusLabel(row.orderStatus)}}</el-tag></template></el-table-column>
         <el-table-column label="交付信息" min-width="240"><template #default="{row}"><template v-if="row.productType==='digital'"><a v-if="row.digitalFileUrl" :href="row.digitalFileUrl" target="_blank">查看电子绘本 PDF</a><span v-else>{{ row.automaticArtwork ? '等待自动生成 PDF' : '等待上传电子文件' }}</span></template><template v-else><div>{{row.recipientName}} {{row.phone}}</div><small>{{row.fullAddress}}</small><div v-if="row.digitalFileUrl"><a :href="row.digitalFileUrl" target="_blank" rel="noopener">下载印刷 PDF</a></div></template></template></el-table-column>
         <el-table-column prop="createdAt" label="创建时间" width="170" />

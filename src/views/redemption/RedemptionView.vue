@@ -2,27 +2,34 @@
   <div class="redemption-view">
     <el-card>
       <template #header>
-        <div class="heading"><div><h2>兑换码管理</h2><p>每张码仅可兑换一次，为指定家庭增加30天订阅。</p></div><el-button type="primary" @click="generateVisible = true">生成兑换码</el-button></div>
+        <div class="heading"><div><h2>兑换码管理</h2><p>每张码可兑换一次。支持绘本各版本和家庭订阅。</p></div><el-button type="primary" @click="generateVisible = true">生成兑换码</el-button></div>
       </template>
       <div class="filters">
-        <el-input v-model="queryCode" clearable placeholder="按兑换码搜索" style="width: 190px" @keyup.enter="load" />
-        <el-select v-model="status" placeholder="全部状态" clearable style="width: 150px" @change="load">
+        <el-input v-model="queryCode" clearable placeholder="按兑换码搜索" style="width: 190px" @keyup.enter="query" />
+        <el-select v-model="status" placeholder="全部状态" clearable style="width: 150px" @change="query">
           <el-option label="未兑换" value="unused" /><el-option label="已兑换" value="redeemed" /><el-option label="已停用" value="disabled" />
         </el-select>
-        <el-button @click="load">查询</el-button>
+        <el-select v-model="productFilter" clearable placeholder="全部规格" style="width: 150px" @change="query">
+          <el-option v-for="(label, value) in productLabels" :key="value" :label="label" :value="value" />
+        </el-select>
+        <el-button @click="query">查询</el-button>
       </div>
       <el-table :data="codes" v-loading="loading" stripe>
-        <el-table-column prop="code" label="兑换码" width="120" />
+        <el-table-column prop="code" label="兑换码" width="150">
+          <template #default="{ row }"><el-button link @click="copyCodes([row.code])">{{ row.code }}</el-button></template>
+        </el-table-column>
+        <el-table-column label="规格" min-width="140"><template #default="{ row }">{{ productLabel(row) }}</template></el-table-column>
         <el-table-column prop="source" label="发放渠道/批次" min-width="150" />
         <el-table-column label="状态" width="110"><template #default="{ row }"><el-tag :type="statusType(row.status)">{{ statusLabel(row.status) }}</el-tag></template></el-table-column>
         <el-table-column prop="createdAt" label="生成时间" min-width="180" />
         <el-table-column prop="redeemedBy" label="兑换用户ID" min-width="190" />
+        <el-table-column prop="storybookOrderId" label="绘本订单ID" min-width="190" />
         <el-table-column prop="redeemedFamilyId" label="家庭ID" min-width="190" />
         <el-table-column prop="redeemedAt" label="兑换时间" min-width="180" />
         <el-table-column prop="subscriptionEndDate" label="兑换后到期日" min-width="140" />
         <el-table-column label="操作" fixed="right" width="160"><template #default="{ row }">
           <template v-if="row.status === 'unused'">
-            <el-button link type="primary" @click="openRedeem(row)">代用户兑换</el-button>
+            <el-button v-if="!row.storybookProductType" link type="primary" @click="openRedeem(row)">代用户兑换</el-button>
             <el-button link type="danger" @click="disable(row)">停用</el-button>
           </template>
         </template></el-table-column>
@@ -32,6 +39,11 @@
 
     <el-dialog v-model="generateVisible" title="生成兑换码" width="450px">
       <el-form label-width="95px">
+        <el-form-item label="规格">
+          <el-select v-model="product" style="width:100%">
+            <el-option v-for="(label, value) in productLabels" :key="value" :label="label" :value="value" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="数量"><el-input-number v-model="count" :min="1" :max="100" /></el-form-item>
         <el-form-item label="渠道/批次"><el-input v-model="source" maxlength="100" placeholder="例如：小红书首批、线下体验" /></el-form-item>
       </el-form>
@@ -39,9 +51,10 @@
     </el-dialog>
 
     <el-dialog v-model="generatedVisible" title="本次生成的兑换码" width="500px">
-      <p>请在抖音、小红书或线下按需分发；兑换码不会自动发送给用户。</p>
+      <p>{{ generatedLabel }} · {{ generated.length }} 张</p>
+      <p v-if="generatedProduct !== 'subscription'" class="hint">可以复制到小红书等平台发货，或把码发给测试人员。在小程序「解锁完整版」页面使用。</p>
       <el-input :model-value="generated.join('\n')" type="textarea" :rows="Math.min(12, Math.max(3, generated.length))" readonly />
-      <template #footer><el-button @click="copyGenerated">复制全部</el-button><el-button type="primary" @click="generatedVisible = false">完成</el-button></template>
+      <template #footer><el-button @click="copyCodes(generated)">复制全部</el-button><el-button type="primary" @click="generatedVisible = false">完成</el-button></template>
     </el-dialog>
 
     <el-dialog v-model="redeemVisible" :title="'代用户兑换 · ' + selectedCode" width="500px">
@@ -61,10 +74,21 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { listCodes, generateCodes, disableCode, redeemForUser, findUsers, familiesOf, type RedemptionCode, type UserChoice, type FamilyChoice } from '@/api/redemption'
+import { listCodes, generateCodes, disableCode, redeemForUser, findUsers, familiesOf, type RedemptionCode, type StorybookRedemptionProduct, type UserChoice, type FamilyChoice } from '@/api/redemption'
 
+const productLabels: Record<StorybookRedemptionProduct | 'subscription', string> = {
+  digital: '电子完整版',
+  softcover: '标准实体版',
+  gift: '送礼纪念版',
+  subscription: '家庭订阅（30天）'
+}
+const productLabel = (row: RedemptionCode) => productLabels[row.storybookProductType || 'subscription']
+const product = ref<StorybookRedemptionProduct | 'subscription'>('subscription')
+const productFilter = ref('')
+const generatedProduct = ref<StorybookRedemptionProduct | 'subscription'>('subscription')
+const generatedLabel = computed(() => productLabels[generatedProduct.value])
 const codes = ref<RedemptionCode[]>([])
 const loading = ref(false)
 const saving = ref(false)
@@ -88,18 +112,26 @@ const selectedFamily = ref('')
 const statusLabel = (value: string) => ({ unused: '未兑换', redeemed: '已兑换', disabled: '已停用' }[value] || value)
 const statusType = (value: string) => value === 'unused' ? 'success' : value === 'redeemed' ? 'info' : 'danger'
 
+function query() {
+  page.value = 1
+  return load()
+}
+
 async function load() {
   loading.value = true
   try {
-    const result = await listCodes({ page: page.value, pageSize: 20, status: status.value || undefined, code: queryCode.value.trim() || undefined })
+    const result = await listCodes({ page: page.value, pageSize: 20, status: status.value || undefined, code: queryCode.value.trim() || undefined, product: productFilter.value || undefined })
     codes.value = result.data.list
     total.value = result.data.total
   } finally { loading.value = false }
 }
 async function generate() {
+  if (!count.value || saving.value) return
   saving.value = true
+  const selectedProduct = product.value
   try {
-    const result = await generateCodes(count.value, source.value.trim())
+    const result = await generateCodes(count.value, source.value.trim(), selectedProduct === 'subscription' ? undefined : selectedProduct)
+    generatedProduct.value = selectedProduct
     generated.value = result.data.map(item => item.code)
     generateVisible.value = false
     generatedVisible.value = true
@@ -107,9 +139,13 @@ async function generate() {
     await load()
   } finally { saving.value = false }
 }
-async function copyGenerated() {
-  await navigator.clipboard.writeText(generated.value.join('\n'))
-  ElMessage.success('已复制')
+async function copyCodes(values: string[]) {
+  try {
+    await navigator.clipboard.writeText(values.join('\n'))
+    ElMessage.success('已复制')
+  } catch {
+    ElMessage.warning('浏览器未允许访问剪贴板，请手动复制')
+  }
 }
 async function disable(row: RedemptionCode) {
   await ElMessageBox.confirm(`停用兑换码 ${row.code}？停用后不能再兑换。`, '确认停用', { type: 'warning' })

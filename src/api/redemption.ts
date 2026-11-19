@@ -1,7 +1,11 @@
 import request from './request'
 import type { ApiResponse, PageResult } from '@/types'
 
+export type StorybookRedemptionProduct = 'digital' | 'softcover' | 'gift'
+
 export interface RedemptionCode {
+  storybookProductType?: StorybookRedemptionProduct
+  storybookOrderId?: string
   id: string
   code: string
   status: 'unused' | 'redeemed' | 'disabled'
@@ -17,10 +21,10 @@ export interface RedemptionCode {
 export interface UserChoice { id: string; nickname: string; phone?: string }
 export interface FamilyChoice { id: string; name: string }
 
-export const listCodes = (params: { page: number; pageSize: number; status?: string; code?: string }): Promise<ApiResponse<PageResult<RedemptionCode>>> =>
+export const listCodes = (params: { page: number; pageSize: number; status?: string; code?: string; product?: string }): Promise<ApiResponse<PageResult<RedemptionCode>>> =>
   request.get('/api/admin/redemption/list', { params })
-export const generateCodes = (count: number, source: string): Promise<ApiResponse<RedemptionCode[]>> =>
-  request.post('/api/admin/redemption/generate', { count, source })
+export const generateCodes = (count: number, source: string, storybookProductType?: StorybookRedemptionProduct): Promise<ApiResponse<RedemptionCode[]>> =>
+  request.post('/api/admin/redemption/generate', { count, source, storybookProductType })
 export const disableCode = (id: string): Promise<ApiResponse<null>> =>
   request.post(`/api/admin/redemption/${encodeURIComponent(id)}/disable`)
 export const redeemForUser = (code: string, userId: string, familyId: string): Promise<ApiResponse<{ endDate: string }>> =>
