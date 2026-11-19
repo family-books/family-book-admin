@@ -26,6 +26,8 @@
             生成缺少的插画
           </el-button>
           <el-button :disabled="artworkBusy" @click="refreshArtwork()">刷新进度</el-button>
+          <el-button v-if="artwork?.status === 'full_completed' && artwork.pages[0]?.layout === 'COVER'"
+            @click="printArtwork">排版并保存 PDF</el-button>
           <span v-if="artwork?.status === 'full_running'">正在后台生成</span>
           <span v-else-if="artwork?.status === 'full_completed'">插画已齐，可以进行人工校对</span>
         </div>
@@ -51,6 +53,7 @@ import { ArrowDown } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { getStorybookArtwork, getStorybookOrders, queueStorybookArtwork, shipStorybookOrder, updateStorybookOrderStatus, uploadStorybookDigitalFile } from '@/api/storybooks'
 import type { StorybookArtwork } from '@/api/storybooks'
+import { openStorybookPrint } from './storybookPrint'
 import type { StorybookOrder } from '@/types'
 const loading=ref(false),orders=ref<StorybookOrder[]>([]),status=ref(''),page=ref(1),pageSize=ref(20),total=ref(0),shipVisible=ref(false),submitting=ref(false),selected=ref<StorybookOrder|null>(null),expressCompany=ref('顺丰速运'),trackingNo=ref('')
 const statusOptions=[{label:'已支付',value:'paid'},{label:'制作中',value:'generating'},{label:'人工校对',value:'reviewing'},{label:'印刷中',value:'printing'},{label:'已发货',value:'shipped'},{label:'已完成',value:'completed'},{label:'已取消',value:'cancelled'},{label:'已退款',value:'refunded'}]
@@ -89,6 +92,15 @@ const refreshArtwork = async () => {
     if (artwork.value.status === 'full_running') artworkTimer = setTimeout(refreshArtwork, 5000)
   } catch {
     // The request layer displays the error. Refresh is available in the dialog.
+  }
+}
+
+const printArtwork = async () => {
+  if (!artwork.value) return
+  try {
+    await openStorybookPrint(artwork.value.pages)
+  } catch (error) {
+    ElMessage.warning(error instanceof Error ? error.message : '暂时无法打开绘本排版')
   }
 }
 

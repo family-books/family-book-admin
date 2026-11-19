@@ -19,7 +19,7 @@ export const uploadStorybookDigitalFile = (id: string, file: File): Promise<ApiR
 export interface StorybookArtwork {
   status?: string
   error?: string
-  pages: Array<{ number: number; title: string; text?: string; imageUrl?: string }>
+  pages: Array<{ number: number; title: string; text?: string; imageUrl?: string; layout?: string }>
 }
 
 export const getStorybookArtwork = (id: string): Promise<ApiResponse<StorybookArtwork>> =>
