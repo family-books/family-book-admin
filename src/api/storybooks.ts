@@ -24,9 +24,10 @@ interface StorybookCaption {
   lines: Array<{ text: string; left: number; top: number }>
 }
 export interface StorybookArtwork {
+  templateCode?: string
   status?: string
   error?: string
-  pages: Array<{ number: number; title: string; text?: string; imageUrl?: string; layout?: string; textBox?: StorybookTextBox; caption?: StorybookCaption }>
+  pages: Array<{ number: number; title: string; text?: string; imageUrl?: string; layout?: string; qualityStatus?: string; textBox?: StorybookTextBox; caption?: StorybookCaption }>
 }
 
 export const getStorybookArtwork = (id: string): Promise<ApiResponse<StorybookArtwork>> =>

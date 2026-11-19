@@ -64,35 +64,32 @@
         <el-alert v-if="artwork?.error" :title="artwork.error" type="warning" :closable="false" />
         <div v-if="artwork" class="artwork-pages">
           <article v-for="page in artwork.pages" :key="page.number">
-            <div v-if="page.imageUrl" class="artwork-frame" :class="{ 'with-caption': page.caption }">
-              <el-image :src="page.imageUrl" fit="contain" :preview-src-list="[page.imageUrl]" preview-teleported />
-              <template v-if="page.caption">
-                <span v-for="(line, index) in page.caption.lines" :key="index" class="laid-out-caption"
-                  :style="{left: line.left + '%', top: line.top + '%', color: page.caption.color, fontSize: page.caption.fontWidthPercent + 'cqw'}">{{ line.text }}</span>
-              </template>
-              <p v-else-if="page.textBox" class="artwork-caption" :style="{
-                left: page.textBox.left + '%', width: page.textBox.width + '%',
-                [page.textBox.fromBottom ? 'bottom' : 'top']: page.textBox.offset + '%',
-              }">{{ page.text }}</p>
-            </div>
+            <button v-if="page.imageUrl" type="button" class="artwork-thumbnail"
+              :aria-label="`放大预览第 ${page.number} 页`" @click="expandedPageNumber = page.number">
+              <StorybookPreviewPage :page="page" :template-code="artwork.templateCode" />
+            </button>
             <strong>第 {{ page.number }} 页 · {{ page.title }}</strong>
-            <p v-if="(!page.textBox && !page.caption) || !page.imageUrl">{{ page.text }}</p>
+            <p v-if="(!page.layout || page.layout === 'LEGACY' || !page.imageUrl) && page.qualityStatus !== 'caption_pending'">{{ page.text }}</p>
             <el-button v-if="page.imageUrl && !artworkOrder?.automaticArtwork && artworkOrder?.orderStatus === 'generating' && artwork.status?.startsWith('full_')"
               size="small" :disabled="artworkBusy || artwork.status === 'full_running'" @click="generateArtwork(page.number)">只重画这一页</el-button>
           </article>
         </div>
       </div>
     </el-dialog>
+    <el-dialog v-model="expandedPreviewVisible" :title="expandedPage?.title || '绘本预览'" width="min(820px, 94vw)" append-to-body>
+      <StorybookPreviewPage v-if="expandedPage" :page="expandedPage" :template-code="artwork?.templateCode" />
+    </el-dialog>
     <el-dialog v-model="shipVisible" title="确认绘本发货" width="460px"><el-form label-width="90px"><el-form-item label="订单号">{{selected?.orderNo}}</el-form-item><el-form-item label="快递公司"><el-input v-model="expressCompany" placeholder="例如：顺丰速运"/></el-form-item><el-form-item label="快递单号"><el-input v-model="trackingNo" placeholder="请输入快递单号"/></el-form-item></el-form><template #footer><el-button @click="shipVisible=false">取消</el-button><el-button type="primary" :loading="submitting" @click="submitShip">确认发货</el-button></template></el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { ArrowDown } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { getStorybookArtwork, getStorybookOrders, getStorybookPreviews, getStorybookPreviewArtwork, queueStorybookArtwork, shipStorybookOrder, updateStorybookOrderStatus, uploadStorybookDigitalFile } from '@/api/storybooks'
 import type { StorybookArtwork, StorybookPreview } from '@/api/storybooks'
+import StorybookPreviewPage from './StorybookPreviewPage.vue'
 import { openStorybookPrint } from './storybookPrint'
 import type { StorybookOrder } from '@/types'
 const activeTab=ref('orders'), previews=ref<StorybookPreview[]>([]), previewId=ref<string | null>(null)
@@ -122,6 +119,12 @@ const artworkVisible = ref(false)
 const artworkBusy = ref(false)
 const artworkOrder = ref<StorybookOrder | null>(null)
 const artwork = ref<StorybookArtwork | null>(null)
+const expandedPageNumber = ref<number | null>(null)
+const expandedPage = computed(() => artwork.value?.pages.find(page => page.number === expandedPageNumber.value))
+const expandedPreviewVisible = computed({
+  get: () => !!expandedPage.value,
+  set: (visible) => { if (!visible) expandedPageNumber.value = null },
+})
 let artworkTimer: ReturnType<typeof setTimeout> | undefined
 
 const closeArtwork = () => {
@@ -129,6 +132,7 @@ const closeArtwork = () => {
   artworkOrder.value = null
   previewId.value = null
   artwork.value = null
+  expandedPageNumber.value = null
 }
 
 const refreshArtwork = async () => {
@@ -189,11 +193,5 @@ onMounted(load)
 .artwork-actions{display:flex;align-items:center;gap:12px;margin-bottom:12px}
 .artwork-pages{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:16px}
 .artwork-pages article{border:1px solid var(--el-border-color);border-radius:8px;padding:12px}
-.artwork-pages .el-image{display:block;width:100%;height:180px;margin-bottom:8px}
-.artwork-frame{position:relative;width:100%}
-.artwork-frame .el-image{display:block;width:100%}
-.artwork-frame.with-caption{aspect-ratio:4/3;container-type:inline-size}
-.artwork-frame.with-caption .el-image{height:100%;margin:0}
-.laid-out-caption{position:absolute;white-space:nowrap;pointer-events:none;line-height:1.15}
-.artwork-frame .artwork-caption{position:absolute;margin:0;pointer-events:none;padding:5px 7px;box-sizing:border-box;color:#fff8e9;background:rgba(9,19,34,.72);border-radius:5px;font-size:12px;line-height:1.5}
+.artwork-thumbnail{display:block;width:100%;margin:0 0 8px;padding:0;border:0;background:none;text-align:left;cursor:zoom-in}
 </style>
