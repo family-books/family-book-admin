@@ -16,10 +16,12 @@ export const uploadStorybookDigitalFile = (id: string, file: File): Promise<ApiR
   return request.post(`/api/admin/storybook/orders/${id}/digital-file`, data, { headers: { 'Content-Type': 'multipart/form-data' } })
 }
 
+export interface StorybookTextBox { left: number; offset: number; width: number; fromBottom: boolean }
+
 export interface StorybookArtwork {
   status?: string
   error?: string
-  pages: Array<{ number: number; title: string; text?: string; imageUrl?: string; layout?: string }>
+  pages: Array<{ number: number; title: string; text?: string; imageUrl?: string; layout?: string; textBox?: StorybookTextBox }>
 }
 
 export const getStorybookArtwork = (id: string): Promise<ApiResponse<StorybookArtwork>> =>

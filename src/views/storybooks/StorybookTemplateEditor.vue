@@ -6,7 +6,8 @@
         <el-option v-for="story in stories" :key="story.code" :value="story.code" :label="story.name" />
       </el-select>
       <template v-if="draft && published">
-        <p>当前发布版本 {{ published.baseVersion }}</p>
+        <p>当前发布版本 {{ published.baseVersion }} · {{ published.pages.length + 1 }} 页</p>
+        <p>编辑中 {{ draft.pages.length + 1 }} 页（含封面和寄语）</p>
         <el-alert v-if="!published.materials.length" title="这是首版素材草稿。请先重新编排整本并逐页审阅，再发布。" :closable="false" />
         <el-collapse>
           <el-collapse-item title="10 个固定素材">
@@ -39,7 +40,10 @@
           </el-collapse-item>
         </el-collapse>
         <div class="actions">
+          <el-input-number v-if="isFullBleed" v-model="targetPageCount" :min="18" :max="24"
+            aria-label="整本目标页数（含封面和寄语）" />
           <el-button type="primary" @click="replan">重新编排整本</el-button>
+          <el-button v-if="recommendedPageCount > draft.pages.length + 1" @click="loadExpanded">载入新版分镜</el-button>
           <el-button @click="save">保存草稿</el-button>
         </div>
         <p>建议复核 {{ impact.length ? impact.join('、') + ' 页' : '暂无' }}。</p>
@@ -71,6 +75,12 @@
                 <el-form-item v-if="index" label="正文"><el-input v-model="page.text" type="textarea" /></el-form-item>
                 <el-form-item label="着装"><el-input v-model="page.wardrobe" /></el-form-item>
                 <el-form-item label="剧情动作和画面分镜"><el-input v-model="page.shot" type="textarea" :rows="4" /></el-form-item>
+                <div v-if="page.textBox" class="fields">
+                  <el-form-item label="正文左边距 (%)"><el-input-number v-model="page.textBox.left" :min="5" :max="95 - page.textBox.width" /></el-form-item>
+                  <el-form-item label="正文宽度 (%)"><el-input-number v-model="page.textBox.width" :min="33" :max="Math.min(75, 95 - page.textBox.left)" /></el-form-item>
+                  <el-form-item label="正文上下边距 (%)"><el-input-number v-model="page.textBox.offset" :min="5" :max="55" /></el-form-item>
+                  <el-form-item label="从底部定位"><el-switch v-model="page.textBox.fromBottom" /></el-form-item>
+                </div>
                 <el-form-item v-if="page.number > 1" label="复用前页图片">
                   <el-switch :model-value="!!page.photoInset" @change="toggleInset(page)" />
                 </el-form-item>
@@ -85,8 +95,11 @@
             </div>
             <el-button @click="draw(page.number)">试画本页（喜好留空）</el-button>
             <p v-if="trials[page.number] && trials[page.number]?.snapshot !== snapshot">草稿已修改，下图来自上次试画。</p>
-            <el-image v-if="trials[page.number]" class="trial" :src="trials[page.number]?.url"
-              :preview-src-list="[trials[page.number]?.url || '']" preview-teleported />
+            <div v-if="trials[page.number]" class="trial-frame">
+              <el-image class="trial" :src="trials[page.number]?.url"
+                :preview-src-list="[trials[page.number]?.url || '']" preview-teleported />
+              <div v-if="page.textBox" class="trial-caption" :style="captionStyle(page.textBox)">{{ page.text.split('{name}').join('小星').split('{motif}').join('小云朵') }}</div>
+            </div>
           </el-collapse-item>
         </el-collapse>
         <div class="actions">
@@ -105,6 +118,7 @@
 import { computed, ref, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import request from '@/api/request'
+import type { StorybookTextBox } from '@/api/storybooks'
 import type { ApiResponse } from '@/types'
 
 interface Page {
@@ -114,6 +128,7 @@ interface Page {
   wardrobe: string
   shot: string
   layout: string
+  textBox?: StorybookTextBox | null
   photoInset?: { sourcePage: number; x: number; y: number; width: number; height: number } | null
 }
 interface Material {
@@ -126,10 +141,11 @@ interface Material {
 }
 interface Draft {
   baseVersion: string
+  previewNumbers?: number[]
   materials: Material[]
   pages: Page[]
 }
-interface Story { code: string; name: string }
+interface Story { code: string; name: string; pageCount: number }
 
 const endpoint = '/api/admin/storybook/templates'
 const visible = ref(false)
@@ -139,12 +155,20 @@ const stories = ref<Story[]>([])
 const draft = ref<Draft>()
 const published = ref<Draft>()
 const selected = ref<number[]>([])
-const previewNumbers = ref<number[]>([])
+const publishedPreviewNumbers = ref<number[]>([])
+const previewNumbers = computed(() => draft.value?.previewNumbers ?? publishedPreviewNumbers.value)
+const recommendedPageCount = computed(() => stories.value.find(story => story.code === code.value)?.pageCount ?? 0)
 const expanded = ref<number[]>([])
 const reviewed = ref(false)
 const referenceVisible = ref(false)
 const referenceImage = ref('')
 const trials = ref<Record<number, { snapshot: string; url: string }>>({})
+const isFullBleed = computed(() => draft.value?.pages[1]?.layout === 'FULL_BLEED')
+const targetPageCount = ref<number>()
+watch(() => draft.value?.pages.length, count => { targetPageCount.value = count === undefined ? undefined : count + 1 })
+const captionStyle = (box: StorybookTextBox) => ({
+  left: box.left + '%', width: box.width + '%', [box.fromBottom ? 'bottom' : 'top']: box.offset + '%',
+})
 const snapshot = computed(() => JSON.stringify(draft.value))
 watch(snapshot, () => { reviewed.value = false })
 
@@ -225,7 +249,7 @@ async function fetchDraft() {
   const result: ApiResponse<{ draft: Draft; published: Draft; previewNumbers: number[] }> = await request.get(`${endpoint}/${code.value}`)
   draft.value = result.data.draft
   published.value = result.data.published
-  previewNumbers.value = result.data.previewNumbers
+  publishedPreviewNumbers.value = result.data.previewNumbers
   selectImpact()
 }
 
@@ -263,6 +287,23 @@ async function editorialJob<T>(path: string, body: unknown): Promise<T> {
   throw new Error('绘本任务等待超时，请稍后重试')
 }
 
+async function loadExpanded() {
+  try {
+    await ElMessageBox.confirm(
+      `载入 ${recommendedPageCount.value} 页的新版素材和分镜，会替换编辑区中的内容。请先保存需要保留的修改。`,
+      '载入新版分镜',
+    )
+  } catch {
+    return
+  }
+  void run(async () => {
+    const result: ApiResponse<Draft> = await request.get(`${endpoint}/${code.value}/expanded-draft`)
+    draft.value = result.data
+    selectImpact()
+    expanded.value = []
+  })
+}
+
 async function replan() {
   if (!draft.value || busy.value) return
   try {
@@ -276,7 +317,8 @@ async function replan() {
   }
   void run(async () => {
     if (!draft.value) return
-    const revised = await editorialJob<Draft>(`${endpoint}/${code.value}/replan`, draft.value)
+    const query = isFullBleed.value && targetPageCount.value ? `?pageCount=${targetPageCount.value}` : ''
+    const revised = await editorialJob<Draft>(`${endpoint}/${code.value}/replan${query}`, draft.value)
     draft.value = revised
     selectImpact()
     expanded.value = [revised.pages[0]?.number ?? 1]
@@ -329,5 +371,8 @@ async function publish() {
 .comparison { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .material { border-bottom: 1px solid var(--el-border-color-light); padding-top: 10px; }
 .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 14px 0; }
+.trial-frame { position: relative; width: min(100%, 420px); }
+.trial-caption { position: absolute; pointer-events: none; padding: 6px 8px; box-sizing: border-box;
+  color: #fff8e9; background: rgba(9, 19, 34, .72); border-radius: 6px; font-size: 13px; line-height: 1.5; }
 .trial { display: block; max-width: 420px; margin-top: 12px; }
 </style>

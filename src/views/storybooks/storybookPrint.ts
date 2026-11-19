@@ -16,7 +16,27 @@ const styles = `
   section { min-width: 0; flex: 1; }
   .COVER { padding: 0; position: relative; }
   .COVER img { width: 100%; height: 100%; }
-  .COVER section { position: absolute; inset: auto 12mm 12mm; background: white; padding: 4mm; text-align: center; }
+  .COVER section {
+    position: absolute; inset: auto 0 0; padding: 30mm 14mm 13mm; text-align: center;
+    background: linear-gradient(180deg, transparent, rgba(13,24,40,.55) 60%, rgba(13,24,40,.83));
+    print-color-adjust: exact; -webkit-print-color-adjust: exact;
+  }
+  .COVER h1 {
+    margin: 0; color: #fff1ca; font-size: 36pt; font-weight: 800; overflow-wrap: anywhere;
+    font-family: "Yuanti SC", "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+    text-shadow: 0 1mm 0 rgba(62,34,27,.75), 0 1.6mm 4mm rgba(4,11,22,.82);
+  }
+  .COVER h1.medium { font-size: 27pt; }
+  .COVER h1.compact { font-size: 21pt; }
+  .FULL_BLEED { position: relative; padding: 0; overflow: hidden; }
+  .FULL_BLEED img { width: 100%; height: 100%; object-fit: cover; }
+  .FULL_BLEED section {
+    position: absolute; box-sizing: border-box; border-radius: 4mm; padding: 3mm 4mm;
+    color: #fff8e9; font-family: "PingFang SC", "Noto Sans CJK SC", sans-serif; font-weight: 600;
+    background: linear-gradient(130deg, rgba(9,19,34,.78), rgba(9,19,34,.54));
+    print-color-adjust: exact; -webkit-print-color-adjust: exact;
+  }
+  .FULL_BLEED p { font-size: 16pt; line-height: 1.52; }
   .DEDICATION { display: grid; place-items: center; text-align: center; }
   @media print { body { background: white; } article { margin: 0; } }
 `
@@ -49,9 +69,22 @@ export async function openStorybookPrint(pages: StorybookArtwork['pages']) {
     const copy = doc.createElement('section')
     const title = doc.createElement('h1')
     title.textContent = page.title
+    if (page.layout === 'COVER') {
+      const length = Array.from(page.title || '').length
+      if (length > 44) title.className = 'compact'
+      else if (length > 26) title.className = 'medium'
+    }
     const story = doc.createElement('p')
     story.textContent = page.text || ''
-    copy.append(title, story)
+    if (page.layout === 'FULL_BLEED' && page.textBox) {
+      const { left, offset, width, fromBottom } = page.textBox
+      copy.style.left = `${left}%`
+      copy.style.width = `${width}%`
+      copy.style[fromBottom ? 'bottom' : 'top'] = `${offset}%`
+      copy.append(story)
+    } else {
+      copy.append(title, story)
+    }
     sheet.append(copy)
     doc.body.append(sheet)
   }
