@@ -37,6 +37,7 @@ const styles = `
     print-color-adjust: exact; -webkit-print-color-adjust: exact;
   }
   .FULL_BLEED p { font-size: 16pt; line-height: 1.52; }
+  .caption-scrim { position: absolute; background: rgba(0,0,0,.72); print-color-adjust: exact; -webkit-print-color-adjust: exact; }
   .caption-line { position: absolute; white-space: nowrap; font-family: sans-serif; line-height: 1.15; }
   .DEDICATION { display: grid; place-items: center; text-align: center; }
   @media print { body { background: white; } article { margin: 0; } }
@@ -64,10 +65,25 @@ export async function openStorybookPrint(pages: StorybookArtwork['pages']) {
       const image = doc.createElement('img')
       image.alt = ''
       image.src = page.imageUrl
+      const scale = page.caption?.imageScale
+      if (scale) {
+        sheet.style.background = '#faf5ea'
+        sheet.style.printColorAdjust = 'exact'
+        Object.assign(image.style, { width: `${scale}%`, height: `${scale}%`, marginInline: 'auto', objectFit: 'contain' })
+      }
       sheet.append(image)
       images.push(image)
     }
     if (page.caption) {
+      const scrim = page.caption.scrim
+      if (scrim) {
+        const panel = doc.createElement('div')
+        panel.className = 'caption-scrim'
+        Object.assign(panel.style, {
+          left: `${scrim.left}%`, top: `${scrim.top}%`, width: `${scrim.width}%`, height: `${scrim.height}%`,
+        })
+        sheet.append(panel)
+      }
       for (const line of page.caption.lines) {
         const element = doc.createElement('span')
         element.className = 'caption-line'

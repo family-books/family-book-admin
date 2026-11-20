@@ -21,6 +21,8 @@ export interface StorybookTextBox { left: number; offset: number; width: number;
 interface StorybookCaption {
   color: string
   fontWidthPercent: number
+  imageScale?: number
+  scrim?: { left: number; top: number; width: number; height: number }
   lines: Array<{ text: string; left: number; top: number }>
 }
 export interface StorybookArtwork {

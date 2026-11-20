@@ -5,8 +5,11 @@
       <span class="book-cover-title" :class="coverTitleSize">{{ page.title }}</span>
     </div>
   </div>
-  <div v-else-if="page.layout === 'FULL_BLEED'" class="preview full-bleed-preview">
-    <img :src="page.imageUrl" alt="" />
+  <div v-else-if="page.layout === 'FULL_BLEED'" class="preview full-bleed-preview" :class="{ 'separate-caption': page.caption?.imageScale }">
+    <img :src="page.imageUrl" alt="" :style="page.caption?.imageScale ? { left: (100 - page.caption.imageScale) / 2 + '%', width: page.caption.imageScale + '%', height: page.caption.imageScale + '%' } : undefined" />
+    <div v-if="page.caption?.scrim" class="caption-scrim"
+      :style="{ left: page.caption.scrim.left + '%', top: page.caption.scrim.top + '%',
+        width: page.caption.scrim.width + '%', height: page.caption.scrim.height + '%' }" />
     <template v-if="page.caption">
       <span v-for="(line, index) in page.caption.lines" :key="index" class="laid-out-caption"
         :style="{ left: line.left + '%', top: line.top + '%', color: page.caption.color,
@@ -115,6 +118,8 @@ const captionPosition = computed(() => {
   white-space:pre-wrap;overflow-wrap:anywhere;
   text-shadow:0 calc(1 * var(--page-unit)) calc(3 * var(--page-unit)) rgba(0,0,0,.65);
 }
+.full-bleed-preview.separate-caption{background:#faf5ea}
+.caption-scrim{position:absolute;background:rgba(0,0,0,.72)}
 .laid-out-caption{position:absolute;display:block;white-space:nowrap;font-family:sans-serif;font-weight:400;line-height:1.15}
 .full-bleed-caption.space-caption{padding:0;background:none;border-radius:0}
 
