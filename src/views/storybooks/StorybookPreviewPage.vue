@@ -16,7 +16,7 @@
           fontSize: page.caption.fontWidthPercent + 'cqw' }">{{ line.text }}</span>
     </template>
     <span v-else-if="page.qualityStatus !== 'caption_pending'" class="full-bleed-caption"
-      :class="{ 'space-caption': templateCode === 'space-station' }" :style="captionPosition">{{ page.text }}</span>
+      :class="{ 'space-caption': fullBleed }" :style="captionPosition">{{ page.text }}</span>
   </div>
   <div v-else-if="page.layout && page.layout !== 'LEGACY'" class="preview story-preview">
     <div class="book-page" :class="storyLayout">
@@ -35,6 +35,8 @@ import { computed } from 'vue'
 import type { StorybookArtwork } from '@/api/storybooks'
 
 const props = defineProps<{ page: StorybookArtwork['pages'][number]; templateCode?: string }>()
+
+const fullBleed = computed(() => props.templateCode === 'space-station' || props.templateCode === 'dinosaur')
 
 const coverTitleSize = computed(() => {
   const length = Array.from(props.page.title).length

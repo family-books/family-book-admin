@@ -10,7 +10,7 @@
         <p>编辑中 {{ draft.pages.length + 1 }} 页（含封面和寄语）</p>
         <el-alert v-if="!published.materials.length" title="这是首版素材草稿。请先重新编排整本并逐页审阅，再发布。" :closable="false" />
         <el-collapse>
-          <el-collapse-item v-if="code === 'space-station'" title="全书配色">
+          <el-collapse-item v-if="isFullBleed" title="全书配色">
             <el-input v-model="draft.palette" type="textarea" :rows="4" maxlength="650" show-word-limit
               placeholder="填写全书主色、道具固定颜色和留白要求" />
           </el-collapse-item>
@@ -80,7 +80,7 @@
                 <el-form-item v-if="index" label="正文"><el-input v-model="page.text" type="textarea" /></el-form-item>
                 <el-form-item label="着装"><el-input v-model="page.wardrobe" /></el-form-item>
                 <el-form-item label="剧情动作和画面分镜"><el-input v-model="page.shot" type="textarea" :rows="4" /></el-form-item>
-                <el-form-item v-if="code === 'space-station'" label="本页配色与亮色焦点">
+                <el-form-item v-if="isFullBleed" label="本页配色与亮色焦点">
                   <el-input v-model="page.colorDirection" type="textarea" :rows="3" maxlength="350" show-word-limit
                     placeholder="填写本页主色、视觉焦点和正文留白的颜色" />
                 </el-form-item>
@@ -162,6 +162,7 @@ const endpoint = '/api/admin/storybook/templates'
 const visible = ref(false)
 const busy = ref(false)
 const code = ref('')
+const isFullBleed = computed(() => code.value === 'space-station' || code.value === 'dinosaur')
 const stories = ref<Story[]>([])
 const draft = ref<Draft>()
 const published = ref<Draft>()
