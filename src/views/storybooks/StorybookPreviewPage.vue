@@ -121,7 +121,7 @@ const captionPosition = computed(() => {
   text-shadow:0 calc(1 * var(--page-unit)) calc(3 * var(--page-unit)) rgba(0,0,0,.65);
 }
 .full-bleed-preview.separate-caption{background:#faf5ea}
-.caption-scrim{position:absolute;background:rgba(0,0,0,.72)}
+.caption-scrim{position:absolute;background:linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,.72) 18%,rgba(0,0,0,.72) 82%,rgba(0,0,0,0) 100%)}
 .laid-out-caption{position:absolute;display:block;white-space:nowrap;font-family:sans-serif;font-weight:400;line-height:1.15}
 .full-bleed-caption.space-caption{padding:0;background:none;border-radius:0}
 
