@@ -2,7 +2,7 @@
   <div v-if="page.layout === 'COVER'" class="preview cover-preview book-cover">
     <img :src="page.imageUrl" alt="" />
     <div class="book-cover-copy">
-      <span class="book-cover-title" :class="coverTitleSize">{{ page.title }}</span>
+      <span class="book-cover-title" :style="coverTitleStyle">{{ page.title }}</span>
     </div>
   </div>
   <div v-else-if="page.layout === 'FULL_BLEED'" class="preview full-bleed-preview" :class="{ 'separate-caption': page.caption?.imageScale }">
@@ -39,11 +39,10 @@ const props = defineProps<{ page: StorybookArtwork['pages'][number]; templateCod
 
 const fullBleed = computed(() => props.templateCode === 'space-station' || props.templateCode === 'dinosaur')
 
-const coverTitleSize = computed(() => {
+const coverTitleStyle = computed(() => {
   const length = Array.from(props.page.title).length
-  if (length > 44) return 'book-cover-title--compact'
-  if (length > 26) return 'book-cover-title--medium'
-  return ''
+  const size = Math.min(46, Math.max(20, Math.floor(560 / Math.max(1, length))))
+  return { fontSize: `calc(${size} * var(--page-unit))` }
 })
 
 const storyLayout = computed(() => {
@@ -86,7 +85,7 @@ const captionOutlineColor = (caption?: StorybookArtwork['pages'][number]['captio
 }
 .book-cover-title{
   display:block;
-  max-width:calc(600 * var(--page-unit));
+  max-width:100%;
   margin:0 auto;
   color:#fff1ca;
   font-family:"Yuanti SC","PingFang SC","Noto Sans CJK SC","Microsoft YaHei",sans-serif;
@@ -95,10 +94,9 @@ const captionOutlineColor = (caption?: StorybookArtwork['pages'][number]['captio
   line-height:1.24;
   letter-spacing:calc(1.5 * var(--page-unit));
   overflow-wrap:anywhere;
+  text-align:center;
   text-shadow:0 calc(3 * var(--page-unit)) 0 rgba(62,34,27,.75),0 calc(5 * var(--page-unit)) calc(16 * var(--page-unit)) rgba(4,11,22,.82);
 }
-.book-cover-title--medium{font-size:calc(34 * var(--page-unit));letter-spacing:calc(1 * var(--page-unit))}
-.book-cover-title--compact{font-size:calc(26 * var(--page-unit));letter-spacing:0}
 .story-preview .story-image{background:transparent}
 .story-preview .story-image img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
 .story-preview .story-copy{height:auto;min-width:0}
