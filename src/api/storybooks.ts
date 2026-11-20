@@ -22,6 +22,7 @@ interface StorybookCaption {
   color: string
   fontWidthPercent: number
   imageScale?: number
+  outline?: boolean
   scrim?: { left: number; top: number; width: number; height: number }
   lines: Array<{ text: string; left: number; top: number }>
 }
