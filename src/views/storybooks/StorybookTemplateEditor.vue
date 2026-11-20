@@ -162,7 +162,8 @@ const endpoint = '/api/admin/storybook/templates'
 const visible = ref(false)
 const busy = ref(false)
 const code = ref('')
-const isFullBleed = computed(() => code.value === 'space-station' || code.value === 'dinosaur')
+const isFullBleed = computed(() => code.value === 'space-station' || code.value === 'dinosaur'
+  || draft.value?.pages[1]?.layout === 'FULL_BLEED')
 const stories = ref<Story[]>([])
 const draft = ref<Draft>()
 const published = ref<Draft>()
@@ -175,7 +176,6 @@ const reviewed = ref(false)
 const referenceVisible = ref(false)
 const referenceImage = ref('')
 const trials = ref<Record<number, { snapshot: string; url: string }>>({})
-const isFullBleed = computed(() => draft.value?.pages[1]?.layout === 'FULL_BLEED')
 const targetPageCount = ref<number>()
 watch(() => draft.value?.pages.length, count => { targetPageCount.value = count === undefined ? undefined : count + 1 })
 const captionStyle = (box: StorybookTextBox) => ({

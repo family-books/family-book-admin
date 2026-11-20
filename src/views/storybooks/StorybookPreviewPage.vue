@@ -12,8 +12,9 @@
         width: page.caption.scrim.width + '%', height: page.caption.scrim.height + '%' }" />
     <template v-if="page.caption">
       <span v-for="(line, index) in page.caption.lines" :key="index" class="laid-out-caption"
+        :class="{ outlined: page.caption.outline }"
         :style="{ left: line.left + '%', top: line.top + '%', color: page.caption.color,
-          fontSize: page.caption.fontWidthPercent + 'cqw' }">{{ line.text }}</span>
+          fontSize: page.caption.fontWidthPercent + 'cqw', '--caption-outline': captionOutlineColor(page.caption) }">{{ line.text }}</span>
     </template>
     <span v-else-if="page.qualityStatus !== 'caption_pending'" class="full-bleed-caption"
       :class="{ 'space-caption': fullBleed }" :style="captionPosition">{{ page.text }}</span>
@@ -59,6 +60,9 @@ const captionPosition = computed(() => {
     [box.fromBottom ? 'bottom' : 'top']: box.offset + '%',
   }
 })
+
+const captionOutlineColor = (caption?: StorybookArtwork['pages'][number]['caption']) =>
+  caption?.outline ? (caption.color === '#201B17' ? 'rgba(255,255,255,.85)' : 'rgba(0,0,0,.55)') : 'transparent'
 </script>
 
 <style scoped>
@@ -123,6 +127,11 @@ const captionPosition = computed(() => {
 .full-bleed-preview.separate-caption{background:#faf5ea}
 .caption-scrim{position:absolute;background:linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,.72) 18%,rgba(0,0,0,.72) 82%,rgba(0,0,0,0) 100%)}
 .laid-out-caption{position:absolute;display:block;white-space:nowrap;font-family:sans-serif;font-weight:400;line-height:1.15}
+.laid-out-caption.outlined{
+  -webkit-text-stroke:calc(0.5 * var(--page-unit)) var(--caption-outline);
+  paint-order:stroke fill;
+  text-shadow:0 calc(1 * var(--page-unit)) calc(2 * var(--page-unit)) rgba(0,0,0,.3);
+}
 .full-bleed-caption.space-caption{padding:0;background:none;border-radius:0}
 
 .book-cover{background:#b9693f}
