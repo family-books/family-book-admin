@@ -318,7 +318,7 @@
           <button type="button" @click="openModal('story')">品牌故事</button>
           <a href="#how">如何使用</a>
           <a href="#faq">常见问题</a>
-          <button type="button" @click="openModal('contact')">联系客服</button>
+          <button type="button" @click="openModal('contact')">联系我们</button>
           <button type="button" @click="openModal('privacy')">隐私政策</button>
           <button type="button" @click="openModal('terms')">服务条款</button>
         </nav>
@@ -356,10 +356,18 @@
         </template>
 
         <template v-else-if="modal === 'contact'">
-          <p class="dialog-kicker">联系客服</p>
-          <h3 id="dialog-title">我们在这里</h3>
-          <p class="dialog-copy">如需帮助，可以在微信小程序「家书」内联系客服。</p>
-          <p class="dialog-copy">也可以发送邮件至 <a class="mail" href="mailto:service@myjiashu.cn">service@myjiashu.cn</a>，我们会尽快回复。</p>
+          <h3 id="dialog-title">联系我们</h3>
+          <section class="contact-part">
+            <h4>客户服务</h4>
+            <p class="dialog-copy">使用家书时遇到问题？欢迎在微信小程序「家书」内联系客服，或发送邮件至 <a class="mail" href="mailto:service@myjiashu.cn">service@myjiashu.cn</a>，我们会尽快回复。</p>
+          </section>
+          <section class="contact-part">
+            <h4>商务合作</h4>
+            <p class="dialog-copy">我们期待与更多伙伴一起，让爱与陪伴抵达更多家庭。</p>
+            <p class="dialog-copy">无论您来自养老机构、企业、社区组织，还是希望开展渠道推广、品牌联名、内容创作等合作，都欢迎与我们联系。</p>
+            <p class="dialog-copy">商务合作邮箱：<a class="mail" href="mailto:service@myjiashu.cn">service@myjiashu.cn</a></p>
+            <p class="dialog-copy">期待与你一起，让更多家庭收到爱。</p>
+          </section>
         </template>
 
         <template v-else-if="modal === 'privacy'">
@@ -689,10 +697,6 @@ const faqGroups = [
       {
         q: '家人都需要付费吗？',
         a: '不需要。一位家人开通订阅后，其他受邀家庭成员都可以共同上传照片和文字，家庭成员数量不限。只有额外收件地址需要按期购买加印。',
-      },
-      {
-        q: '可以先免费体验吗？',
-        a: '可以先免费创建家庭、邀请家人并体验照片和故事的记录流程。自动生成纸质家书、覆膜高清打印和寄送属于付费订阅权益，具体以小程序订阅页为准。',
       },
       {
         q: '订阅到期后怎么办？',
@@ -1798,6 +1802,14 @@ footer { border-top: 1px solid #efe4d6; padding: 36px 0 28px; }
 .dialog h3.wechat-title { padding-right: 0; text-align: center; }
 .dialog-kicker { color: #a15a32; font-size: 13px; font-weight: 700; letter-spacing: .08em; }
 .dialog-copy { margin-top: 12px; color: #5f554e; font-size: 15px; line-height: 1.85; }
+.contact-part h4 {
+  margin: 22px 0 0;
+  color: #3a312b;
+  font-size: 16px;
+  line-height: 1.4;
+}
+.contact-part:first-of-type h4 { margin-top: 18px; }
+.contact-part .dialog-copy { margin-top: 8px; }
 .page .search-name {
   margin: 20px 0;
   padding: 12px 14px;
