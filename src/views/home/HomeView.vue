@@ -365,7 +365,7 @@
             <h4>商务合作</h4>
             <p class="dialog-copy">我们期待与更多伙伴一起，让爱与陪伴抵达更多家庭。</p>
             <p class="dialog-copy">无论您来自养老机构、企业、社区组织，还是希望开展渠道推广、品牌联名、内容创作等合作，都欢迎与我们联系。</p>
-            <p class="dialog-copy">商务合作邮箱：<a class="mail" href="mailto:service@myjiashu.cn">service@myjiashu.cn</a></p>
+            <p class="dialog-copy">商务合作邮箱：<a class="mail" href="mailto:business@myjiashu.cn">business@myjiashu.cn</a></p>
             <p class="dialog-copy">期待与你一起，让更多家庭收到爱。</p>
           </section>
         </template>
