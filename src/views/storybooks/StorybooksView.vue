@@ -48,6 +48,7 @@
             <div class="order-actions">
               <el-button size="small" :disabled="!hasBookDetails(row)" @click="copyProduction(row)">复制资料</el-button>
               <el-button v-if="row.artworkSupported" size="small" @click="openArtwork(row)">插画</el-button>
+              <el-button v-if="row.orderStatus === 'confirming'" size="small" type="primary" @click="confirmOrder(row)">代确认</el-button>
               <el-upload v-if="canUploadPdf(row)" :show-file-list="false" accept="application/pdf" :http-request="(options:any)=>uploadDigital(row,options)">
                 <el-button size="small" type="primary">{{ row.productType === 'digital' ? '上传电子 PDF' : '上传印刷 PDF' }}</el-button>
               </el-upload>
@@ -82,7 +83,7 @@
     <el-dialog v-model="artworkVisible" title="绘本插画与分镜" width="min(820px, 94vw)" @closed="closeArtwork">
       <div v-loading="artworkBusy">
         <div class="artwork-actions">
-          <el-button v-if="artworkOrder?.orderStatus === 'generating' && artwork?.status !== 'full_completed' && (!artworkOrder.automaticArtwork || artwork?.status === 'full_failed')"
+          <el-button v-if="artworkOrder?.orderStatus === 'generating' && artwork?.status !== 'full_completed' && (!artworkOrder.automaticArtwork || artwork?.status === 'full_failed' || artwork?.status === 'full_partial')"
             type="primary" :disabled="!artwork || artworkBusy || artwork.status === 'full_running'" @click="generateArtwork()">
             {{ artworkOrder?.automaticArtwork ? '重试自动制作' : '生成缺少的插画' }}
           </el-button>
@@ -130,7 +131,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { ArrowDown } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getStorybookArtwork, getStorybookOrders, getStorybookPreviews, getStorybookPreviewArtwork, queueStorybookArtwork, shipStorybookOrder, updateStorybookOrderStatus, uploadStorybookDigitalFile } from '@/api/storybooks'
+import { getStorybookArtwork, getStorybookOrders, getStorybookPreviews, getStorybookPreviewArtwork, queueStorybookArtwork, confirmStorybookOrder, shipStorybookOrder, updateStorybookOrderStatus, uploadStorybookDigitalFile } from '@/api/storybooks'
 import type { StorybookArtwork, StorybookPreview } from '@/api/storybooks'
 import StorybookPreviewPage from './StorybookPreviewPage.vue'
 import { openStorybookPrint } from './storybookPrint'
@@ -139,12 +140,12 @@ const activeTab=ref('orders'), previews=ref<StorybookPreview[]>([]), previewId=r
 const isGenerating = (status?: string) => /^(queued|running|full_running|initializing|analyzing|plan|planning|character|cover|caption|delivery|scene_\d+)$/.test(status || '')
 const previewLabels: Record<string, string> = {
   unavailable: '暂无预览', partial: '部分完成', completed: '预览完成', failed: '生成失败',
-  full_running: '成书生成中', full_completed: '成书完成', full_failed: '成书生成失败',
+  full_running: '成书生成中', full_completed: '成书完成', full_failed: '成书生成失败', full_partial: '成书部分待重试',
 }
 const previewStatus = (status: string) => previewLabels[status] || (isGenerating(status) ? '生成中' : status || '—')
 const switchTab=()=>{page.value=1;load()}
 const loading=ref(false),orders=ref<StorybookOrder[]>([]),status=ref(''),page=ref(1),pageSize=ref(20),total=ref(0),shipVisible=ref(false),submitting=ref(false),selected=ref<StorybookOrder|null>(null),expressCompany=ref('顺丰速运'),trackingNo=ref('')
-const statusOptions=[{label:'待支付',value:'pending_payment'},{label:'已支付',value:'paid'},{label:'制作中',value:'generating'},{label:'人工校对',value:'reviewing'},{label:'印刷中',value:'printing'},{label:'已发货',value:'shipped'},{label:'已完成',value:'completed'},{label:'已取消',value:'cancelled'},{label:'已退款',value:'refunded'}]
+const statusOptions=[{label:'待支付',value:'pending_payment'},{label:'已支付',value:'paid'},{label:'制作中',value:'generating'},{label:'待用户确认',value:'confirming'},{label:'人工校对',value:'reviewing'},{label:'印刷中',value:'printing'},{label:'已发货',value:'shipped'},{label:'已完成',value:'completed'},{label:'已取消',value:'cancelled'},{label:'已退款',value:'refunded'}]
 const transitionMap:Record<string,Array<{label:string,value:string}>>={paid:[{label:'开始制作',value:'generating'}],generating:[{label:'提交人工校对',value:'reviewing'}],shipped:[{label:'确认完成',value:'completed'}]}
 const nextActions=(row:StorybookOrder)=>row.automaticArtwork&&row.orderStatus!=='shipped'?[]:row.orderStatus==='reviewing'?(row.productType==='digital'?[{label:'退回制作',value:'generating'},...(row.digitalFileUrl?[{label:'确认交付完成',value:'completed'}]:[])]:[{label:'退回制作',value:'generating'},{label:'校对通过，进入印刷',value:'printing'}]):transitionMap[row.orderStatus]||[]
 const statusLabel=(value:string)=>statusOptions.find(i=>i.value===value)?.label||({pending_payment:'待支付'} as Record<string,string>)[value]||value
@@ -189,6 +190,14 @@ const changeStatus = async (row: StorybookOrder, value: string) => {
   }
   await updateStorybookOrderStatus(row.id, value)
   ElMessage.success('状态已更新')
+  await load()
+}
+const confirmOrder = async (row: StorybookOrder) => {
+  try {
+    await ElMessageBox.confirm('该绘本将按用户已确认处理，直接进入印刷/交付且不可撤回。', '人工代确认', { type: 'warning' })
+  } catch { return }
+  await confirmStorybookOrder(row.id)
+  ElMessage.success('已确认')
   await load()
 }
 const openShip=(row:StorybookOrder)=>{selected.value=row;trackingNo.value='';shipVisible.value=true}

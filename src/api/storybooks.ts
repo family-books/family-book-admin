@@ -7,6 +7,9 @@ export const getStorybookOrders = (params: { page: number; pageSize: number; sta
 export const updateStorybookOrderStatus = (id: string, status: string): Promise<ApiResponse<null>> =>
   request.put(`/api/admin/storybook/orders/${id}/status`, { status })
 
+export const confirmStorybookOrder = (id: string): Promise<ApiResponse<null>> =>
+  request.post(`/api/admin/storybook/orders/${id}/confirm`)
+
 export const shipStorybookOrder = (id: string, expressCompany: string, trackingNo: string): Promise<ApiResponse<null>> =>
   request.post(`/api/admin/storybook/orders/${id}/ship`, { expressCompany, trackingNo })
 
