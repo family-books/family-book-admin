@@ -9,7 +9,8 @@
     <img :src="page.imageUrl" alt="" :style="page.caption?.imageScale ? { left: (100 - page.caption.imageScale) / 2 + '%', width: page.caption.imageScale + '%', height: page.caption.imageScale + '%' } : undefined" />
     <div v-if="page.caption?.scrim" class="caption-scrim"
       :style="{ left: page.caption.scrim.left + '%', top: page.caption.scrim.top + '%',
-        width: page.caption.scrim.width + '%', height: page.caption.scrim.height + '%' }" />
+        width: page.caption.scrim.width + '%', height: page.caption.scrim.height + '%',
+        background: captionScrimBackground(page.caption) }" />
     <template v-if="page.caption">
       <span v-for="(line, index) in page.caption.lines" :key="index" class="laid-out-caption"
         :class="{ outlined: page.caption.outline }"
@@ -62,6 +63,10 @@ const captionPosition = computed(() => {
 
 const captionOutlineColor = (caption?: StorybookArtwork['pages'][number]['caption']) =>
   caption?.outline ? (caption.color === '#201B17' ? 'rgba(255,255,255,.85)' : 'rgba(0,0,0,.55)') : 'transparent'
+const captionScrimBackground = (caption?: StorybookArtwork['pages'][number]['caption']) =>
+  caption?.color === '#201B17'
+    ? 'linear-gradient(180deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.85) 18%,rgba(255,255,255,.85) 82%,rgba(255,255,255,0) 100%)'
+    : 'linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,.72) 18%,rgba(0,0,0,.72) 82%,rgba(0,0,0,0) 100%)'
 </script>
 
 <style scoped>
