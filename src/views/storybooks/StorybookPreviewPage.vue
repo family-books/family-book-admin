@@ -135,7 +135,8 @@ const captionScrimBackground = (caption?: StorybookArtwork['pages'][number]['cap
 .laid-out-caption.outlined{
   -webkit-text-stroke:calc(0.9 * var(--page-unit)) var(--caption-outline);
   paint-order:stroke fill;
-  text-shadow:calc(0.6 * var(--page-unit)) calc(1.6 * var(--page-unit)) calc(2.6 * var(--page-unit)) var(--caption-shadow);
+  text-shadow:0 0 calc(2.5 * var(--page-unit)) var(--caption-outline),
+    calc(0.6 * var(--page-unit)) calc(1.6 * var(--page-unit)) calc(2.6 * var(--page-unit)) var(--caption-shadow);
 }
 .full-bleed-caption.space-caption{padding:0;background:none;border-radius:0}
 
