@@ -15,7 +15,7 @@
       <span v-for="(line, index) in page.caption.lines" :key="index" class="laid-out-caption"
         :class="{ outlined: page.caption.outline }"
         :style="{ left: line.left + '%', top: line.top + '%', color: page.caption.color,
-          fontSize: page.caption.fontWidthPercent + 'cqw', '--caption-outline': captionOutlineColor(page.caption) }">{{ line.text }}</span>
+          fontSize: page.caption.fontWidthPercent + 'cqw', '--caption-outline': captionOutlineColor(page.caption), '--caption-shadow': captionShadowColor(page.caption) }">{{ line.text }}</span>
     </template>
     <span v-else-if="page.qualityStatus !== 'caption_pending'" class="full-bleed-caption"
       :class="{ 'space-caption': fullBleed }" :style="captionPosition">{{ page.text }}</span>
@@ -63,6 +63,8 @@ const captionPosition = computed(() => {
 
 const captionOutlineColor = (caption?: StorybookArtwork['pages'][number]['caption']) =>
   caption?.outline ? (caption.color === '#201B17' ? 'rgba(255,255,255,.85)' : 'rgba(0,0,0,.55)') : 'transparent'
+const captionShadowColor = (caption?: StorybookArtwork['pages'][number]['caption']) =>
+  caption?.color === '#201B17' ? 'rgba(20,36,52,.4)' : 'rgba(18,42,38,.5)'
 const captionScrimBackground = (caption?: StorybookArtwork['pages'][number]['caption']) =>
   caption?.color === '#201B17'
     ? 'linear-gradient(180deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.85) 18%,rgba(255,255,255,.85) 82%,rgba(255,255,255,0) 100%)'
@@ -131,9 +133,9 @@ const captionScrimBackground = (caption?: StorybookArtwork['pages'][number]['cap
 .caption-scrim{position:absolute;background:linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,.72) 18%,rgba(0,0,0,.72) 82%,rgba(0,0,0,0) 100%)}
 .laid-out-caption{position:absolute;display:block;white-space:nowrap;font-family:sans-serif;font-weight:400;line-height:1.15}
 .laid-out-caption.outlined{
-  -webkit-text-stroke:calc(0.5 * var(--page-unit)) var(--caption-outline);
+  -webkit-text-stroke:calc(0.9 * var(--page-unit)) var(--caption-outline);
   paint-order:stroke fill;
-  text-shadow:0 calc(1 * var(--page-unit)) calc(2 * var(--page-unit)) rgba(0,0,0,.3);
+  text-shadow:calc(0.6 * var(--page-unit)) calc(1.6 * var(--page-unit)) calc(2.6 * var(--page-unit)) var(--caption-shadow);
 }
 .full-bleed-caption.space-caption{padding:0;background:none;border-radius:0}
 
