@@ -37,6 +37,7 @@ const styles = `
     print-color-adjust: exact; -webkit-print-color-adjust: exact;
   }
   .FULL_BLEED p { font-size: 16pt; line-height: 1.52; }
+  .caption-block { position: absolute; pointer-events: none; }
   .caption-scrim { position: absolute; border-radius: 5mm; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
   .caption-line { position: absolute; white-space: nowrap; font-family: "LXGWWenKai", "Yuanti SC", "PingFang SC", sans-serif; line-height: 1.15; }
   .DEDICATION { display: grid; place-items: center; text-align: center; }
@@ -77,7 +78,17 @@ export async function openStorybookPrint(pages: StorybookArtwork['pages']) {
     if (page.caption) {
       const scrim = page.caption.scrim
       const bottomBar = scrim?.style === 'bottom'
-      if (scrim) {
+      if (page.captionBlockUrl && scrim) {
+        const block = doc.createElement('img')
+        block.alt = ''
+        block.className = 'caption-block'
+        block.src = page.captionBlockUrl
+        Object.assign(block.style, {
+          left: `${scrim.left}%`, top: `${scrim.top}%`, width: `${scrim.width}%`, height: `${scrim.height}%`,
+        })
+        sheet.append(block)
+        images.push(block)
+      } else if (scrim) {
         const hex = (scrim.color || '#FFF6E6').replace('#', '')
         const red = parseInt(hex.slice(0, 2), 16)
         const green = parseInt(hex.slice(2, 4), 16)
@@ -85,7 +96,7 @@ export async function openStorybookPrint(pages: StorybookArtwork['pages']) {
         const panel = doc.createElement('div')
         panel.className = 'caption-scrim'
         panel.style.background = bottomBar
-          ? 'linear-gradient(to bottom,rgba(255,255,255,0) 0%,rgba(255,255,255,.84) 40%,rgba(255,255,255,.84) 75%,rgba(255,255,255,0) 100%)'
+          ? 'linear-gradient(to bottom,rgba(255,255,255,0) 0%,rgba(255,255,255,.84) 25%,rgba(255,255,255,.84) 75%,rgba(255,255,255,0) 100%)'
           : `rgba(${red},${green},${blue},${scrim.opacity ?? 0.82})`
         Object.assign(panel.style, {
           left: `${scrim.left}%`, top: `${scrim.top}%`, width: `${scrim.width}%`, height: `${scrim.height}%`,
