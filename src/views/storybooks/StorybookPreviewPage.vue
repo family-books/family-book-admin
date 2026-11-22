@@ -7,17 +7,19 @@
   </div>
   <div v-else-if="page.layout === 'FULL_BLEED'" class="preview full-bleed-preview" :class="{ 'separate-caption': page.caption?.imageScale }">
     <img :src="page.imageUrl" alt="" :style="page.caption?.imageScale ? { left: (100 - page.caption.imageScale) / 2 + '%', width: page.caption.imageScale + '%', height: page.caption.imageScale + '%' } : undefined" />
-    <div v-if="page.caption?.scrim" class="caption-scrim"
+    <div v-if="!page.stickerOverlayUrl && page.caption?.scrim" class="caption-scrim"
       :style="{ left: page.caption.scrim.left + '%', top: page.caption.scrim.top + '%',
         width: page.caption.scrim.width + '%', height: page.caption.scrim.height + '%',
         background: captionScrimBackground(page.caption) }" />
-    <template v-if="page.caption">
+    <img v-if="page.stickerOverlayUrl" class="sticker-overlay" :src="page.stickerOverlayUrl" alt=""
+      :style="stickerStyle(page.stickerBox)" />
+    <template v-if="!page.stickerOverlayUrl && page.caption">
       <span v-for="(line, index) in page.caption.lines" :key="index" class="laid-out-caption"
         :class="{ outlined: page.caption.outline }"
         :style="{ left: line.left + '%', top: line.top + '%', color: page.caption.color,
           fontSize: page.caption.fontWidthPercent + 'cqw', '--caption-outline': captionOutlineColor(page.caption) }">{{ line.text }}</span>
     </template>
-    <span v-else-if="page.qualityStatus !== 'caption_pending'" class="full-bleed-caption"
+    <span v-else-if="!page.stickerOverlayUrl && page.qualityStatus !== 'caption_pending'" class="full-bleed-caption"
       :class="{ 'space-caption': fullBleed }" :style="captionPosition">{{ page.text }}</span>
   </div>
   <div v-else-if="page.layout && page.layout !== 'LEGACY'" class="preview story-preview">
@@ -61,12 +63,18 @@ const captionPosition = computed(() => {
   }
 })
 
+const isDarkInk = (caption?: StorybookArtwork['pages'][number]['caption']) =>
+  !caption?.color || caption.color === '#000000' || caption.color === '#201B17'
 const captionOutlineColor = (caption?: StorybookArtwork['pages'][number]['caption']) =>
-  caption?.outline ? (caption.color === '#201B17' ? 'rgba(255,255,255,.85)' : 'rgba(0,0,0,.55)') : 'transparent'
+  caption?.outline ? (isDarkInk(caption) ? 'rgba(255,255,255,.85)' : 'rgba(0,0,0,.55)') : 'transparent'
 const captionScrimBackground = (caption?: StorybookArtwork['pages'][number]['caption']) =>
-  caption?.color === '#201B17'
-    ? 'linear-gradient(180deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.85) 18%,rgba(255,255,255,.85) 82%,rgba(255,255,255,0) 100%)'
-    : 'linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,.72) 18%,rgba(0,0,0,.72) 82%,rgba(0,0,0,0) 100%)'
+  isDarkInk(caption)
+    ? 'radial-gradient(ellipse 100% 100% at 50% 50%,rgba(255,255,255,.88) 0%,rgba(255,255,255,.88) 55%,rgba(255,255,255,0) 82%)'
+    : 'radial-gradient(ellipse 100% 100% at 50% 50%,rgba(0,0,0,.72) 0%,rgba(0,0,0,.72) 55%,rgba(0,0,0,0) 82%)'
+const stickerStyle = (box?: { left: number; top: number; width: number; height: number }) => {
+  if (!box) return {}
+  return { left: box.left + '%', top: box.top + '%', width: box.width + '%', height: box.height + '%' }
+}
 </script>
 
 <style scoped>
@@ -128,7 +136,8 @@ const captionScrimBackground = (caption?: StorybookArtwork['pages'][number]['cap
   text-shadow:0 calc(1 * var(--page-unit)) calc(3 * var(--page-unit)) rgba(0,0,0,.65);
 }
 .full-bleed-preview.separate-caption{background:#faf5ea}
-.caption-scrim{position:absolute;background:linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,.72) 18%,rgba(0,0,0,.72) 82%,rgba(0,0,0,0) 100%)}
+.caption-scrim{position:absolute;background:radial-gradient(ellipse 100% 100% at 50% 50%,rgba(255,255,255,.88) 0%,rgba(255,255,255,.88) 55%,rgba(255,255,255,0) 82%)}
+.sticker-overlay{position:absolute;pointer-events:none}
 .laid-out-caption{position:absolute;display:block;white-space:nowrap;font-family:sans-serif;font-weight:400;line-height:1.15}
 .laid-out-caption.outlined{
   -webkit-text-stroke:calc(0.9 * var(--page-unit)) var(--caption-outline);

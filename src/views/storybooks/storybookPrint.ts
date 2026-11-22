@@ -37,7 +37,8 @@ const styles = `
     print-color-adjust: exact; -webkit-print-color-adjust: exact;
   }
   .FULL_BLEED p { font-size: 16pt; line-height: 1.52; }
-  .caption-scrim { position: absolute; background: rgba(0,0,0,.72); print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .caption-scrim { position: absolute; border-radius: 5mm; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .sticker-overlay { position: absolute; pointer-events: none; }
   .caption-line { position: absolute; white-space: nowrap; font-family: sans-serif; line-height: 1.15; }
   .DEDICATION { display: grid; place-items: center; text-align: center; }
   @media print { body { background: white; } article { margin: 0; } }
@@ -74,11 +75,29 @@ export async function openStorybookPrint(pages: StorybookArtwork['pages']) {
       sheet.append(image)
       images.push(image)
     }
+    if (page.stickerOverlayUrl) {
+      const sticker = doc.createElement('img')
+      sticker.alt = ''
+      sticker.className = 'sticker-overlay'
+      sticker.src = page.stickerOverlayUrl
+      const box = page.stickerBox
+      if (box) {
+        Object.assign(sticker.style, {
+          left: `${box.left}%`, top: `${box.top}%`, width: `${box.width}%`, height: `${box.height}%`,
+        })
+      }
+      sheet.append(sticker)
+      images.push(sticker)
+      doc.body.append(sheet)
+      continue
+    }
     if (page.caption) {
+      const darkInk = !page.caption.color || page.caption.color === '#000000' || page.caption.color === '#201B17'
       const scrim = page.caption.scrim
       if (scrim) {
         const panel = doc.createElement('div')
         panel.className = 'caption-scrim'
+        panel.style.background = darkInk ? 'rgba(255,246,230,.92)' : 'rgba(13,24,40,.72)'
         Object.assign(panel.style, {
           left: `${scrim.left}%`, top: `${scrim.top}%`, width: `${scrim.width}%`, height: `${scrim.height}%`,
         })
