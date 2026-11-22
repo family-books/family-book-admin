@@ -33,7 +33,7 @@ export interface StorybookArtwork {
   templateCode?: string
   status?: string
   error?: string
-  pages: Array<{ number: number; title: string; text?: string; imageUrl?: string; layout?: string; qualityStatus?: string; textBox?: StorybookTextBox; caption?: StorybookCaption; stickerOverlayUrl?: string; stickerBox?: { left: number; top: number; width: number; height: number } }>
+  pages: Array<{ number: number; title: string; text?: string; imageUrl?: string; layout?: string; qualityStatus?: string; textBox?: StorybookTextBox; caption?: StorybookCaption; accentColor?: string; accentTokens?: string[]; stickerOverlayUrl?: string; stickerBox?: { left: number; top: number; width: number; height: number } }>
 }
 
 export const getStorybookArtwork = (id: string): Promise<ApiResponse<StorybookArtwork>> =>
