@@ -26,14 +26,14 @@ interface StorybookCaption {
   fontWidthPercent: number
   imageScale?: number
   outline?: boolean
-  scrim?: { left: number; top: number; width: number; height: number }
+  scrim?: { left: number; top: number; width: number; height: number; color?: string; opacity?: number; style?: string }
   lines: Array<{ text: string; left: number; top: number }>
 }
 export interface StorybookArtwork {
   templateCode?: string
   status?: string
   error?: string
-  pages: Array<{ number: number; title: string; text?: string; imageUrl?: string; layout?: string; qualityStatus?: string; textBox?: StorybookTextBox; caption?: StorybookCaption; accentColor?: string; accentTokens?: string[]; stickerOverlayUrl?: string; stickerBox?: { left: number; top: number; width: number; height: number } }>
+  pages: Array<{ number: number; title: string; text?: string; imageUrl?: string; layout?: string; qualityStatus?: string; textBox?: StorybookTextBox; caption?: StorybookCaption; accentColor?: string; accentTokens?: string[] }>
 }
 
 export const getStorybookArtwork = (id: string): Promise<ApiResponse<StorybookArtwork>> =>

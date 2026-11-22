@@ -23,7 +23,7 @@ const styles = `
   }
   .COVER h1 {
     margin: 0; color: #fff1ca; font-size: 36pt; font-weight: 800; overflow-wrap: anywhere;
-    font-family: "Yuanti SC", "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+    font-family: "LXGWWenKai", "Yuanti SC", "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
     text-shadow: 0 1mm 0 rgba(62,34,27,.75), 0 1.6mm 4mm rgba(4,11,22,.82);
   }
   .COVER h1.medium { font-size: 27pt; }
@@ -32,14 +32,13 @@ const styles = `
   .FULL_BLEED img { width: 100%; height: 100%; object-fit: cover; }
   .FULL_BLEED section {
     position: absolute; box-sizing: border-box; border-radius: 4mm; padding: 3mm 4mm;
-    color: #fff8e9; font-family: "PingFang SC", "Noto Sans CJK SC", sans-serif; font-weight: 600;
+    color: #fff8e9; font-family: "LXGWWenKai", "PingFang SC", "Noto Sans CJK SC", sans-serif; font-weight: 600;
     background: linear-gradient(130deg, rgba(9,19,34,.78), rgba(9,19,34,.54));
     print-color-adjust: exact; -webkit-print-color-adjust: exact;
   }
   .FULL_BLEED p { font-size: 16pt; line-height: 1.52; }
   .caption-scrim { position: absolute; border-radius: 5mm; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
-  .sticker-overlay { position: absolute; pointer-events: none; }
-  .caption-line { position: absolute; white-space: nowrap; font-family: sans-serif; line-height: 1.15; }
+  .caption-line { position: absolute; white-space: nowrap; font-family: "LXGWWenKai", "Yuanti SC", "PingFang SC", sans-serif; line-height: 1.15; }
   .DEDICATION { display: grid; place-items: center; text-align: center; }
   @media print { body { background: white; } article { margin: 0; } }
 `
@@ -75,31 +74,22 @@ export async function openStorybookPrint(pages: StorybookArtwork['pages']) {
       sheet.append(image)
       images.push(image)
     }
-    if (page.stickerOverlayUrl) {
-      const sticker = doc.createElement('img')
-      sticker.alt = ''
-      sticker.className = 'sticker-overlay'
-      sticker.src = page.stickerOverlayUrl
-      const box = page.stickerBox
-      if (box) {
-        Object.assign(sticker.style, {
-          left: `${box.left}%`, top: `${box.top}%`, width: `${box.width}%`, height: `${box.height}%`,
-        })
-      }
-      sheet.append(sticker)
-      images.push(sticker)
-      doc.body.append(sheet)
-      continue
-    }
     if (page.caption) {
-      const darkInk = !page.caption.color || page.caption.color === '#000000' || page.caption.color === '#201B17'
       const scrim = page.caption.scrim
+      const bottomBar = scrim?.style === 'bottom'
       if (scrim) {
+        const hex = (scrim.color || '#FFF6E6').replace('#', '')
+        const red = parseInt(hex.slice(0, 2), 16)
+        const green = parseInt(hex.slice(2, 4), 16)
+        const blue = parseInt(hex.slice(4, 6), 16)
         const panel = doc.createElement('div')
         panel.className = 'caption-scrim'
-        panel.style.background = darkInk ? 'rgba(255,246,230,.92)' : 'rgba(13,24,40,.72)'
+        panel.style.background = bottomBar
+          ? 'linear-gradient(to bottom,rgba(255,255,255,0) 0%,rgba(255,255,255,.84) 40%,rgba(255,255,255,.84) 75%,rgba(255,255,255,0) 100%)'
+          : `rgba(${red},${green},${blue},${scrim.opacity ?? 0.82})`
         Object.assign(panel.style, {
           left: `${scrim.left}%`, top: `${scrim.top}%`, width: `${scrim.width}%`, height: `${scrim.height}%`,
+          borderRadius: bottomBar ? '0' : '5mm',
         })
         sheet.append(panel)
       }
@@ -111,6 +101,7 @@ export async function openStorybookPrint(pages: StorybookArtwork['pages']) {
         element.style.top = `${line.top}%`
         element.style.color = page.caption.color
         element.style.fontSize = `${page.caption.fontWidthPercent * 2.4}mm`
+        if (bottomBar) element.style.letterSpacing = '0.10em'
         sheet.append(element)
       }
       doc.body.append(sheet)

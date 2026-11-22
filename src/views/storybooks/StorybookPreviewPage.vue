@@ -7,21 +7,20 @@
   </div>
   <div v-else-if="page.layout === 'FULL_BLEED'" class="preview full-bleed-preview" :class="{ 'separate-caption': page.caption?.imageScale }">
     <img :src="page.imageUrl" alt="" :style="page.caption?.imageScale ? { left: (100 - page.caption.imageScale) / 2 + '%', width: page.caption.imageScale + '%', height: page.caption.imageScale + '%' } : undefined" />
-    <div v-if="!page.stickerOverlayUrl && page.caption?.scrim" class="caption-scrim"
+    <div v-if="page.caption?.scrim" class="caption-scrim"
       :style="{ left: page.caption.scrim.left + '%', top: page.caption.scrim.top + '%',
         width: page.caption.scrim.width + '%', height: page.caption.scrim.height + '%',
+        borderRadius: page.caption.scrim.style === 'bottom' ? '0' : '3%',
         background: captionScrimBackground(page.caption) }" />
-    <img v-if="page.stickerOverlayUrl" class="sticker-overlay" :src="page.stickerOverlayUrl" alt=""
-      :style="stickerStyle(page.stickerBox)" />
-    <template v-if="fontReady && !page.stickerOverlayUrl && page.caption">
+    <template v-if="fontReady && page.caption">
       <span v-for="(line, index) in page.caption.lines" :key="index" class="laid-out-caption"
-        :class="{ outlined: page.caption.outline }"
+        :class="{ outlined: page.caption.outline, 'bottom-bar-text': page.caption.scrim?.style === 'bottom' }"
         :style="{ left: line.left + '%', top: line.top + '%', color: page.caption.color,
           fontSize: page.caption.fontWidthPercent + 'cqw', '--caption-outline': captionOutlineColor(page.caption) }"><span
           v-for="(run, runIndex) in accentRuns(line.text, page.accentTokens)" :key="runIndex"
           :style="run.accent ? { color: page.accentColor || '#E07A3F' } : undefined">{{ run.text }}</span></span>
     </template>
-    <span v-else-if="!page.stickerOverlayUrl && page.qualityStatus !== 'caption_pending'" class="full-bleed-caption"
+    <span v-else-if="page.qualityStatus !== 'caption_pending'" class="full-bleed-caption"
       :class="{ 'space-caption': fullBleed }" :style="captionPosition">{{ page.text }}</span>
   </div>
   <div v-else-if="page.layout && page.layout !== 'LEGACY'" class="preview story-preview">
@@ -42,23 +41,49 @@ import type { StorybookArtwork } from '@/api/storybooks'
 import { ensureStorybookFont } from '@/utils/storybookFont'
 
 const ACCENT_TOKENS = ['嗒嗒', '咚咚', '啪嗒', '沙沙', '嗒', '咚', '啪', '哗', '吱', '砰', '呼', '咕']
+const IGNORABLE = /[\s，。、！？；：…—·“”‘’（）《》〈〉【】「」『』,.!?;:'"()\[\]{}<>-]/
+const isOnomatopoeiaOnly = (inner: string, tokens: string[]) => {
+  let index = 0
+  let hasToken = false
+  while (index < inner.length) {
+    if (IGNORABLE.test(inner[index])) {
+      index += 1
+      continue
+    }
+    const token = tokens.find((item) => inner.startsWith(item, index))
+    if (!token) return false
+    hasToken = true
+    index += token.length
+  }
+  return hasToken
+}
 const accentRuns = (text: string, tokens: string[] = ACCENT_TOKENS) => {
   const runs: Array<{ text: string; accent: boolean }> = []
   let plain = ''
   let index = 0
   while (index < text.length) {
-    const token = tokens.find((item) => text.startsWith(item, index))
-    if (!token) {
-      plain += text[index]
-      index += 1
-      continue
+    const open = text[index]
+    const close = open === '“' ? '”' : open === '「' ? '」' : ''
+    if (close) {
+      const end = text.indexOf(close, index + 1)
+      if (end > index) {
+        const inner = text.slice(index + 1, end)
+        if (isOnomatopoeiaOnly(inner, tokens)) {
+          if (plain) {
+            runs.push({ text: plain, accent: false })
+            plain = ''
+          }
+          runs.push({ text: text.slice(index, end + 1), accent: true })
+          index = end + 1
+          continue
+        }
+        plain += text.slice(index, end + 1)
+        index = end + 1
+        continue
+      }
     }
-    if (plain) {
-      runs.push({ text: plain, accent: false })
-      plain = ''
-    }
-    runs.push({ text: token, accent: true })
-    index += token.length
+    plain += open
+    index += 1
   }
   if (plain) runs.push({ text: plain, accent: false })
   return runs
@@ -99,11 +124,16 @@ const isDarkInk = (caption?: StorybookArtwork['pages'][number]['caption']) =>
   !caption?.color || caption.color === '#000000' || caption.color === '#201B17' || caption.color === '#3A3A3A'
 const captionOutlineColor = (caption?: StorybookArtwork['pages'][number]['caption']) =>
   caption?.outline ? (isDarkInk(caption) ? 'rgba(255,255,255,.85)' : 'rgba(0,0,0,.55)') : 'transparent'
-const captionScrimBackground = (caption?: StorybookArtwork['pages'][number]['caption']) =>
-  isDarkInk(caption) ? 'rgba(255,250,240,.68)' : 'rgba(0,0,0,.6)'
-const stickerStyle = (box?: { left: number; top: number; width: number; height: number }) => {
-  if (!box) return {}
-  return { left: box.left + '%', top: box.top + '%', width: box.width + '%', height: box.height + '%' }
+const captionScrimBackground = (caption?: StorybookArtwork['pages'][number]['caption']) => {
+  const scrim = caption?.scrim
+  if (scrim?.style === 'bottom') {
+    return 'linear-gradient(to bottom,rgba(255,255,255,0) 0%,rgba(255,255,255,.84) 40%,rgba(255,255,255,.84) 75%,rgba(255,255,255,0) 100%)'
+  }
+  const hex = (scrim?.color || '#FFF6E6').replace('#', '')
+  const red = parseInt(hex.slice(0, 2), 16)
+  const green = parseInt(hex.slice(2, 4), 16)
+  const blue = parseInt(hex.slice(4, 6), 16)
+  return `rgba(${red},${green},${blue},${scrim?.opacity ?? 0.82})`
 }
 </script>
 
@@ -166,9 +196,9 @@ const stickerStyle = (box?: { left: number; top: number; width: number; height: 
   text-shadow:0 calc(1 * var(--page-unit)) calc(3 * var(--page-unit)) rgba(0,0,0,.65);
 }
 .full-bleed-preview.separate-caption{background:#faf5ea}
-.caption-scrim{position:absolute;border-radius:3%;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)}
-.sticker-overlay{position:absolute;pointer-events:none}
+.caption-scrim{position:absolute;border-radius:3%}
 .laid-out-caption{position:absolute;display:block;white-space:nowrap;font-family:"LXGWWenKai","Yuanti SC","PingFang SC",sans-serif;font-weight:400;line-height:1}
+.bottom-bar-text{letter-spacing:.10em}
 .laid-out-caption.outlined{
   -webkit-text-stroke:calc(0.9 * var(--page-unit)) var(--caption-outline);
   paint-order:stroke fill;
