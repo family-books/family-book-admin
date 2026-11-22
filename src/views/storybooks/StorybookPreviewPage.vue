@@ -100,9 +100,7 @@ const isDarkInk = (caption?: StorybookArtwork['pages'][number]['caption']) =>
 const captionOutlineColor = (caption?: StorybookArtwork['pages'][number]['caption']) =>
   caption?.outline ? (isDarkInk(caption) ? 'rgba(255,255,255,.85)' : 'rgba(0,0,0,.55)') : 'transparent'
 const captionScrimBackground = (caption?: StorybookArtwork['pages'][number]['caption']) =>
-  isDarkInk(caption)
-    ? 'radial-gradient(ellipse 100% 100% at 50% 50%,rgba(255,250,240,.78) 0%,rgba(255,250,240,.78) 55%,rgba(255,250,240,0) 82%)'
-    : 'radial-gradient(ellipse 100% 100% at 50% 50%,rgba(0,0,0,.68) 0%,rgba(0,0,0,.68) 55%,rgba(0,0,0,0) 82%)'
+  isDarkInk(caption) ? 'rgba(255,250,240,.68)' : 'rgba(0,0,0,.6)'
 const stickerStyle = (box?: { left: number; top: number; width: number; height: number }) => {
   if (!box) return {}
   return { left: box.left + '%', top: box.top + '%', width: box.width + '%', height: box.height + '%' }
@@ -168,7 +166,7 @@ const stickerStyle = (box?: { left: number; top: number; width: number; height: 
   text-shadow:0 calc(1 * var(--page-unit)) calc(3 * var(--page-unit)) rgba(0,0,0,.65);
 }
 .full-bleed-preview.separate-caption{background:#faf5ea}
-.caption-scrim{position:absolute;background:radial-gradient(ellipse 100% 100% at 50% 50%,rgba(255,250,240,.78) 0%,rgba(255,250,240,.78) 55%,rgba(255,250,240,0) 82%)}
+.caption-scrim{position:absolute;border-radius:3%;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)}
 .sticker-overlay{position:absolute;pointer-events:none}
 .laid-out-caption{position:absolute;display:block;white-space:nowrap;font-family:"LXGWWenKai","Yuanti SC","PingFang SC",sans-serif;font-weight:400;line-height:1}
 .laid-out-caption.outlined{
