@@ -39,7 +39,7 @@ const styles = `
   .FULL_BLEED p { font-size: 16pt; line-height: 1.52; }
   .caption-block { position: absolute; pointer-events: none; }
   .caption-scrim { position: absolute; border-radius: 5mm; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
-  .caption-line { position: absolute; white-space: nowrap; font-family: "LXGWWenKai", "Yuanti SC", "PingFang SC", sans-serif; line-height: 1.15; }
+  .caption-line { position: absolute; white-space: nowrap; font-family: "LXGWWenKai", "Yuanti SC", "PingFang SC", sans-serif; line-height: 1.15; letter-spacing: .04em; }
   .DEDICATION { display: grid; place-items: center; text-align: center; }
   @media print { body { background: white; } article { margin: 0; } }
 `
@@ -112,7 +112,6 @@ export async function openStorybookPrint(pages: StorybookArtwork['pages']) {
         element.style.top = `${line.top}%`
         element.style.color = page.caption.color
         element.style.fontSize = `${page.caption.fontWidthPercent * 2.4}mm`
-        if (bottomBar) element.style.letterSpacing = '0.10em'
         sheet.append(element)
       }
       doc.body.append(sheet)

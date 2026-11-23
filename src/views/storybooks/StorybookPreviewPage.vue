@@ -185,8 +185,8 @@ const captionScrimBackground = (caption?: StorybookArtwork['pages'][number]['cap
 .full-bleed-preview.separate-caption{background:#faf5ea}
 .caption-block{position:absolute;pointer-events:none}
 .caption-scrim{position:absolute;border-radius:3%}
-.laid-out-caption{position:absolute;display:block;white-space:nowrap;font-family:"LXGWWenKai","Yuanti SC","PingFang SC",sans-serif;font-weight:400;line-height:1}
-.bottom-bar-text{letter-spacing:.10em}
+.laid-out-caption{position:absolute;display:block;white-space:nowrap;font-family:"LXGWWenKai","Yuanti SC","PingFang SC",sans-serif;font-weight:400;letter-spacing:.04em;line-height:1}
+.bottom-bar-text{letter-spacing:.04em}
 .laid-out-caption.outlined{
   -webkit-text-stroke:calc(0.9 * var(--page-unit)) var(--caption-outline);
   paint-order:stroke fill;
