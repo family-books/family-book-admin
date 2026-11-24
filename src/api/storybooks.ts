@@ -21,12 +21,24 @@ export const uploadStorybookDigitalFile = (id: string, file: File): Promise<ApiR
 
 export interface StorybookTextBox { left: number; offset: number; width: number; fromBottom: boolean }
 
+export interface CaptionScrim {
+  left: number
+  top: number
+  width: number
+  height: number
+  color?: string
+  opacity?: number
+  style?: string
+  core?: { left: number; top: number; right: number; bottom: number }
+}
+
 interface StorybookCaption {
   color: string
   fontWidthPercent: number
   imageScale?: number
   outline?: boolean
-  scrim?: { left: number; top: number; width: number; height: number; color?: string; opacity?: number; style?: string }
+  layoutVersion?: number
+  scrim?: CaptionScrim
   lines: Array<{ text: string; left: number; top: number }>
 }
 export interface StorybookArtwork {

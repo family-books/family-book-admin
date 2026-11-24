@@ -1,20 +1,19 @@
 const FONT_FAMILY = 'LXGWWenKai'
-let loading: Promise<boolean> | null = null
+const loading = new WeakMap<Document, Promise<boolean>>()
 
-export const ensureStorybookFont = () => {
-  if (loading) return loading
+export const ensureStorybookFont = (doc = document) => {
+  const pending = loading.get(doc)
+  if (pending) return pending
   const base = import.meta.env.VITE_API_BASE_URL
   const url = import.meta.env.VITE_STORYBOOK_FONT_URL || (base ? `${base}/fonts/LXGWWenKai-Subset.woff2` : '')
-  if (!url || typeof document === 'undefined' || !('fonts' in document)) {
-    loading = Promise.resolve(false)
-    return loading
-  }
-  loading = new FontFace(FONT_FAMILY, `url(${url})`)
+  if (!url || !('fonts' in doc)) return Promise.resolve(false)
+  const font = new FontFace(FONT_FAMILY, `url(${url})`)
     .load()
     .then((face) => {
-      document.fonts.add(face)
+      doc.fonts.add(face)
       return true
     })
     .catch(() => false)
-  return loading
+  loading.set(doc, font)
+  return font
 }

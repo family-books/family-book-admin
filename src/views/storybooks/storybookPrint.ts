@@ -1,4 +1,6 @@
 import type { StorybookArtwork } from '@/api/storybooks'
+import { ensureStorybookFont } from '@/utils/storybookFont'
+import { captionScrimStyle } from './storybookCaptionScrim'
 
 const styles = `
   @page { size: 240mm 180mm; margin: 0; }
@@ -37,7 +39,7 @@ const styles = `
     print-color-adjust: exact; -webkit-print-color-adjust: exact;
   }
   .FULL_BLEED p { font-size: 16pt; line-height: 1.52; }
-  .caption-block { position: absolute; pointer-events: none; }
+  .FULL_BLEED .caption-block { object-fit: fill; position: absolute; pointer-events: none; }
   .caption-scrim { position: absolute; border-radius: 5mm; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
   .caption-line { position: absolute; white-space: nowrap; font-family: "LXGWWenKai", "Yuanti SC", "PingFang SC", sans-serif; line-height: 1.15; letter-spacing: .04em; }
   .DEDICATION { display: grid; place-items: center; text-align: center; }
@@ -59,6 +61,7 @@ export async function openStorybookPrint(pages: StorybookArtwork['pages']) {
   doc.head.append(style)
 
   const images: HTMLImageElement[] = []
+  const pendingBlocks: Promise<void>[] = []
   for (const page of pages) {
     const sheet = doc.createElement('article')
     sheet.className = page.layout || 'PORTRAIT_LEFT'
@@ -77,37 +80,34 @@ export async function openStorybookPrint(pages: StorybookArtwork['pages']) {
     }
     if (page.caption) {
       const scrim = page.caption.scrim
-      const bottomBar = scrim?.style === 'bottom'
-      if (page.captionBlockUrl && scrim) {
-        const block = doc.createElement('img')
-        block.alt = ''
-        block.className = 'caption-block'
-        block.src = page.captionBlockUrl
-        Object.assign(block.style, {
-          left: `${scrim.left}%`, top: `${scrim.top}%`, width: `${scrim.width}%`, height: `${scrim.height}%`,
-        })
-        sheet.append(block)
-        images.push(block)
-      } else if (scrim) {
-        const hex = (scrim.color || '#FFF6E6').replace('#', '')
-        const red = parseInt(hex.slice(0, 2), 16)
-        const green = parseInt(hex.slice(2, 4), 16)
-        const blue = parseInt(hex.slice(4, 6), 16)
+      if (scrim) {
         const panel = doc.createElement('div')
         panel.className = 'caption-scrim'
-        panel.style.background = bottomBar
-          ? 'radial-gradient(ellipse at center,rgba(255,250,240,.50) 0%,rgba(255,250,240,.50) 60%,rgba(255,250,240,0) 100%)'
-          : `rgba(${red},${green},${blue},${scrim.opacity ?? 0.82})`
-        Object.assign(panel.style, {
-          left: `${scrim.left}%`, top: `${scrim.top}%`, width: `${scrim.width}%`, height: `${scrim.height}%`,
-          borderRadius: bottomBar ? '0' : '5mm',
-        })
-        sheet.append(panel)
+        Object.assign(panel.style, captionScrimStyle(scrim, '5mm'))
+        if (page.captionBlockUrl) {
+          const block = doc.createElement('img')
+          block.alt = ''
+          block.className = 'caption-block'
+          block.src = page.captionBlockUrl
+          Object.assign(block.style, {
+            left: `${scrim.left}%`, top: `${scrim.top}%`, width: `${scrim.width}%`, height: `${scrim.height}%`,
+          })
+          sheet.append(block)
+          if (scrim.core) {
+            // The saved range still allows rendering if the signed image expires.
+            pendingBlocks.push(block.decode().catch(() => { block.replaceWith(panel) }))
+          } else {
+            images.push(block)
+          }
+        } else {
+          sheet.append(panel)
+        }
       }
       for (const line of page.caption.lines) {
         const element = doc.createElement('span')
         element.className = 'caption-line'
         element.textContent = line.text
+        if (page.caption.layoutVersion === 11) element.style.lineHeight = '1'
         element.style.left = `${line.left}%`
         element.style.top = `${line.top}%`
         element.style.color = page.caption.color
@@ -141,7 +141,8 @@ export async function openStorybookPrint(pages: StorybookArtwork['pages']) {
   }
 
   try {
-    await Promise.all(images.map(image => image.decode()))
+    await Promise.all([...images.map(image => image.decode()), ...pendingBlocks])
+    await ensureStorybookFont(doc)
     await doc.fonts.ready
     const overflowingPage = Array.from(doc.querySelectorAll('article')).findIndex(
       sheet => sheet.scrollHeight > sheet.clientHeight + 1

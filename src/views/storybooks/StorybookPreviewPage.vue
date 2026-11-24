@@ -7,24 +7,21 @@
   </div>
   <div v-else-if="page.layout === 'FULL_BLEED'" class="preview full-bleed-preview" :class="{ 'separate-caption': page.caption?.imageScale }">
     <img :src="page.imageUrl" alt="" :style="page.caption?.imageScale ? { left: (100 - page.caption.imageScale) / 2 + '%', width: page.caption.imageScale + '%', height: page.caption.imageScale + '%' } : undefined" />
-    <img v-if="page.captionBlockUrl && page.caption?.scrim" class="caption-block"
-      :src="page.captionBlockUrl" alt=""
+    <img v-if="page.captionBlockUrl && page.captionBlockUrl !== failedCaptionBlock && page.caption?.scrim" class="caption-block"
+      :src="page.captionBlockUrl" alt="" @error="failedCaptionBlock = page.captionBlockUrl || ''"
       :style="{ left: page.caption.scrim.left + '%', top: page.caption.scrim.top + '%',
         width: page.caption.scrim.width + '%', height: page.caption.scrim.height + '%' }" />
     <div v-else-if="page.caption?.scrim" class="caption-scrim"
-      :style="{ left: page.caption.scrim.left + '%', top: page.caption.scrim.top + '%',
-        width: page.caption.scrim.width + '%', height: page.caption.scrim.height + '%',
-        borderRadius: page.caption.scrim.style === 'bottom' ? '0' : '3%',
-        background: captionScrimBackground(page.caption) }" />
+      :style="captionScrimStyle(page.caption.scrim, '3%')" />
     <template v-if="fontReady && page.caption">
       <span v-for="(line, index) in page.caption.lines" :key="index" class="laid-out-caption"
         :class="{ outlined: page.caption.outline, 'bottom-bar-text': page.caption.scrim?.style === 'bottom' }"
         :style="{ left: line.left + '%', top: line.top + '%', color: page.caption.color,
           fontSize: page.caption.fontWidthPercent + 'cqw', '--caption-outline': captionOutlineColor(page.caption) }"><span
           v-for="(run, runIndex) in accentRuns(line.text)" :key="runIndex"
-          :style="run.accent ? { color: page.accentColor || '#E07A3F' } : undefined">{{ run.text }}</span></span>
+          :style="run.accent && page.caption.layoutVersion !== 11 ? { color: page.accentColor || '#E07A3F' } : undefined">{{ run.text }}</span></span>
     </template>
-    <span v-else-if="page.qualityStatus !== 'caption_pending'" class="full-bleed-caption"
+    <span v-else-if="!page.caption && page.qualityStatus !== 'caption_pending'" class="full-bleed-caption"
       :class="{ 'space-caption': fullBleed }" :style="captionPosition">{{ page.text }}</span>
   </div>
   <div v-else-if="page.layout && page.layout !== 'LEGACY'" class="preview story-preview">
@@ -40,8 +37,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import type { StorybookArtwork } from '@/api/storybooks'
+import { captionScrimStyle } from './storybookCaptionScrim'
 import { ensureStorybookFont } from '@/utils/storybookFont'
 
 const accentRuns = (text: string) => {
@@ -84,6 +82,9 @@ onMounted(() => {
 
 const props = defineProps<{ page: StorybookArtwork['pages'][number]; templateCode?: string }>()
 
+const failedCaptionBlock = ref('')
+watch(() => props.page.captionBlockUrl, () => { failedCaptionBlock.value = '' })
+
 const fullBleed = computed(() => props.templateCode === 'space-station' || props.templateCode === 'dinosaur')
 
 const coverTitleStyle = computed(() => {
@@ -111,17 +112,6 @@ const isDarkInk = (caption?: StorybookArtwork['pages'][number]['caption']) =>
   !caption?.color || caption.color === '#000000' || caption.color === '#201B17' || caption.color === '#3A3A3A'
 const captionOutlineColor = (caption?: StorybookArtwork['pages'][number]['caption']) =>
   caption?.outline ? (isDarkInk(caption) ? 'rgba(255,255,255,.85)' : 'rgba(0,0,0,.55)') : 'transparent'
-const captionScrimBackground = (caption?: StorybookArtwork['pages'][number]['caption']) => {
-  const scrim = caption?.scrim
-  if (scrim?.style === 'bottom') {
-    return 'radial-gradient(ellipse at center,rgba(255,250,240,.50) 0%,rgba(255,250,240,.50) 60%,rgba(255,250,240,0) 100%)'
-  }
-  const hex = (scrim?.color || '#FFF6E6').replace('#', '')
-  const red = parseInt(hex.slice(0, 2), 16)
-  const green = parseInt(hex.slice(2, 4), 16)
-  const blue = parseInt(hex.slice(4, 6), 16)
-  return `rgba(${red},${green},${blue},${scrim?.opacity ?? 0.82})`
-}
 </script>
 
 <style scoped>
@@ -183,7 +173,7 @@ const captionScrimBackground = (caption?: StorybookArtwork['pages'][number]['cap
   text-shadow:0 calc(1 * var(--page-unit)) calc(3 * var(--page-unit)) rgba(0,0,0,.65);
 }
 .full-bleed-preview.separate-caption{background:#faf5ea}
-.caption-block{position:absolute;pointer-events:none}
+.full-bleed-preview .caption-block{object-fit:fill;pointer-events:none}
 .caption-scrim{position:absolute;border-radius:3%}
 .laid-out-caption{position:absolute;display:block;white-space:nowrap;font-family:"LXGWWenKai","Yuanti SC","PingFang SC",sans-serif;font-weight:400;letter-spacing:.04em;line-height:1}
 .bottom-bar-text{letter-spacing:.04em}
