@@ -7,6 +7,7 @@
       </el-select>
       <template v-if="draft && published">
         <p>当前发布版本 {{ published.baseVersion }} · {{ published.pages.length + 1 }} 页</p>
+        <p v-if="selectedStory?.minPageCount && selectedStory?.maxPageCount">用户生成成书范围 {{ selectedStory.minPageCount }}–{{ selectedStory.maxPageCount }} 页（含封面和寄语）</p>
         <p>编辑中 {{ draft.pages.length + 1 }} 页（含封面和寄语）</p>
         <el-alert v-if="!published.materials.length" title="这是首版素材草稿。请先重新编排整本并逐页审阅，再发布。" :closable="false" />
         <el-collapse>
@@ -156,7 +157,7 @@ interface Draft {
   materials: Material[]
   pages: Page[]
 }
-interface Story { code: string; name: string; pageCount: number }
+interface Story { code: string; name: string; pageCount: number; minPageCount?: number; maxPageCount?: number }
 
 const endpoint = '/api/admin/storybook/templates'
 const visible = ref(false)
@@ -170,7 +171,8 @@ const published = ref<Draft>()
 const selected = ref<number[]>([])
 const publishedPreviewNumbers = ref<number[]>([])
 const previewNumbers = computed(() => draft.value?.previewNumbers ?? publishedPreviewNumbers.value)
-const recommendedPageCount = computed(() => stories.value.find(story => story.code === code.value)?.pageCount ?? 0)
+const selectedStory = computed(() => stories.value.find(story => story.code === code.value))
+const recommendedPageCount = computed(() => selectedStory.value?.pageCount ?? 0)
 const expanded = ref<number[]>([])
 const reviewed = ref(false)
 const referenceVisible = ref(false)
