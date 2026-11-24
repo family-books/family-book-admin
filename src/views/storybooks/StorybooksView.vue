@@ -87,6 +87,8 @@
             type="primary" :disabled="!artwork || artworkBusy || artwork.status === 'full_running'" @click="generateArtwork()">
             {{ artworkOrder?.automaticArtwork ? '重试自动制作' : '生成缺少的插画' }}
           </el-button>
+          <el-button v-if="artworkOrder && artwork?.readerPdfState === 'failed'" :loading="retryingPdf"
+            @click="retryReaderPdf()">重试生成 PDF</el-button>
           <el-button :disabled="artworkBusy" @click="refreshArtwork()">刷新进度</el-button>
           <el-button v-if="artworkOrder && !artworkOrder.automaticArtwork && artwork?.status === 'full_completed' && artwork.pages[0]?.layout === 'COVER'"
             @click="printArtwork">打开打印 / 导出 PDF</el-button>
@@ -104,6 +106,9 @@
               <StorybookPreviewPage :page="page" :template-code="artwork.templateCode" />
             </button>
             <strong>第 {{ page.number }} 页 · {{ page.title }}</strong>
+            <p v-if="page.failure">
+              {{ page.failure.stage ? page.failure.stage + ' · ' : '' }}{{ page.failure.code }} · 已尝试 {{ page.failure.attempts ?? 0 }} 次
+            </p>
             <p v-if="(!page.layout || page.layout === 'LEGACY' || !page.imageUrl) && page.qualityStatus !== 'caption_pending'">{{ page.text }}</p>
             <el-button v-if="page.imageUrl && !artworkOrder?.automaticArtwork && artworkOrder?.orderStatus === 'generating' && artwork.status?.startsWith('full_')"
               size="small" :disabled="artworkBusy || artwork.status === 'full_running'" @click="generateArtwork(page.number)">只重画这一页</el-button>
@@ -131,7 +136,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { ArrowDown } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getStorybookArtwork, getStorybookOrders, getStorybookPreviews, getStorybookPreviewArtwork, queueStorybookArtwork, confirmStorybookOrder, shipStorybookOrder, updateStorybookOrderStatus, uploadStorybookDigitalFile } from '@/api/storybooks'
+import { getStorybookArtwork, getStorybookOrders, getStorybookPreviews, getStorybookPreviewArtwork, queueStorybookArtwork, retryStorybookReaderPdf, confirmStorybookOrder, shipStorybookOrder, updateStorybookOrderStatus, uploadStorybookDigitalFile } from '@/api/storybooks'
 import type { StorybookArtwork, StorybookPreview } from '@/api/storybooks'
 import StorybookPreviewPage from './StorybookPreviewPage.vue'
 import { openStorybookPrint } from './storybookPrint'
@@ -235,6 +240,21 @@ const closeArtwork = () => {
   expandedPageNumber.value = null
 }
 
+const retryingPdf = ref(false)
+
+const retryReaderPdf = async () => {
+  const projectId = artworkOrder.value?.projectId
+  if (!projectId || retryingPdf.value) return
+  retryingPdf.value = true
+  try {
+    const { data } = await retryStorybookReaderPdf(projectId)
+    if (data) ElMessage.success('已重新安排 PDF 生成')
+    await refreshArtwork()
+  } finally {
+    retryingPdf.value = false
+  }
+}
+
 const refreshArtwork = async () => {
   clearTimeout(artworkTimer)
   const id = previewId.value || artworkOrder.value?.id
@@ -249,7 +269,7 @@ const refreshArtwork = async () => {
     if (!current()) return
     artworkLoadFailed.value = false
     artwork.value = response.data
-    if (isGenerating(artwork.value.status)) {
+    if (isGenerating(artwork.value.status) || ['queued', 'running'].includes(artwork.value.readerPdfState || '')) {
       artworkTimer = setTimeout(refreshArtwork, 5000)
     } else if ((isGenerating(previousStatus) || (!fromPreview && artworkOrder.value?.orderStatus === 'generating'
         && artwork.value.status === 'full_completed')) && activeTab.value === (fromPreview ? 'previews' : 'orders')) {
