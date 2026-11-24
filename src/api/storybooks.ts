@@ -30,6 +30,7 @@ export interface CaptionScrim {
   opacity?: number
   style?: string
   core?: { left: number; top: number; right: number; bottom: number }
+  softLines?: Array<{ left: number; top: number; right: number; bottom: number }>
 }
 
 interface StorybookCaption {

@@ -3,6 +3,17 @@ import type { CaptionScrim } from '@/api/storybooks'
 export function localCaptionGradient(scrim: CaptionScrim) {
   const core = scrim.core
   if (!core) return {}
+  if (scrim.softLines?.length && scrim.width > 0 && scrim.height > 0) {
+    const color = scrim.color || '#FFF8EE'
+    const backgroundImage = scrim.softLines.map(line => {
+      const x = ((line.left + line.right) / 2 - scrim.left) / scrim.width * 100
+      const y = ((line.top + line.bottom) / 2 - scrim.top) / scrim.height * 100
+      const rx = Math.min(x, 100 - x, (line.right - line.left) / scrim.width * 50 + 20)
+      const ry = Math.min(y, 100 - y, (line.bottom - line.top) / scrim.height * 50 + 22)
+      return `radial-gradient(ellipse ${rx}% ${ry}% at ${x}% ${y}%, ${color} 48%, transparent 100%)`
+    }).join(', ')
+    return { backgroundImage, opacity: scrim.opacity ?? 0.50 }
+  }
   const feather = (direction: string, start: number, end: number, origin: number, size: number) => {
     const first = (start - origin) / size * 100
     const last = (end - origin) / size * 100
