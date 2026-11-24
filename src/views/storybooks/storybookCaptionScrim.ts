@@ -3,7 +3,7 @@ import type { CaptionScrim } from '@/api/storybooks'
 export function localCaptionGradient(scrim: CaptionScrim) {
   const core = scrim.core
   if (!core) return {}
-  if (scrim.softLines?.length && scrim.width > 0 && scrim.height > 0) {
+  if (scrim.style !== 'local-smooth-glow' && scrim.softLines?.length && scrim.width > 0 && scrim.height > 0) {
     const color = scrim.color || '#FFF8EE'
     const backgroundImage = scrim.softLines.map(line => {
       const x = ((line.left + line.right) / 2 - scrim.left) / scrim.width * 100
@@ -21,7 +21,8 @@ export function localCaptionGradient(scrim: CaptionScrim) {
   }
   return {
     backgroundColor: scrim.color || '#FFFFFF',
-    opacity: scrim.opacity ?? 0.85,
+    borderRadius: scrim.style === 'local-smooth-glow' ? '24% / 28%' : '0',
+    opacity: scrim.opacity ?? (scrim.style === 'local-smooth-glow' ? 0.45 : 0.85),
     maskImage: [
       feather('to right', core.left, core.right, scrim.left, scrim.width),
       feather('to bottom', core.top, core.bottom, scrim.top, scrim.height),
@@ -34,7 +35,7 @@ export function captionScrimStyle(scrim: CaptionScrim, legacyRadius: string) {
   const position = {
     left: scrim.left + '%', top: scrim.top + '%', width: scrim.width + '%', height: scrim.height + '%',
   }
-  if (scrim.core) return { ...position, ...localCaptionGradient(scrim), borderRadius: '0' }
+  if (scrim.core) return { ...position, ...localCaptionGradient(scrim) }
   if (scrim.style === 'bottom') {
     return { ...position, borderRadius: '0', background: 'radial-gradient(ellipse at center, #fffaf080 0%, #fffaf080 60%, transparent 100%)' }
   }
