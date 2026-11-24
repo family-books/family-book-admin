@@ -96,7 +96,7 @@ export async function openStorybookPrint(pages: StorybookArtwork['pages']) {
         const panel = doc.createElement('div')
         panel.className = 'caption-scrim'
         panel.style.background = bottomBar
-          ? 'linear-gradient(to bottom,rgba(255,255,255,0) 0%,rgba(255,255,255,.84) 25%,rgba(255,255,255,.84) 75%,rgba(255,255,255,0) 100%)'
+          ? 'radial-gradient(ellipse at center,rgba(255,250,240,.50) 0%,rgba(255,250,240,.50) 60%,rgba(255,250,240,0) 100%)'
           : `rgba(${red},${green},${blue},${scrim.opacity ?? 0.82})`
         Object.assign(panel.style, {
           left: `${scrim.left}%`, top: `${scrim.top}%`, width: `${scrim.width}%`, height: `${scrim.height}%`,

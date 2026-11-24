@@ -114,7 +114,7 @@ const captionOutlineColor = (caption?: StorybookArtwork['pages'][number]['captio
 const captionScrimBackground = (caption?: StorybookArtwork['pages'][number]['caption']) => {
   const scrim = caption?.scrim
   if (scrim?.style === 'bottom') {
-    return 'linear-gradient(to bottom,rgba(255,255,255,0) 0%,rgba(255,255,255,.84) 25%,rgba(255,255,255,.84) 75%,rgba(255,255,255,0) 100%)'
+    return 'radial-gradient(ellipse at center,rgba(255,250,240,.50) 0%,rgba(255,250,240,.50) 60%,rgba(255,250,240,0) 100%)'
   }
   const hex = (scrim?.color || '#FFF6E6').replace('#', '')
   const red = parseInt(hex.slice(0, 2), 16)
