@@ -45,7 +45,7 @@
           </el-collapse-item>
         </el-collapse>
         <div class="actions">
-          <el-input-number v-if="isFullBleed" v-model="targetPageCount" :min="18" :max="24"
+          <el-input-number v-if="isFullBleed" v-model="targetPageCount" :min="18" :max="maxEditorialPageCount"
             aria-label="整本目标页数（含封面和寄语）" />
           <el-button type="primary" @click="replan">重新编排整本</el-button>
           <el-button v-if="recommendedPageCount > draft.pages.length + 1" @click="loadExpanded">载入新版分镜</el-button>
@@ -172,6 +172,7 @@ const selected = ref<number[]>([])
 const publishedPreviewNumbers = ref<number[]>([])
 const previewNumbers = computed(() => draft.value?.previewNumbers ?? publishedPreviewNumbers.value)
 const selectedStory = computed(() => stories.value.find(story => story.code === code.value))
+const maxEditorialPageCount = computed(() => Math.min(24, selectedStory.value?.maxPageCount ?? 24))
 const recommendedPageCount = computed(() => selectedStory.value?.pageCount ?? 0)
 const expanded = ref<number[]>([])
 const reviewed = ref(false)

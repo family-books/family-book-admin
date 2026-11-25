@@ -68,3 +68,15 @@ export const getStorybookPreviews = (params: { page: number; pageSize: number })
   request.get('/api/admin/storybook/previews', { params })
 export const getStorybookPreviewArtwork = (id: string): Promise<ApiResponse<StorybookArtwork>> =>
   request.get(`/api/admin/storybook/previews/${id}/artwork`)
+
+export interface StorybookTemplateScript {
+  code: string
+  name: string
+  ageRange: string
+  version: string
+  plot: string | null
+  pages: Array<{ number: number; title: string; text: string; storyboard: string }>
+}
+
+export const getStorybookTemplateScripts = (): Promise<ApiResponse<StorybookTemplateScript[]>> =>
+  request.get('/api/admin/storybook/story-templates')

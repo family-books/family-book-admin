@@ -85,7 +85,8 @@ const props = defineProps<{ page: StorybookArtwork['pages'][number]; templateCod
 const failedCaptionBlock = ref('')
 watch(() => props.page.captionBlockUrl, () => { failedCaptionBlock.value = '' })
 
-const fullBleed = computed(() => props.templateCode === 'space-station' || props.templateCode === 'dinosaur')
+const fullBleed = computed(() => props.templateCode === 'space-station' || props.templateCode === 'dinosaur'
+  || props.templateCode === 'hare-and-tortoise' || props.templateCode === 'crow-and-pitcher')
 
 const coverTitleStyle = computed(() => {
   const length = Array.from(props.page.title).length

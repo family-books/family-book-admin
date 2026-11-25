@@ -1,6 +1,10 @@
 <template>
   <div>
-    <el-tabs v-model="activeTab" @tab-change="switchTab"><el-tab-pane label="订单管理" name="orders" /><el-tab-pane label="预览记录" name="previews" /></el-tabs>
+    <el-tabs v-model="activeTab" @tab-change="switchTab">
+      <el-tab-pane label="订单管理" name="orders" />
+      <el-tab-pane label="预览记录" name="previews" />
+      <el-tab-pane label="故事模板" name="templates" />
+    </el-tabs>
     <template v-if="activeTab === 'orders'">
     <el-card class="filter-card">
       <el-form inline>
@@ -64,7 +68,7 @@
       <el-pagination class="pagination" v-model:current-page="page" v-model:page-size="pageSize" :total="total" layout="total, prev, pager, next, sizes" :page-sizes="[10,20,50]" @current-change="load" @size-change="load" />
     </el-card>
     </template>
-    <el-card v-else>
+    <el-card v-else-if="activeTab === 'previews'">
       <el-button class="preview-refresh" :loading="loading" @click="load">刷新记录</el-button>
       <el-table :data="previews" stripe v-loading="loading">
         <el-table-column prop="id" label="项目 ID" min-width="180" />
@@ -80,6 +84,7 @@
       </el-table>
       <el-pagination class="pagination" v-model:current-page="page" v-model:page-size="pageSize" :total="total" layout="total, prev, pager, next, sizes" :page-sizes="[10,20,50]" @current-change="load" @size-change="load" />
     </el-card>
+    <StorybookTemplateReader v-else />
     <el-dialog v-model="artworkVisible" title="绘本插画与分镜" width="min(820px, 94vw)" @closed="closeArtwork">
       <div v-loading="artworkBusy">
         <div class="artwork-actions">
@@ -139,6 +144,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { getStorybookArtwork, getStorybookOrders, getStorybookPreviews, getStorybookPreviewArtwork, queueStorybookArtwork, retryStorybookReaderPdf, confirmStorybookOrder, shipStorybookOrder, updateStorybookOrderStatus, uploadStorybookDigitalFile } from '@/api/storybooks'
 import type { StorybookArtwork, StorybookPreview } from '@/api/storybooks'
 import StorybookPreviewPage from './StorybookPreviewPage.vue'
+import StorybookTemplateReader from './StorybookTemplateReader.vue'
 import { openStorybookPrint } from './storybookPrint'
 import type { StorybookOrder } from '@/types'
 const activeTab=ref('orders'), previews=ref<StorybookPreview[]>([]), previewId=ref<string | null>(null)
@@ -148,7 +154,15 @@ const previewLabels: Record<string, string> = {
   full_running: '成书生成中', full_completed: '成书完成', full_failed: '成书生成失败', full_partial: '成书部分待重试',
 }
 const previewStatus = (status: string) => previewLabels[status] || (isGenerating(status) ? '生成中' : status || '—')
-const switchTab=()=>{page.value=1;load()}
+const switchTab=()=>{
+  page.value=1
+  if (activeTab.value === 'templates') {
+    listVersion++
+    loading.value = false
+    return
+  }
+  void load()
+}
 const loading=ref(false),orders=ref<StorybookOrder[]>([]),status=ref(''),page=ref(1),pageSize=ref(20),total=ref(0),shipVisible=ref(false),submitting=ref(false),selected=ref<StorybookOrder|null>(null),expressCompany=ref('顺丰速运'),trackingNo=ref('')
 const statusOptions=[{label:'待支付',value:'pending_payment'},{label:'已支付',value:'paid'},{label:'制作中',value:'generating'},{label:'待用户确认',value:'confirming'},{label:'人工校对',value:'reviewing'},{label:'印刷中',value:'printing'},{label:'已发货',value:'shipped'},{label:'已完成',value:'completed'},{label:'已取消',value:'cancelled'},{label:'已退款',value:'refunded'}]
 const transitionMap:Record<string,Array<{label:string,value:string}>>={paid:[{label:'开始制作',value:'generating'}],generating:[{label:'提交人工校对',value:'reviewing'}],shipped:[{label:'确认完成',value:'completed'}]}
@@ -327,7 +341,7 @@ onBeforeUnmount(() => {
 onMounted(() => {
   void load()
   listTimer = setInterval(() => {
-    if (loading.value || document.hidden) return
+    if (loading.value || document.hidden || activeTab.value === 'templates') return
     const pending = activeTab.value === 'orders'
       ? orders.value.some(row => row.automaticArtwork && row.orderStatus === 'generating')
       : previews.value.some(row => isGenerating(row.aiStatus) || isGenerating(row.productionStatus))
