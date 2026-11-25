@@ -21,8 +21,8 @@
           v-for="(run, runIndex) in accentRuns(line.text)" :key="runIndex"
           :style="run.accent && page.caption.layoutVersion !== 11 ? { color: page.accentColor || '#E07A3F' } : undefined">{{ run.text }}</span></span>
     </template>
-    <span v-else-if="!page.caption && page.qualityStatus !== 'caption_pending'" class="full-bleed-caption"
-      :class="{ 'space-caption': fullBleed }" :style="captionPosition">{{ page.text }}</span>
+    <span v-else-if="!page.caption && page.qualityStatus !== 'caption_pending' && page.qualityStatus !== 'image_pending'"
+      class="full-bleed-caption" :style="captionPosition">{{ page.text }}</span>
   </div>
   <div v-else-if="page.layout && page.layout !== 'LEGACY'" class="preview story-preview">
     <div class="book-page" :class="storyLayout">
@@ -80,14 +80,10 @@ onMounted(() => {
   })
 })
 
-const props = defineProps<{ page: StorybookArtwork['pages'][number]; templateCode?: string }>()
+const props = defineProps<{ page: StorybookArtwork['pages'][number] }>()
 
 const failedCaptionBlock = ref('')
 watch(() => props.page.captionBlockUrl, () => { failedCaptionBlock.value = '' })
-
-const fullBleed = computed(() => props.templateCode === 'space-station' || props.templateCode === 'dinosaur'
-  || props.templateCode === 'hare-and-tortoise' || props.templateCode === 'crow-and-pitcher'
-  || props.templateCode === 'wonderland-garden')
 
 const coverTitleStyle = computed(() => {
   const length = Array.from(props.page.title).length
@@ -168,8 +164,6 @@ const captionOutlineColor = (caption?: StorybookArtwork['pages'][number]['captio
 .full-bleed-preview img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .full-bleed-caption{
   position:absolute;display:block;box-sizing:border-box;
-  padding:calc(10 * var(--page-unit)) calc(13 * var(--page-unit));border-radius:calc(12 * var(--page-unit));
-  background:linear-gradient(130deg,rgba(9,19,34,.78),rgba(9,19,34,.54));
   color:#fff8e9;font-family:"LXGWWenKai","Yuanti SC","PingFang SC",sans-serif;font-size:calc(22 * var(--page-unit));font-weight:600;line-height:1.52;
   white-space:pre-wrap;overflow-wrap:anywhere;
   text-shadow:0 calc(1 * var(--page-unit)) calc(3 * var(--page-unit)) rgba(0,0,0,.65);
@@ -183,7 +177,6 @@ const captionOutlineColor = (caption?: StorybookArtwork['pages'][number]['captio
   -webkit-text-stroke:calc(0.9 * var(--page-unit)) var(--caption-outline);
   paint-order:stroke fill;
 }
-.full-bleed-caption.space-caption{padding:0;background:none;border-radius:0}
 
 .book-cover{background:#b9693f}
 .legacy-image{display:block;width:100%}

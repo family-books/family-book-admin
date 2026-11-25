@@ -33,10 +33,9 @@ const styles = `
   .FULL_BLEED { position: relative; padding: 0; overflow: hidden; }
   .FULL_BLEED img { width: 100%; height: 100%; object-fit: cover; }
   .FULL_BLEED section {
-    position: absolute; box-sizing: border-box; border-radius: 4mm; padding: 3mm 4mm;
-    color: #fff8e9; font-family: "LXGWWenKai", "PingFang SC", "Noto Sans CJK SC", sans-serif; font-weight: 600;
-    background: linear-gradient(130deg, rgba(9,19,34,.78), rgba(9,19,34,.54));
-    print-color-adjust: exact; -webkit-print-color-adjust: exact;
+    position: absolute; box-sizing: border-box;
+    color: #fff8e9; font-family: "LXGWWenKai", "Yuanti SC", "PingFang SC", sans-serif; font-weight: 600;
+    text-shadow: 0 0.35mm 1mm rgba(0,0,0,.65);
   }
   .FULL_BLEED p { font-size: 16pt; line-height: 1.52; }
   .FULL_BLEED .caption-block { object-fit: fill; position: absolute; pointer-events: none; }
@@ -49,6 +48,9 @@ const styles = `
 export async function openStorybookPrint(pages: StorybookArtwork['pages']) {
   if (!pages.length || pages.some(page => page.layout !== 'DEDICATION' && !page.imageUrl)) {
     throw new Error('请先生成全部插画')
+  }
+  if (pages.some(page => page.qualityStatus === 'image_pending' || page.qualityStatus === 'caption_pending')) {
+    throw new Error('请先完成插画和文字排版')
   }
 
   const preview = window.open('', '_blank')
@@ -127,8 +129,8 @@ export async function openStorybookPrint(pages: StorybookArtwork['pages']) {
     }
     const story = doc.createElement('p')
     story.textContent = page.text || ''
-    if (page.layout === 'FULL_BLEED' && page.textBox) {
-      const { left, offset, width, fromBottom } = page.textBox
+    if (page.layout === 'FULL_BLEED') {
+      const { left, offset, width, fromBottom } = page.textBox ?? { left: 7, offset: 8, width: 53, fromBottom: true }
       copy.style.left = `${left}%`
       copy.style.width = `${width}%`
       copy.style[fromBottom ? 'bottom' : 'top'] = `${offset}%`

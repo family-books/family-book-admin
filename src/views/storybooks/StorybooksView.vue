@@ -102,13 +102,13 @@
         </div>
         <el-alert v-if="artwork?.error" :title="artwork.error" type="warning" :closable="false" />
         <el-empty v-if="!artwork?.pages.length && !artworkBusy" :description="artworkLoadFailed ? '加载失败，请刷新重试' : artwork?.status === 'failed' ? '预览生成失败，暂无可查看页面' : '暂无可查看页面'" />
-        <el-alert v-else-if="previewId && artwork?.pages.length && (artwork.status === 'partial' || artwork.status === 'failed' || isGenerating(artwork.status) || artwork.pages.some(page => !page.imageUrl || page.qualityStatus === 'caption_pending'))"
+        <el-alert v-else-if="previewId && artwork?.pages.length && (artwork.status === 'partial' || artwork.status === 'failed' || isGenerating(artwork.status) || artwork.pages.some(page => !page.imageUrl || page.qualityStatus === 'image_pending' || page.qualityStatus === 'caption_pending'))"
           title="部分预览尚未完成，以下为已保存的内容" type="info" :closable="false" />
         <div v-if="artwork" class="artwork-pages">
           <article v-for="page in artwork.pages" :key="page.number">
             <button v-if="page.imageUrl" type="button" class="artwork-thumbnail"
               :aria-label="`放大预览第 ${page.number} 页`" @click="expandedPageNumber = page.number">
-              <StorybookPreviewPage :page="page" :template-code="artwork.templateCode" />
+              <StorybookPreviewPage :page="page" />
             </button>
             <strong>第 {{ page.number }} 页 · {{ page.title }}</strong>
             <p v-if="page.failure">
@@ -131,7 +131,7 @@
       </template>
     </el-dialog>
     <el-dialog v-model="expandedPreviewVisible" :title="expandedPage?.title || '绘本预览'" width="min(820px, 94vw)" append-to-body>
-      <StorybookPreviewPage v-if="expandedPage" :page="expandedPage" :template-code="artwork?.templateCode" />
+      <StorybookPreviewPage v-if="expandedPage" :page="expandedPage" />
     </el-dialog>
     <el-dialog v-model="shipVisible" title="确认绘本发货" width="460px"><el-form label-width="90px"><el-form-item label="订单号">{{selected?.orderNo}}</el-form-item><el-form-item label="快递公司"><el-input v-model="expressCompany" placeholder="例如：顺丰速运"/></el-form-item><el-form-item label="快递单号"><el-input v-model="trackingNo" placeholder="请输入快递单号"/></el-form-item></el-form><template #footer><el-button @click="shipVisible=false">取消</el-button><el-button type="primary" :loading="submitting" @click="submitShip">确认发货</el-button></template></el-dialog>
   </div>
