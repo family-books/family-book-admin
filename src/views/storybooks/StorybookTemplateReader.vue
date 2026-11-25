@@ -14,6 +14,23 @@
         <h3>完整剧情</h3>
         <p>{{ book.plot }}</p>
       </section>
+      <section v-if="book.options?.length" class="script">
+        <h3>喜好选项</h3>
+        <article v-for="option in book.options" :key="option.code" class="script-page">
+          <h4>{{ option.label }} · 第 {{ option.page.number }} 页</h4>
+          <p>{{ option.page.text }}</p>
+          <details>
+            <summary>查看分镜</summary>
+            <p>{{ option.page.storyboard }}</p>
+          </details>
+          <p class="meta">{{ reviewLabels[option.review.status] }}<template v-if="option.review.model"> · {{ option.review.model }}</template></p>
+          <p v-if="option.review.findings">{{ option.review.findings }}</p>
+          <el-button v-if="option.review.status !== 'approved'" :loading="reviewing === option"
+            :disabled="reviewing !== null" @click="reviewOption(book.code, option)">
+            {{ option.review.status === 'rejected' ? '重新 AI 审读' : '开始 AI 审读' }}
+          </el-button>
+        </article>
+      </section>
       <section class="script" :key="book.code">
         <h3>逐页正文与分镜</h3>
         <p v-if="book.pages.some(page => page.text.includes('{'))" class="meta">正文里的 {name} 和 {motif} 分别是姓名和兴趣的占位符。</p>
@@ -32,13 +49,28 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { getStorybookTemplateScripts, type StorybookTemplateScript } from '@/api/storybooks'
+import { getStorybookTemplateScripts, reviewStorybookInterestOption, type StorybookInterestOption,
+  type StorybookTemplateScript } from '@/api/storybooks'
 
 const books = ref<StorybookTemplateScript[]>([])
 const selectedCode = ref('')
 const book = computed(() => books.value.find(item => item.code === selectedCode.value))
 const loading = ref(true)
 const failed = ref(false)
+const reviewing = ref<StorybookInterestOption | null>(null)
+const reviewLabels = { pending: '待审读', rejected: '已退回', approved: '已通过 · 可用于新订单' }
+
+async function reviewOption(code: string, option: StorybookInterestOption) {
+  reviewing.value = option
+  try {
+    const { data } = await reviewStorybookInterestOption(code, option.code)
+    option.review = data
+  } catch {
+    // The request interceptor reports the error.
+  } finally {
+    reviewing.value = null
+  }
+}
 
 async function load() {
   loading.value = true

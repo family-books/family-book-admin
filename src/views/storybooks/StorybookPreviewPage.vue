@@ -86,7 +86,8 @@ const failedCaptionBlock = ref('')
 watch(() => props.page.captionBlockUrl, () => { failedCaptionBlock.value = '' })
 
 const fullBleed = computed(() => props.templateCode === 'space-station' || props.templateCode === 'dinosaur'
-  || props.templateCode === 'hare-and-tortoise' || props.templateCode === 'crow-and-pitcher')
+  || props.templateCode === 'hare-and-tortoise' || props.templateCode === 'crow-and-pitcher'
+  || props.templateCode === 'wonderland-garden')
 
 const coverTitleStyle = computed(() => {
   const length = Array.from(props.page.title).length

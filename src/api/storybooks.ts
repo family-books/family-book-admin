@@ -76,7 +76,25 @@ export interface StorybookTemplateScript {
   version: string
   plot: string | null
   pages: Array<{ number: number; title: string; text: string; storyboard: string }>
+  options?: StorybookInterestOption[]
+}
+
+interface StorybookOptionReview {
+  status: 'pending' | 'rejected' | 'approved'
+  model: string | null
+  findings: string | null
+}
+
+export interface StorybookInterestOption {
+  code: string
+  label: string
+  page: StorybookTemplateScript['pages'][number]
+  review: StorybookOptionReview
 }
 
 export const getStorybookTemplateScripts = (): Promise<ApiResponse<StorybookTemplateScript[]>> =>
   request.get('/api/admin/storybook/story-templates')
+
+export const reviewStorybookInterestOption = (code: string, option: string): Promise<ApiResponse<StorybookOptionReview>> =>
+  request.post(`/api/admin/storybook/story-templates/${encodeURIComponent(code)}/options/${encodeURIComponent(option)}/review`,
+    null, { timeout: 120000 })
