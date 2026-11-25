@@ -22,7 +22,7 @@ export function localCaptionGradient(scrim: CaptionScrim) {
   return {
     backgroundColor: scrim.color || '#FFFFFF',
     borderRadius: scrim.style === 'local-smooth-glow' ? '24% / 28%' : '0',
-    opacity: scrim.opacity ?? (scrim.style === 'local-smooth-glow' ? 0.45 : 0.85),
+    opacity: scrim.opacity ?? 0.50,
     maskImage: [
       feather('to right', core.left, core.right, scrim.left, scrim.width),
       feather('to bottom', core.top, core.bottom, scrim.top, scrim.height),
